@@ -1,0 +1,131 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.ReportsAnalyticsHubView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="32,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,24">
+                <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                <TextBlock Text="{Binding Subtitle}" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- Cards Grid -->
+            <Grid Grid.Row="1">
+                <UniformGrid Columns="{Binding CardColumns}">
+
+                    <!-- CARD 1: Campus Danger Heatmap -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="6" Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="{DynamicResource DangerBgBrush}" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="🗺️" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="Campus Danger Heatmap" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <TextBlock Grid.Row="2" Text="Interactive campus map visualization displaying high-risk incident nodes and security patrol priority rankings." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+
+                            <Button Grid.Row="3" Content="Open Heatmap →"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenCampusHeatmapCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="38"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- CARD 2: Recidivism Analytics -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="6" Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="{DynamicResource InfoBgBrush}" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="📈" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="Recidivism &amp; Offender Analytics" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <TextBlock Grid.Row="2" Text="Analyze repeat infraction rates, intervention success probabilities, and longitudinal student conduct trends." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+
+                            <Button Grid.Row="3" Content="Open Analytics →"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenRecidivismCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="38"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- CARD 3: Student Incident & Active Investigation Monitor -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="6" Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="{DynamicResource InfoBgBrush}" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="🔎" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="Student Case &amp; Investigation Monitor" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <TextBlock Grid.Row="2" Text="Look up any student to check their incidents, active investigation status, inquiry stage, assigned lead investigators, and case progress." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+
+                            <Button Grid.Row="3" Content="Open Case Inquiry →"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenStudentInquiryCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="38"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- CARD 4: Executive Summary Reports -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="6" Padding="20"
+                            Visibility="{Binding CanAccessExecutiveReports, Converter={StaticResource BoolToVis}}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="{DynamicResource SuccessBgBrush}" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="📊" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="Executive Summary Reports" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <TextBlock Grid.Row="2" Text="Generate monthly and annual institutional safety performance summaries for school principals and board directors." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+
+                            <Button Grid.Row="3" Content="Open Report Generator →"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenExecutiveReportsCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="38"/>
+                        </Grid>
+                    </Border>
+
+                </UniformGrid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

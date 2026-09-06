@@ -1,0 +1,185 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.SettingsWorkspaceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:views="clr-namespace:SmartSchoolIncidentManagementSystem.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="850" d:DesignWidth="1200">
+    <Grid Background="{DynamicResource AppBackgroundBrush}">
+        <Grid Margin="32,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- 1. Header -->
+            <Grid Grid.Row="0" Margin="0,0,0,16">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="System Settings &amp; Institutional Configuration" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    <TextBlock Text="Configure user accounts, RBAC matrix, SMTP email dispatches, risk engine rules, school identity, and security logs." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- 2. Main Tabbed Workspaces -->
+            <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" SelectedIndex="{Binding SelectedTabIndex}">
+                <!-- Tab 1: User Accounts (Admin Only) -->
+                <TabItem Header="👥 User Accounts" FontSize="13" FontWeight="SemiBold"
+                         Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVis}}">
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="0" Margin="0,12,0,0">
+                        <views:UserManagementView DataContext="{Binding UserManagementVM}"/>
+                    </Border>
+                </TabItem>
+
+                <!-- Tab 2: RBAC Matrix (Admin Only) -->
+                <TabItem Header="🔐 RBAC Matrix" FontSize="13" FontWeight="SemiBold"
+                         Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVis}}">
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="0" Margin="0,12,0,0">
+                        <views:RbacView DataContext="{Binding RbacVM}"/>
+                    </Border>
+                </TabItem>
+
+                <!-- Tab 3: Email & SMTP Alerts -->
+                <TabItem Header="📧 Email &amp; SMTP Alerts" FontSize="13" FontWeight="SemiBold">
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="24" Margin="0,12,0,0">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel MaxWidth="700" HorizontalAlignment="Left">
+                                <TextBlock Text="Automated SMTP Dispatch Configuration" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,16"/>
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                        <TextBlock Text="SMTP Host Server:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                        <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SmtpHost}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                        <TextBlock Text="Port:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                        <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SmtpPort}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                        <TextBlock Text="Sender Email Address:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                        <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SmtpSenderEmail}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                        <TextBlock Text="Sender Display Name:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                        <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SmtpSenderName}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock Text="SMTP App Password / Secret Key:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SmtpPassword}" Margin="0,0,0,12"/>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                    <CheckBox Content="Use SSL / TLS Encryption" IsChecked="{Binding SmtpEnableSsl}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,20,0"/>
+                                    <CheckBox Content="Enable Automated Email Notifications" IsChecked="{Binding NotificationsEnabled}" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+
+                                <Button Content="💾 Save SMTP Settings" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveEmailSettingsCommand}" HorizontalAlignment="Left" Width="180" Margin="0,0,0,24"/>
+
+                                <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}" Margin="0,0,0,16"/>
+
+                                <TextBlock Text="Send Verification Test Email" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding TestRecipientEmail}" Margin="0,0,8,0"/>
+                                    <Button Grid.Column="1" Content="🚀 Send Test Email" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding SendTestEmailCommand}"/>
+                                </Grid>
+                                <TextBlock Text="{Binding EmailStatusMessage}" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+                </TabItem>
+
+                <!-- Tab 4: Risk Rules & Engine -->
+                <TabItem Header="⚖️ Disciplinary &amp; Risk Rules" FontSize="13" FontWeight="SemiBold">
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="16" Margin="0,12,0,0">
+                        <TabControl Background="Transparent" BorderThickness="0">
+                            <TabItem Header="🔤 Keyword Sensitivity Matrix" FontSize="12">
+                                <views:KeywordMatrixView DataContext="{Binding KeywordVM}" Margin="0,8,0,0"/>
+                            </TabItem>
+                            <TabItem Header="📍 Location Weightings" FontSize="12">
+                                <views:LocationWeightingView DataContext="{Binding LocationVM}" Margin="0,8,0,0"/>
+                            </TabItem>
+                            <TabItem Header="🔄 Repeat Offender Triggers" FontSize="12">
+                                <views:RepeatOffenderTriggersView DataContext="{Binding RepeatOffenderVM}" Margin="0,8,0,0"/>
+                            </TabItem>
+                        </TabControl>
+                    </Border>
+                </TabItem>
+
+                <!-- Tab 5: Branding & Maintenance -->
+                <TabItem Header="🎨 Branding &amp; Maintenance" FontSize="13" FontWeight="SemiBold">
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="24" Margin="0,12,0,0">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel MaxWidth="680" HorizontalAlignment="Left">
+                                <TextBlock Text="Institutional Identity &amp; Branding" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,16"/>
+
+                                <TextBlock Text="School Name:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SchoolName}" Margin="0,0,0,12"/>
+
+                                <TextBlock Text="Application Title:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SystemTitle}" Margin="0,0,0,12"/>
+
+                                <TextBlock Text="School Motto:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding Motto}" Margin="0,0,0,12"/>
+
+                                <TextBlock Text="Tagline:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding Tagline}" Margin="0,0,0,16"/>
+
+                                <Button Content="💾 Save School Branding" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveBrandingCommand}" HorizontalAlignment="Left" Width="180" Margin="0,0,0,24"/>
+
+                                <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}" Margin="0,0,0,16"/>
+
+                                <!-- Interface Theme -->
+                                <TextBlock Text="Interface Theme Customization" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
+                                    <TextBlock Text="{Binding ThemeModeText, StringFormat='Current Theme: {0}'}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,16,0"/>
+                                    <Button Content="🌓 Toggle Dark / Light Theme" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ToggleThemeCommand}"/>
+                                </StackPanel>
+
+                                <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}" Margin="0,0,0,16"/>
+
+                                <!-- Database Maintenance -->
+                                <TextBlock Text="Database Backup &amp; Disaster Recovery" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
+                                <TextBlock Text="{Binding LastBackupDate, StringFormat='Last Snapshot: {0}'}" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,12"/>
+                                <Button Content="💾 Create Backup Snapshot Now" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CreateBackupCommand}" HorizontalAlignment="Left"/>
+                                <TextBlock Text="{Binding BackupStatusMessage}" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+                </TabItem>
+
+                <!-- Tab 6: Security & Audit Logs (Admin Only) -->
+                <TabItem Header="🛡️ Security &amp; Audit Logs" FontSize="13" FontWeight="SemiBold"
+                         Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVis}}">
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="16" Margin="0,12,0,0">
+                        <TabControl Background="Transparent" BorderThickness="0">
+                            <TabItem Header="📋 System Activity Ledger" FontSize="12">
+                                <views:ActivityLogView DataContext="{Binding ActivityLogVM}" Margin="0,8,0,0"/>
+                            </TabItem>
+                            <TabItem Header="🔒 Hash Integrity Audits" FontSize="12">
+                                <views:IntegrityAuditView DataContext="{Binding IntegrityVM}" Margin="0,8,0,0"/>
+                            </TabItem>
+                            <TabItem Header="🔑 Access &amp; Login Security" FontSize="12">
+                                <views:SecurityAccessLogView DataContext="{Binding SecurityLogVM}" Margin="0,8,0,0"/>
+                            </TabItem>
+                        </TabControl>
+                    </Border>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,104 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.UserManagementHubView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="32,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,24">
+                <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                <TextBlock Text="{Binding Subtitle}" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- 3-Card Grid -->
+            <Grid Grid.Row="1">
+                <UniformGrid Columns="3">
+
+                    <!-- CARD 1: User Credentials & Management -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="6" Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="{DynamicResource InfoBgBrush}" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="👤" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="User Credentials &amp; Management" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <TextBlock Grid.Row="2" Text="Create and manage system user accounts, institutional role assignments, master-detail editing, and password resets." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+
+                            <Button Grid.Row="3" Content="Open User Credentials →"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenUserCredentialsCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="38"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- CARD 2: Role-Based Access Control (RBAC) -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="6" Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="{DynamicResource SuccessBgBrush}" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="🛡️" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="Role-Based Access Control (RBAC)" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <TextBlock Grid.Row="2" Text="Configure granular module permissions matrix across Administrators, Discipline Officers, Guidance Counselors, Teachers, and Staff." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+
+                            <Button Grid.Row="3" Content="Open Permissions Matrix →"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenRbacCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="38"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- CARD 3: Staff Roster Sync -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="6" Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="{DynamicResource TableRowAltBrush}" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="🏢" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="Staff Roster Sync" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <TextBlock Grid.Row="2" Text="Maintain active staff directory, department assignments, investigator roles, homeroom advisers, and phone contacts." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+
+                            <Button Grid.Row="3" Content="Open Staff Directory →"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenStaffRosterCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="38"/>
+                        </Grid>
+                    </Border>
+
+                </UniformGrid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

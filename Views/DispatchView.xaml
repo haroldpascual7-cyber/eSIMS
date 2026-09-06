@@ -1,0 +1,180 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.DispatchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Grid Margin="24,20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="6*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- LEFT COLUMN: Dispatch Composer (40%) -->
+        <Border Grid.Column="0" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="20">
+            <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.04" BlurRadius="10" ShadowDepth="2"/></Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,14">
+                    <Button Content="&#x2190; Back to Parent Notices Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="10,4" Margin="0,0,0,10"/>
+                    <TextBlock Text="SMS &amp; Email Dispatcher" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    <TextBlock Text="Send instant notifications and advisories directly to parents." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <!-- Form ScrollViewer -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,0,4,0">
+                        <!-- Select Student Header -->
+                        <TextBlock Text="Search &amp; Select Student / Guardian" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                        <!-- Search Bar Input -->
+                        <Grid Margin="0,0,0,8">
+                            <TextBox Text="{Binding StudentSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{DynamicResource ModernTextBoxStyle}"
+                                     Padding="28,0,24,0"
+                                     Height="36"/>
+                            <TextBlock Text="🔍" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="8,0,0,0" IsHitTestVisible="False"/>
+                            <Button Content="✕" Command="{Binding ClearSearchCommand}"
+                                    Visibility="{Binding HasSearchText, Converter={StaticResource BoolToVis}}"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0"
+                                    Background="Transparent" BorderThickness="0" Foreground="#94A3B8" Cursor="Hand" Width="20" Height="20"/>
+                        </Grid>
+
+                        <!-- Searchable Rich Student ComboBox -->
+                        <ComboBox ItemsSource="{Binding FilteredStudents}"
+                                  SelectedItem="{Binding SelectedStudent}"
+                                  Height="44"
+                                  VerticalContentAlignment="Center"
+                                  Margin="0,0,0,12">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" Background="{DynamicResource InfoBgBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,10,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding StudentNumber}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}"/>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding FullName}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                            <TextBlock FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,0">
+                                                <Run Text="{Binding GradeLevel}"/> <Run Text="-"/> <Run Text="{Binding Section}"/> | <Run Text="Guardian: "/> <Run Text="{Binding GuardianName}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <!-- Resolved Destination Info Card -->
+                        <Border Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,14">
+                            <StackPanel>
+                                <TextBlock Text="{Binding GuardianName, StringFormat='Guardian: {0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                <TextBlock Text="{Binding GuardianPhone, StringFormat='📱 Mobile: {0}'}" FontSize="11" Foreground="{DynamicResource SuccessBrush}" Margin="0,2,0,0"/>
+                                <TextBlock Text="{Binding GuardianEmail, StringFormat='✉️ Email: {0}'}" FontSize="11" Foreground="{DynamicResource PrimaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Dispatch Channel Radio Group -->
+                        <TextBlock Text="Dispatch Channel" FontSize="12" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,6"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                            <RadioButton Content="SMS Only" IsChecked="{Binding IsSmsChannel, Mode=TwoWay}" GroupName="Channel" Margin="0,0,16,0" VerticalAlignment="Center"/>
+                            <RadioButton Content="Email Only" IsChecked="{Binding IsEmailChannel, Mode=TwoWay}" GroupName="Channel" Margin="0,0,16,0" VerticalAlignment="Center"/>
+                            <RadioButton Content="Both (SMS + Email)" IsChecked="{Binding IsBothChannel, Mode=TwoWay}" GroupName="Channel" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Quick Template Selector -->
+                        <TextBlock Text="Quick Message Template" FontSize="12" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,6"/>
+                        <ComboBox ItemsSource="{Binding QuickTemplates}" SelectedItem="{Binding SelectedQuickTemplate}" DisplayMemberPath="Title" Height="36" VerticalContentAlignment="Center" Margin="0,0,0,14"/>
+
+                        <!-- Message Body -->
+                        <TextBlock Text="Message Body" FontSize="12" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding MessageBody, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" Height="110" VerticalContentAlignment="Top" Padding="8" Margin="0,0,0,6"/>
+
+                        <!-- Dynamic Character Counter -->
+                        <TextBlock Text="{Binding CharacterCountText}" Foreground="{Binding CharacterCountColor}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Primary Action Button -->
+                <Button Grid.Row="2" Content="🚀 Dispatch Notification" Command="{Binding DispatchMessageCommand}" Style="{DynamicResource PrimaryButtonStyle}" HorizontalAlignment="Stretch" Height="40" FontSize="13" FontWeight="Bold" Margin="0,14,0,0"/>
+            </Grid>
+        </Border>
+
+        <!-- RIGHT COLUMN: Dispatch History Log (60%) -->
+        <Border Grid.Column="2" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="20">
+            <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.04" BlurRadius="10" ShadowDepth="2"/></Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,14">
+                    <TextBlock Text="Recent Dispatch Log &amp; Delivery Status" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    <TextBlock Text="Simulated Live Gateway Network" FontSize="11" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" FontStyle="Italic"/>
+                </Grid>
+
+                <DataGrid Grid.Row="1" ItemsSource="{Binding RecentDispatches}" SelectedItem="{Binding SelectedDispatch}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{DynamicResource BorderBrush}" Background="Transparent" RowBackground="Transparent" AlternatingRowBackground="{DynamicResource TableRowAltBrush}" Foreground="{DynamicResource PrimaryTextBrush}" HeadersVisibility="Column" BorderThickness="0" RowHeight="42">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Date / Time" Binding="{Binding FormattedDate}" Width="135">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock"><Setter Property="FontSize" Value="11"/><Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Padding" Value="6,0"/></Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Recipient Name" Binding="{Binding GuardianName}" Width="1.3*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock"><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Padding" Value="6,0"/></Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Destination" Binding="{Binding ContactDestination}" Width="1.4*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Padding" Value="6,0"/></Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Channel" Binding="{Binding Channel}" Width="80">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock"><Setter Property="FontWeight" Value="Bold"/><Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/><Setter Property="HorizontalAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="85">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock"><Setter Property="FontWeight" Value="Bold"/><Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/><Setter Property="HorizontalAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTemplateColumn Header="Action" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="View Message" Command="{Binding DataContext.ViewMessageCommand, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" CommandParameter="{Binding}" Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource PrimaryBrush}" BorderThickness="1" Foreground="{DynamicResource PrimaryBrush}" FontSize="11" FontWeight="SemiBold" Height="26" Padding="8,0" Cursor="Hand">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="5" Background="{TemplateBinding Background}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

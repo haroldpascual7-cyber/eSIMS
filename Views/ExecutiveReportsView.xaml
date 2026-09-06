@@ -1,0 +1,146 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.ExecutiveReportsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="32,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <Button Content="&#x2190; Back to Reports Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="10,4" Margin="0,0,0,10"/>
+                <TextBlock Text="Executive Summary &amp; Board Safety Reports" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                <TextBlock Text="Configure multi-section institutional compliance reports for school principals and board members." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- SPLIT PANE GRID (40/60 Split) -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*"/>
+                    <ColumnDefinition Width="24"/>
+                    <ColumnDefinition Width="6*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- LEFT COLUMN: REPORT CONFIGURATION CARD (40%) -->
+                <Border Grid.Column="0" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="20">
+                    <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.04" BlurRadius="10" ShadowDepth="2"/></Border.Effect>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock Text="1. Select Report Period" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,10"/>
+                            
+                            <!-- Period Radio Buttons -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                <RadioButton Content="Monthly" IsChecked="True" GroupName="PeriodGroup" Margin="0,0,16,0" FontSize="12"/>
+                                <RadioButton Content="Quarterly" GroupName="PeriodGroup" Margin="0,0,16,0" FontSize="12"/>
+                                <RadioButton Content="Annual" GroupName="PeriodGroup" FontSize="12"/>
+                            </StackPanel>
+
+                            <TextBlock Text="Select Month / Timeframe" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding TimeframeOptions}" SelectedItem="{Binding SelectedTimeframe}" Height="36" VerticalContentAlignment="Center" Margin="0,0,0,20"/>
+
+                            <!-- Included Sections CheckBoxes -->
+                            <TextBlock Text="2. Select Included Report Sections" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,10"/>
+                            <Border Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,20">
+                                <StackPanel>
+                                    <CheckBox Content="Incident Volume &amp; Severity Breakdown" IsChecked="{Binding Flags.IsIncidentVolumeIncluded}" Margin="0,0,0,8" FontSize="12" FontWeight="SemiBold"/>
+                                    <CheckBox Content="Campus Danger &amp; High-Risk Locations" IsChecked="{Binding Flags.IsHeatmapIncluded}" Margin="0,0,0,8" FontSize="12" FontWeight="SemiBold"/>
+                                    <CheckBox Content="Recidivism &amp; Repeat Offender Rates" IsChecked="{Binding Flags.IsRecidivismIncluded}" Margin="0,0,0,8" FontSize="12" FontWeight="SemiBold"/>
+                                    <CheckBox Content="Parent Notice &amp; Signed Slip Compliance" IsChecked="{Binding Flags.IsComplianceIncluded}" FontSize="12" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Delivery Options -->
+                            <TextBlock Text="3. Output &amp; Delivery Destination" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,10"/>
+                            <StackPanel Margin="0,0,0,14">
+                                <CheckBox Content="Save PDF to Local Computer" IsChecked="{Binding Flags.IsSavePdfLocal}" Margin="0,0,0,8" FontSize="12"/>
+                                <CheckBox Content="Email Copy directly to Principal / Board" IsChecked="{Binding Flags.IsEmailToPrincipal}" Margin="0,0,10,0" FontSize="12"/>
+                                
+                                <TextBlock Text="Principal Email Address:" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding RecipientEmail, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="34"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- RIGHT COLUMN: LIVE EXECUTIVE BRIEFING PREVIEW & ACTIONS (60%) -->
+                <Border Grid.Column="2" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="24">
+                    <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.04" BlurRadius="10" ShadowDepth="2"/></Border.Effect>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                            <TextBlock Text="Executive Report Executive Briefing" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            <TextBlock Text="Summary of aggregated safety metrics to be compiled into the formal document." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <!-- Live Summary Box -->
+                        <Border Grid.Row="1" Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="20" Margin="0,0,0,20">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Text="DOCUMENT TITLE: SMART SCHOOL ACADEMY EXECUTIVE REPORT" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                    <TextBlock Text="{Binding SelectedTimeframe, StringFormat='Report Timeframe: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,14"/>
+
+                                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,0,0,14"/>
+
+                                    <TextBlock Text="Aggregated Executive Metrics:" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
+                                    
+                                    <Grid Margin="0,0,0,6">
+                                        <TextBlock Text="• Total Incidents Logged:" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding ReportData.TotalIncidents}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Right"/>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,6">
+                                        <TextBlock Text="• Primary Offense Category:" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding ReportData.TopInfractionCategory}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Right"/>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,6">
+                                        <TextBlock Text="• High-Risk Campus Location:" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding ReportData.TopDangerLocation}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" HorizontalAlignment="Right"/>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,6">
+                                        <TextBlock Text="• Recidivism Rate:" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding ReportData.RecidivismRatePercent, StringFormat='{}{0}%'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" HorizontalAlignment="Right"/>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,14">
+                                        <TextBlock Text="• Parent Compliance Rate:" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding ReportData.ComplianceRatePercent, StringFormat='{}{0}%'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Right"/>
+                                    </Grid>
+
+                                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,0,0,14"/>
+
+                                    <TextBlock Text="Selected Sections Included in PDF:" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                                    <TextBlock Text="✓ Incident Volume &amp; Severity Breakdown" FontSize="11" Foreground="{DynamicResource SuccessBrush}" Margin="0,0,0,2"/>
+                                    <TextBlock Text="✓ Campus Danger &amp; High-Risk Locations" FontSize="11" Foreground="{DynamicResource SuccessBrush}" Margin="0,0,0,2"/>
+                                    <TextBlock Text="✓ Recidivism &amp; Repeat Offender Rates" FontSize="11" Foreground="{DynamicResource SuccessBrush}" Margin="0,0,0,2"/>
+                                    <TextBlock Text="✓ Parent Notice &amp; Signed Slip Compliance" FontSize="11" Foreground="{DynamicResource SuccessBrush}"/>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+
+                        <!-- Bottom Action Buttons -->
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0" Content="🖨️ Export PDF Only" Command="{Binding ExportPdfOnlyCommand}" Style="{DynamicResource PrimaryButtonStyle}" Height="40" FontSize="13" FontWeight="Bold"/>
+                            <Button Grid.Column="2" Content="📧 Generate &amp; Email to Board" Command="{Binding GenerateAndEmailCommand}" Style="{DynamicResource PrimaryButtonStyle}" Background="{DynamicResource SuccessBrush}" BorderBrush="{DynamicResource SuccessBrush}" Height="40" FontSize="13" FontWeight="Bold"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

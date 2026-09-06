@@ -1,0 +1,387 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.BehavioralTranscriptsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="28,20,28,20">
+                <!-- Back Button + Header -->
+                <Grid Margin="0,0,0,16">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <Button Content="&#x2190; Back to Profiles Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToProfilesHubCommand}" Margin="0,0,14,0" Padding="12,6"/>
+                            <TextBlock Text="Behavioral Transcripts" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock Text="Search a student to view their complete consolidated conduct record including incidents, sanctions, interventions, suspensions, and merit commendations." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Grid>
+                <!-- Action Buttons (visible when result loaded) -->
+                <WrapPanel Margin="0,0,0,16" Visibility="{Binding HasResult, Converter={StaticResource BoolToVis}}">
+                    <Button Content="&#x2190; View Enrolled Students" Command="{Binding ClearTranscriptSelectionCommand}" Style="{DynamicResource SecondaryButtonStyle}" FontSize="11" Height="34" Padding="12,0" Margin="0,0,8,0"/>
+                    <Button Content="&#128424; Print Good Moral Certificate" Command="{Binding PrintGoodMoralCommand}" Style="{DynamicResource SecondaryButtonStyle}" FontSize="11" Height="34" Padding="12,0" Margin="0,0,8,0"/>
+                    <Button Content="&#128196; Export Conduct Record (PDF)" Command="{Binding ExportTranscriptCommand}" Style="{DynamicResource SecondaryButtonStyle}" FontSize="11" Height="34" Padding="12,0" Margin="0,0,8,0"/>
+                    <Button Content="+ Record Merit / Commendation" Command="{Binding OpenAddMeritCommand}" Style="{DynamicResource PrimaryButtonStyle}" FontSize="11" FontWeight="SemiBold" Height="34" Padding="12,0"/>
+                </WrapPanel>
+                <!-- Loading Indicator -->
+                <TextBlock Text="&#x23F3; Loading transcript data..." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center" Margin="0,16"
+                           Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
+
+                <!-- Officially Enrolled Students Directory (Visible when HasResult is False) -->
+                <Border Visibility="{Binding HasResult, Converter={StaticResource InverseBoolToVis}}"
+                        Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="20">
+                    <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.05" BlurRadius="12" ShadowDepth="2"/></Border.Effect>
+                    <StackPanel>
+                        <!-- Directory Header & Filter Toolbar -->
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Officially Enrolled Students" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                                    <Border Background="{DynamicResource InfoBgBrush}" CornerRadius="10" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding EnrolledStudentsCount, StringFormat='{}{0} Students'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}"/>
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Text="Click any student profile below to load and inspect their consolidated conduct transcript." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="Select Student:" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,8,0"/>
+                                <ComboBox IsEditable="True" IsTextSearchEnabled="True" ItemsSource="{Binding StudentSuggestions}"
+                                          Text="{Binding SelectedStudent, UpdateSourceTrigger=PropertyChanged}" FontSize="13" Height="34" Width="220" Margin="0,0,8,0"/>
+                                <Button Content="Load Transcript" Command="{Binding LoadTranscriptCommand}" Style="{DynamicResource PrimaryButtonStyle}" Height="34" Padding="14,0"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Students DataGrid -->
+                        <DataGrid ItemsSource="{Binding FilteredEnrolledStudents}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                                  GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{DynamicResource BorderBrush}"
+                                  Background="{DynamicResource CardBackgroundBrush}" RowBackground="{DynamicResource CardBackgroundBrush}"
+                                  AlternatingRowBackground="{DynamicResource TableRowAltBrush}"
+                                  HeadersVisibility="Column" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" ColumnHeaderHeight="38" RowHeight="46">
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="Background" Value="{DynamicResource TableHoverBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                    <Setter Property="FontSize" Value="11"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="Padding" Value="12,0"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow">
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="{DynamicResource TableHoverBrush}"/></Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Student Name" Width="2*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
+                                                <Border Width="28" Height="28" CornerRadius="14" Background="{DynamicResource InfoBgBrush}" Margin="0,0,10,0">
+                                                    <TextBlock Text="👤" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <TextBlock Text="{Binding FullName}" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Student ID" Binding="{Binding StudentNumber}" Width="120">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock"><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="FontSize" Value="12"/><Setter Property="FontWeight" Value="Medium"/><Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/><Setter Property="Margin" Value="10,0"/></Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTemplateColumn Header="Grade &amp; Section" Width="1.5*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
+                                                <TextBlock Text="{Binding GradeLevel}" FontSize="12" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                <TextBlock Text=" • " FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                <TextBlock Text="{Binding Section}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Adviser" Binding="{Binding Adviser}" Width="1.5*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock"><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/><Setter Property="Margin" Value="10,0"/></Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTemplateColumn Header="Status" Width="140">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource SuccessBgBrush}" CornerRadius="4" Padding="8,3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0">
+                                                <TextBlock Text="Officially Enrolled" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SuccessBrush}"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Action" Width="130">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="View Transcript &#x2192;" Command="{Binding DataContext.SelectEnrolledStudentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" Style="{DynamicResource PrimaryButtonStyle}" FontSize="11" Height="28" Padding="8,0" Margin="4,0" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Results Panel -->
+                <StackPanel Visibility="{Binding HasResult, Converter={StaticResource BoolToVis}}">
+                    <!-- Student Summary Card -->
+                    <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="24,20" Margin="0,0,0,18">
+                        <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.05" BlurRadius="10" ShadowDepth="2"/></Border.Effect>
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="1"/><ColumnDefinition Width="*"/><ColumnDefinition Width="1"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <!-- Identity -->
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,24,0">
+                                <Border Width="68" Height="68" CornerRadius="34" Background="{DynamicResource InfoBgBrush}" BorderBrush="{DynamicResource InfoBrush}" BorderThickness="2" VerticalAlignment="Center" ClipToBounds="True">
+                                    <Grid><TextBlock Text="&#x1F464;" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center"/><Image Source="{Binding TranscriptResult.ProfilePicturePath, Mode=OneWay}" Stretch="UniformToFill"/></Grid>
+                                </Border>
+                                <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding StudentDisplayName, Mode=OneWay}" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                                        <Button Content="Edit Profile" Command="{Binding OpenEditStudentModalCommand}" Style="{DynamicResource SecondaryButtonStyle}" FontSize="11" FontWeight="SemiBold" Padding="10,4" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding StudentIdDisplay, Mode=OneWay}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                                    <TextBlock Text="{Binding TranscriptResult.Section, Mode=OneWay}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"><Run Text="Adviser: "/><Run Text="{Binding TranscriptResult.Adviser, Mode=OneWay}"/></TextBlock>
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"><Run Text="Guardian: "/><Run Text="{Binding TranscriptResult.GuardianName, Mode=OneWay}"/></TextBlock>
+                                    <TextBlock Text="{Binding TranscriptResult.GuardianContact, Mode=OneWay}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <Border Grid.Column="1" Background="{DynamicResource BorderBrush}" Margin="0,4"/>
+                            <!-- Conduct Score -->
+                            <StackPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24,0">
+                                <TextBlock Text="Conduct Score" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                <Border Width="90" Height="90" CornerRadius="45" Background="{DynamicResource TableRowAltBrush}" BorderBrush="{DynamicResource SuccessBrush}" BorderThickness="5" HorizontalAlignment="Center">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding ConductScore, Mode=OneWay}" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="/100" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <ProgressBar Value="{Binding ConductScore, Mode=OneWay}" Maximum="100" Height="6" Margin="0,10,0,0" Background="{DynamicResource BorderBrush}" Foreground="{DynamicResource SuccessBrush}"/>
+                            </StackPanel>
+                            <Border Grid.Column="3" Background="{DynamicResource BorderBrush}" Margin="0,4"/>
+                            <!-- KPI + Badge -->
+                            <StackPanel Grid.Column="4" VerticalAlignment="Center" Width="220" Margin="24,0,0,0">
+                                <Border CornerRadius="6" Padding="10,6" HorizontalAlignment="Left" Margin="0,0,0,12" Background="{Binding TranscriptResult.IsEligible, Converter={StaticResource BoolToGreenRed}, Mode=OneWay}">
+                                    <TextBlock Text="{Binding StandingLabel, Mode=OneWay}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                </Border>
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="8"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                    <Border Grid.Row="0" Grid.Column="0" Background="{DynamicResource InfoBgBrush}" CornerRadius="8" Padding="10,8">
+                                        <StackPanel><TextBlock Text="{Binding IncidentCountText, Mode=OneWay}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}" HorizontalAlignment="Center"/><TextBlock Text="Incidents" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center"/></StackPanel>
+                                    </Border>
+                                    <Border Grid.Row="0" Grid.Column="2" Background="{DynamicResource WarningBgBrush}" CornerRadius="8" Padding="10,8">
+                                        <StackPanel><TextBlock Text="{Binding SanctionCountText, Mode=OneWay}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" HorizontalAlignment="Center"/><TextBlock Text="Sanctions" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center"/></StackPanel>
+                                    </Border>
+                                    <Border Grid.Row="2" Grid.Column="0" Background="{DynamicResource SuccessBgBrush}" CornerRadius="8" Padding="10,8">
+                                        <StackPanel><TextBlock Text="{Binding InterventionCountText, Mode=OneWay}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center"/><TextBlock Text="Interventions" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center"/></StackPanel>
+                                    </Border>
+                                    <Border Grid.Row="2" Grid.Column="2" Background="{DynamicResource DangerBgBrush}" CornerRadius="8" Padding="10,8">
+                                        <StackPanel><TextBlock Text="{Binding SuspensionCountText, Mode=OneWay}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" HorizontalAlignment="Center"/><TextBlock Text="Suspensions" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center"/></StackPanel>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <!-- DataGrid -->
+                    <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.05" BlurRadius="10" ShadowDepth="2"/></Border.Effect>
+                        <StackPanel>
+                            <Border Padding="20,14" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                                <TextBlock Text="Unified Conduct Transcript" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            </Border>
+                            <DataGrid ItemsSource="{Binding FilteredEntries}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                                      GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{DynamicResource BorderBrush}"
+                                      Background="{DynamicResource CardBackgroundBrush}" RowBackground="{DynamicResource CardBackgroundBrush}" AlternatingRowBackground="{DynamicResource TableRowAltBrush}"
+                                      HeadersVisibility="Column" BorderThickness="0" ColumnHeaderHeight="38" RowHeight="42" Margin="0,0,0,8">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="{DynamicResource TableHoverBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                        <Setter Property="FontSize" Value="11"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="Padding" Value="12,0"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/><Setter Property="BorderThickness" Value="0"/></Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="{DynamicResource TableHoverBrush}"/></Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.RowStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell"><Setter Property="BorderThickness" Value="0"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="DataGridCell"><Border Padding="12,0" Background="{TemplateBinding Background}"><ContentPresenter VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter></Style>
+                                </DataGrid.CellStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="&#x1F3C5;" Binding="{Binding EntryIcon}" Width="50" MinWidth="44"><DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="FontSize" Value="14"/></Style></DataGridTextColumn.ElementStyle></DataGridTextColumn>
+                                    <DataGridTextColumn Header="Date" Binding="{Binding FormattedDate}" Width="90" MinWidth="80"><DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="FontSize" Value="12"/></Style></DataGridTextColumn.ElementStyle></DataGridTextColumn>
+                                    <DataGridTextColumn Header="Source Module" Binding="{Binding SourceModule}" Width="130" MinWidth="110"><DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="FontSize" Value="12"/></Style></DataGridTextColumn.ElementStyle></DataGridTextColumn>
+                                    <DataGridTextColumn Header="Reference Code" Binding="{Binding ReferenceCode}" Width="140" MinWidth="120"><DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="FontSize" Value="12"/></Style></DataGridTextColumn.ElementStyle></DataGridTextColumn>
+                                    <DataGridTextColumn Header="Title / Description" Binding="{Binding Title}" Width="*" MinWidth="180">
+                                        <DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="TextTrimming" Value="CharacterEllipsis"/><Setter Property="TextWrapping" Value="NoWrap"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="FontSize" Value="12"/></Style></DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTemplateColumn Header="Score Impact" Width="110" MinWidth="100">
+                                        <DataGridTemplateColumn.CellTemplate><DataTemplate><TextBlock Text="{Binding ScoreImpactText}" Foreground="{Binding ScoreImpactColor}" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" Margin="12,0"/></DataTemplate></DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Handled By" Binding="{Binding HandledBy}" Width="130" MinWidth="100"><DataGridTextColumn.ElementStyle><Style TargetType="TextBlock"><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="FontSize" Value="12"/></Style></DataGridTextColumn.ElementStyle></DataGridTextColumn>
+                                    <DataGridTemplateColumn Header="Status" Width="110" MinWidth="90">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border CornerRadius="4" Margin="8,6" Padding="8,3" HorizontalAlignment="Left">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="{DynamicResource TableHoverBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ComplianceStatus}" Value="Completed"><Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/></DataTrigger>
+                                                                <DataTrigger Binding="{Binding ComplianceStatus}" Value="Cleared"><Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/></DataTrigger>
+                                                                <DataTrigger Binding="{Binding ComplianceStatus}" Value="Active"><Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/></DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding ComplianceStatus}" FontSize="11" FontWeight="SemiBold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ComplianceStatus}" Value="Completed"><Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/></DataTrigger>
+                                                                    <DataTrigger Binding="{Binding ComplianceStatus}" Value="Cleared"><Setter Property="Foreground" Value="{DynamicResource InfoBrush}"/></DataTrigger>
+                                                                    <DataTrigger Binding="{Binding ComplianceStatus}" Value="Active"><Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/></DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+        <!-- Add Merit Modal -->
+        <Border Visibility="{Binding ShowModal, Converter={StaticResource BoolToVis}}" Background="#88000000" Panel.ZIndex="100">
+            <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" MaxWidth="500" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="28,24" Margin="40">
+                <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.18" BlurRadius="32" ShadowDepth="4"/></Border.Effect>
+                <StackPanel>
+                    <TextBlock Text="+ Record Merit / Commendation" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Award merit points to be applied to the student conduct score." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,20"/>
+                    <TextBlock Text="Student" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                    <Border Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,14">
+                        <TextBlock Text="{Binding StudentDisplayName}" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    </Border>
+                    <TextBlock Text="Commendation Category" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding CommendationCategories}" SelectedItem="{Binding ModalCategory}" FontSize="13" Height="36" Margin="0,0,0,14"/>
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0"><TextBlock Text="Points (+)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/><TextBox Text="{Binding ModalPoints, UpdateSourceTrigger=PropertyChanged}" FontSize="13" Height="36" Style="{DynamicResource ModernTextBoxStyle}"/></StackPanel>
+                        <StackPanel Grid.Column="2"><TextBlock Text="Date Awarded" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/><DatePicker SelectedDate="{Binding ModalDate, UpdateSourceTrigger=PropertyChanged}" Height="36" Style="{DynamicResource ModernDatePickerStyle}"/></StackPanel>
+                    </Grid>
+                    <TextBlock Text="Citation / Commendation Description" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding ModalCitation, UpdateSourceTrigger=PropertyChanged}" Height="60" TextWrapping="Wrap" AcceptsReturn="True" Style="{DynamicResource ModernTextBoxStyle}" Margin="0,0,0,20"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Cancel" Command="{Binding CloseModalCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="36" Padding="14,0" Margin="0,0,10,0"/>
+                        <Button Content="Save Merit" Command="{Binding SaveMeritCommand}" Style="{DynamicResource PrimaryButtonStyle}" Height="36" Padding="16,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+        <!-- Register New Student Modal -->
+        <Border Visibility="{Binding ShowAddStudentModal, Converter={StaticResource BoolToVis}}" Background="#88000000" Panel.ZIndex="100">
+            <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" MaxWidth="520" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="28,24" Margin="40">
+                <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.18" BlurRadius="32" ShadowDepth="4"/></Border.Effect>
+                <StackPanel>
+                    <TextBlock Text="+ Register New Student Profile" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Add an officially enrolled student to initialize their behavioral transcript record." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,16"/>
+                    <TextBlock Text="Student ID Number *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding NewStudentId, UpdateSourceTrigger=PropertyChanged}" Height="34" Style="{DynamicResource ModernTextBoxStyle}" Margin="0,0,0,10"/>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0"><TextBlock Text="First Name *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/><TextBox Text="{Binding NewFirstName, UpdateSourceTrigger=PropertyChanged}" Height="34" Style="{DynamicResource ModernTextBoxStyle}"/></StackPanel>
+                        <StackPanel Grid.Column="2"><TextBlock Text="Last Name *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/><TextBox Text="{Binding NewLastName, UpdateSourceTrigger=PropertyChanged}" Height="34" Style="{DynamicResource ModernTextBoxStyle}"/></StackPanel>
+                    </Grid>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0"><TextBlock Text="Grade Level" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/><ComboBox ItemsSource="{Binding GradeLevels}" SelectedItem="{Binding NewGradeLevel}" Height="34"/></StackPanel>
+                        <StackPanel Grid.Column="2"><TextBlock Text="Section" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/><TextBox Text="{Binding NewSection, UpdateSourceTrigger=PropertyChanged}" Height="34" Style="{DynamicResource ModernTextBoxStyle}"/></StackPanel>
+                    </Grid>
+                    <TextBlock Text="Class Adviser" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding NewAdviser, UpdateSourceTrigger=PropertyChanged}" Height="34" Style="{DynamicResource ModernTextBoxStyle}" Margin="0,0,0,10"/>
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0"><TextBlock Text="Guardian Name" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/><TextBox Text="{Binding NewGuardianName, UpdateSourceTrigger=PropertyChanged}" Height="34" Style="{DynamicResource ModernTextBoxStyle}"/></StackPanel>
+                        <StackPanel Grid.Column="2"><TextBlock Text="Guardian Contact" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/><TextBox Text="{Binding NewGuardianContact, UpdateSourceTrigger=PropertyChanged}" Height="34" Style="{DynamicResource ModernTextBoxStyle}"/></StackPanel>
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Cancel" Command="{Binding CloseAddStudentModalCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="34" Padding="14,0" Margin="0,0,8,0"/>
+                        <Button Content="Save &amp; Register" Command="{Binding SaveNewStudentCommand}" Style="{DynamicResource PrimaryButtonStyle}" Height="34" Padding="14,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+        <!-- Edit Profile Modal -->
+        <Border Visibility="{Binding ShowEditStudentModal, Converter={StaticResource BoolToVis}}" Background="#88000000" Panel.ZIndex="100">
+            <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" MaxWidth="620" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="28,20" Margin="20">
+                <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.22" BlurRadius="32" ShadowDepth="4"/></Border.Effect>
+                <ScrollViewer MaxHeight="520" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Edit Student Master Profile" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                        <TextBlock Text="Update official student directory demographic records." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,14"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14" VerticalAlignment="Center">
+                            <Border Width="50" Height="50" CornerRadius="25" Background="{DynamicResource InfoBgBrush}" Margin="0,0,14,0" ClipToBounds="True">
+                                <Grid><TextBlock Text="👤" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/><Image Source="{Binding EditProfilePicturePath}" Stretch="UniformToFill"/></Grid>
+                            </Border>
+                            <Button Content="📷 Change Photo" Command="{Binding UploadProfilePictureCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="30" Padding="10,0"/>
+                        </StackPanel>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0"><TextBlock Text="First Name *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/><TextBox Text="{Binding EditFirstName, UpdateSourceTrigger=PropertyChanged}" Height="32" Style="{DynamicResource ModernTextBoxStyle}"/></StackPanel>
+                            <StackPanel Grid.Column="2"><TextBlock Text="Middle Name" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/><TextBox Text="{Binding EditMiddleName, UpdateSourceTrigger=PropertyChanged}" Height="32" Style="{DynamicResource ModernTextBoxStyle}"/></StackPanel>
+                            <StackPanel Grid.Column="4"><TextBlock Text="Last Name *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/><TextBox Text="{Binding EditLastName, UpdateSourceTrigger=PropertyChanged}" Height="32" Style="{DynamicResource ModernTextBoxStyle}"/></StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0"><TextBlock Text="Grade Level" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/><ComboBox ItemsSource="{Binding GradeLevels}" SelectedItem="{Binding EditGradeLevel}" Height="32"/></StackPanel>
+                            <StackPanel Grid.Column="2"><TextBlock Text="Section" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/><TextBox Text="{Binding EditSection, UpdateSourceTrigger=PropertyChanged}" Height="32" Style="{DynamicResource ModernTextBoxStyle}"/></StackPanel>
+                            <StackPanel Grid.Column="4"><TextBlock Text="Strand" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/><ComboBox ItemsSource="{Binding TrackStrandList}" SelectedItem="{Binding EditTrackStrand}" Height="32"/></StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0"><TextBlock Text="Adviser" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/><TextBox Text="{Binding EditAdviser, UpdateSourceTrigger=PropertyChanged}" Height="32" Style="{DynamicResource ModernTextBoxStyle}"/></StackPanel>
+                            <StackPanel Grid.Column="2"><TextBlock Text="Gender" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/><ComboBox ItemsSource="{Binding GenderList}" SelectedItem="{Binding EditGender}" Height="32"/></StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="10"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0"><TextBlock Text="Guardian Name" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/><TextBox Text="{Binding EditGuardianName, UpdateSourceTrigger=PropertyChanged}" Height="32" Style="{DynamicResource ModernTextBoxStyle}"/></StackPanel>
+                            <StackPanel Grid.Column="2"><TextBlock Text="Guardian Contact" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/><TextBox Text="{Binding EditGuardianContact, UpdateSourceTrigger=PropertyChanged}" Height="32" Style="{DynamicResource ModernTextBoxStyle}"/></StackPanel>
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Cancel" Command="{Binding CloseEditStudentModalCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="34" Padding="14,0" Margin="0,0,8,0"/>
+                            <Button Content="Save Changes" Command="{Binding SaveEditStudentCommand}" Style="{DynamicResource PrimaryButtonStyle}" Height="34" Padding="14,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Border>
+    </Grid>
+</UserControl>

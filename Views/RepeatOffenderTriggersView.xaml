@@ -1,0 +1,292 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.RepeatOffenderTriggersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="850" d:DesignWidth="1150">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid Margin="32,24">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- 1. Header & Navigation Back Button -->
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <Button Content="← Back to Rules Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToRulesHubCommand}" Margin="0,0,14,0" Padding="12,6"/>
+                            <TextBlock Text="Repeat Offender &amp; Recidivism Policy Engine" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock Text="Adjust rolling lookback windows, escalation ladders, and automatic severity triggers for repeated student infractions." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button Content="+ Create Escalation Trigger" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding OpenAddModalCommand}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Status Notification Banner -->
+                <Border Grid.Row="1" Background="{DynamicResource InfoBgBrush}" BorderBrush="{DynamicResource InfoBrush}" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,16">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding StatusMessage}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource InfoBrush}" FontWeight="Medium"/>
+                </Border>
+
+                <!-- 2. Top KPI Summary Cards -->
+                <Grid Grid.Row="2" Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Margin="0,0,12,0" Padding="16,14">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="ACTIVE RECIDIVISM POLICIES" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding ActivePoliciesCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Margin="0,0,12,0" Padding="16,14">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="AVG LOOKBACK WINDOW" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding AverageLookbackText}" FontSize="24" FontWeight="Bold" Foreground="#8B5CF6" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Margin="0,0,12,0" Padding="16,14">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="TRIGGERED ESCALATIONS (THIS MO)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding TriggeredEscalationsCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="3" Style="{DynamicResource CardBorderStyle}" Padding="16,14">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="FLAGGED REPEAT OFFENDERS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding FlaggedOffendersCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- 3. Control Toolbar -->
+                <Border Grid.Row="3" Style="{DynamicResource CardBorderStyle}" Margin="0,0,0,16" Padding="16,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                            <TextBlock Text="Search Policy Name / Scope" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Category Scope Filter" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding CategoryFilterOptions}" SelectedItem="{Binding SelectedCategoryFilter}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 4. Repeat Offender Rules DataGrid -->
+                <Border Grid.Row="4" Style="{DynamicResource CardBorderStyle}" Padding="0">
+                    <DataGrid ItemsSource="{Binding RepeatRules}"
+                              AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False"
+                              SelectionMode="Single" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{DynamicResource BorderBrush}"
+                              Background="Transparent" RowBackground="Transparent" AlternatingRowBackground="{DynamicResource TableRowAltBrush}"
+                              Foreground="{DynamicResource PrimaryTextBrush}" BorderThickness="0" HeadersVisibility="Column"
+                              CanUserResizeRows="False" RowDetailsVisibilityMode="Collapsed" RowHeight="50">
+
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="{DynamicResource HeaderBackgroundBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="FontSize" Value="12"/>
+                                <Setter Property="Padding" Value="8,10"/>
+                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                            </Style>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="DataGridCell">
+                                            <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                            <Style TargetType="TextBlock" x:Key="CellTextStyle">
+                                <Setter Property="Padding" Value="6,0"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="FontSize" Value="12"/>
+                            </Style>
+                        </DataGrid.Resources>
+
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#E0F2FE"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#BAE6FD"/>
+                                        <Setter Property="BorderThickness" Value="3,0,0,0"/>
+                                        <Setter Property="BorderBrush" Value="#0EA5E9"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding PolicyId}" MinWidth="80" Width="80" ElementStyle="{StaticResource CellTextStyle}"/>
+                            <DataGridTextColumn Header="Policy Name" Binding="{Binding PolicyName}" MinWidth="200" Width="1.5*" ElementStyle="{StaticResource CellTextStyle}"/>
+                            <DataGridTextColumn Header="Category Scope" Binding="{Binding Category}" MinWidth="140" Width="1.2*" ElementStyle="{StaticResource CellTextStyle}"/>
+
+                            <DataGridTextColumn Header="Lookback" Binding="{Binding LookbackText}" MinWidth="95" Width="95" ElementStyle="{StaticResource CellTextStyle}"/>
+                            <DataGridTextColumn Header="Threshold" Binding="{Binding ThresholdText}" MinWidth="110" Width="110" ElementStyle="{StaticResource CellTextStyle}"/>
+
+                            <!-- Penalty Action Badge -->
+                            <DataGridTemplateColumn Header="Escalation Action" MinWidth="160" Width="1.3*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="4" Padding="8,3" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FEF3C7">
+                                            <TextBlock Text="{Binding PenaltyActionText}" FontSize="11" FontWeight="Bold" Foreground="#92400E"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Actions -->
+                            <DataGridTemplateColumn Header="Actions" MinWidth="130" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button Content="Edit" Style="{DynamicResource SecondaryButtonStyle}" Padding="6,3" FontSize="11" Margin="0,0,4,0"
+                                                    Command="{Binding DataContext.OpenEditModalCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"/>
+                                            <Button Content="Delete" Style="{DynamicResource SecondaryButtonStyle}" Padding="6,3" FontSize="11" Foreground="{DynamicResource DangerBrush}"
+                                                    Command="{Binding DataContext.DeleteRuleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- 5. MODAL POP-UP DIALOG ("+ Create Escalation Trigger") -->
+        <Grid Background="#80000000">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsModalOpen}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
+            <Border Style="{DynamicResource CardBorderStyle}" Width="520" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24" CornerRadius="12">
+                <StackPanel Orientation="Vertical">
+                    <Grid Margin="0,0,0,14">
+                        <TextBlock Text="Configure Repeat Offender Policy" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        <Button Content="✕" Width="28" Height="28" HorizontalAlignment="Right" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseModalCommand}"/>
+                    </Grid>
+
+                    <Border Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,12">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ModalErrorMessage}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding ModalErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontSize="12" FontWeight="Medium"/>
+                    </Border>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <TextBlock Text="Policy Title / Name *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                        <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding ModalPolicyName, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.4*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="Target Infraction Category *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding CategoryOptions}" SelectedItem="{Binding ModalCategory}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Lookback Window *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding LookbackOptions}" SelectedItem="{Binding ModalLookbackDays}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.3*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="Threshold Count *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding ModalThresholdCount, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Escalation Action Type *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding PenaltyTypeOptions}" SelectedItem="{Binding ModalPenaltyType}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Risk Points Added (if Flat Penalty) *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                        <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding ModalBonusPoints, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <TextBlock Text="AUTOMATED WORKFLOW FLAGS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,6"/>
+                    <CheckBox Content="Auto-create Parent Summons Notice draft" IsChecked="{Binding ModalAutoSummons}" Margin="0,3" FontSize="12"/>
+                    <CheckBox Content="Flag Student Profile with High-Risk Badge" IsChecked="{Binding ModalFlagProfile}" Margin="0,3" FontSize="12"/>
+                    <CheckBox Content="Require Dean / Prefect Incident Sign-off" IsChecked="{Binding ModalRequireDeanSignoff}" Margin="0,3,0,14" FontSize="12"/>
+
+                    <CheckBox Content="Policy Active Status" IsChecked="{Binding ModalIsActive}" Margin="0,0,0,16" FontSize="12" FontWeight="SemiBold"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Cancel" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseModalCommand}" Margin="0,0,10,0" Padding="14,6"/>
+                        <Button Content="Save Policy Rule" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveRuleCommand}" Padding="14,6"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

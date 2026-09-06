@@ -1,0 +1,45 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Backgrounds -->
+    <SolidColorBrush x:Key="AppBackgroundBrush" Color="#0F172A"/>
+    <SolidColorBrush x:Key="SurfaceBackgroundBrush" Color="#1E293B"/>
+    <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#0B1120"/>
+    <SolidColorBrush x:Key="SidebarHoverBrush" Color="#1E293B"/>
+    <SolidColorBrush x:Key="CardBackgroundBrush" Color="#1E293B"/>
+    <SolidColorBrush x:Key="InputBackgroundBrush" Color="#334155"/>
+    <SolidColorBrush x:Key="HeaderBackgroundBrush" Color="#1E293B"/>
+    <SolidColorBrush x:Key="TableRowAltBrush" Color="#182234"/>
+    <SolidColorBrush x:Key="TableHoverBrush" Color="#293548"/>
+    <SolidColorBrush x:Key="ModalOverlayBrush" Color="#B3000000"/>
+
+    <!-- Foregrounds / Text -->
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#F8FAFC"/>
+    <SolidColorBrush x:Key="SecondaryTextBrush" Color="#94A3B8"/>
+    <SolidColorBrush x:Key="MutedTextBrush" Color="#64748B"/>
+    <SolidColorBrush x:Key="SidebarTextBrush" Color="#F1F5F9"/>
+    <SolidColorBrush x:Key="SidebarMutedTextBrush" Color="#64748B"/>
+    <SolidColorBrush x:Key="ButtonTextBrush" Color="#FFFFFF"/>
+
+    <!-- Accents & Brands -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="#3B82F6"/>
+    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#60A5FA"/>
+    <SolidColorBrush x:Key="PrimaryActiveBrush" Color="#2563EB"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="#60A5FA"/>
+
+    <!-- Status & Badges -->
+    <SolidColorBrush x:Key="SuccessBrush" Color="#34D399"/>
+    <SolidColorBrush x:Key="SuccessBgBrush" Color="#064E3B"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="#FBBF24"/>
+    <SolidColorBrush x:Key="WarningBgBrush" Color="#78350F"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="#F87171"/>
+    <SolidColorBrush x:Key="DangerBgBrush" Color="#7F1D1D"/>
+    <SolidColorBrush x:Key="InfoBrush" Color="#38BDF8"/>
+    <SolidColorBrush x:Key="InfoBgBrush" Color="#164E63"/>
+
+    <!-- Borders & Dividers -->
+    <SolidColorBrush x:Key="BorderBrush" Color="#334155"/>
+    <SolidColorBrush x:Key="InputBorderBrush" Color="#475569"/>
+    <SolidColorBrush x:Key="DividerBrush" Color="#334155"/>
+
+</ResourceDictionary>

@@ -1,0 +1,361 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.StaffRosterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Main Scrollable Content -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <Grid Margin="32,24">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                    <Button Content="&#x2190; Back to User Management Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="10,4" Margin="0,0,0,10"/>
+                    <TextBlock Text="Staff Roster Directory &amp; Sync" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    <TextBlock Text="Maintain active staff directory, department assignments, case investigators, homeroom advisers, and contact records." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <!-- Toolbar -->
+                <Grid Grid.Row="1" Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="320"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Search -->
+                    <Grid Grid.Column="0">
+                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{DynamicResource ModernTextBoxStyle}" Padding="30,0,24,0" Height="38"/>
+                        <TextBlock Text="🔍" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}"
+                                   VerticalAlignment="Center" Margin="9,0,0,0" IsHitTestVisible="False"/>
+                        <Button Content="✕" Command="{Binding ClearSearchCommand}"
+                                Visibility="{Binding HasSearchText, Converter={StaticResource BoolToVis}}"
+                                HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0"
+                                Background="Transparent" BorderThickness="0"
+                                Foreground="{DynamicResource SecondaryTextBrush}" Cursor="Hand" Width="20" Height="20"/>
+                    </Grid>
+
+                    <!-- Department Filter -->
+                    <ComboBox Grid.Column="2" ItemsSource="{Binding DepartmentFilterOptions}"
+                              SelectedItem="{Binding SelectedDepartmentFilter}"
+                              Height="38" VerticalContentAlignment="Center"
+                              Style="{DynamicResource ModernComboBoxStyle}"/>
+
+                    <!-- Add New Button -->
+                    <Button Grid.Column="4" Content="+ Add New Staff" Command="{Binding OpenCreateStaffModalCommand}"
+                            Style="{DynamicResource PrimaryButtonStyle}" Height="38" Padding="16,0" FontSize="13" FontWeight="Bold"/>
+
+                    <!-- Sync Button -->
+                    <Button Grid.Column="6" Content="🔄 Sync Directory" Command="{Binding SyncDirectoryCommand}"
+                            Style="{DynamicResource SecondaryButtonStyle}" Height="38" Padding="14,0" FontSize="12"/>
+                </Grid>
+
+                <!-- 4-Column Card Grid -->
+                <ItemsControl Grid.Row="2" ItemsSource="{Binding StaffView}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="4" HorizontalAlignment="Stretch"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{DynamicResource RecordCardStyle}" Margin="6">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick"
+                                                  Command="{Binding DataContext.OpenStaffCardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                  CommandParameter="{Binding}"/>
+                                </Border.InputBindings>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- StaffNumber badge + Status pill -->
+                                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" Background="{DynamicResource PrimaryBrush}"
+                                                CornerRadius="4" Padding="6,3" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding StaffNumber}" FontSize="10"
+                                                       FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                        </Border>
+                                        <Border Grid.Column="1" CornerRadius="10" Padding="8,3">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Inactive">
+                                                            <Setter Property="Background" Value="{DynamicResource DangerBgBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="Bold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Inactive">
+                                                                <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- Full Name -->
+                                    <TextBlock Grid.Row="1" Text="{Binding FullName}"
+                                               FontSize="14" FontWeight="Bold"
+                                               Foreground="{DynamicResource PrimaryTextBrush}"
+                                               TextTrimming="CharacterEllipsis" Margin="0,0,0,4"/>
+
+                                    <!-- Role -->
+                                    <TextBlock Grid.Row="2" Text="{Binding AssignmentRole}"
+                                               FontSize="12" Foreground="{DynamicResource AccentBrush}"
+                                               FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
+
+                                    <!-- Department -->
+                                    <TextBlock Grid.Row="3" FontSize="11"
+                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                               TextTrimming="CharacterEllipsis" Margin="0,0,0,3">
+                                        <Run Text="Dept: "/><Run Text="{Binding Department}"/>
+                                    </TextBlock>
+
+                                    <!-- Email -->
+                                    <TextBlock Grid.Row="4" Text="{Binding Email}"
+                                               FontSize="11" Foreground="{DynamicResource MutedTextBrush}"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- ═══════════════════ STAFF DETAIL / EDIT MODAL ═══════════════════ -->
+        <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000"
+              Background="{DynamicResource ModalOverlayBrush}"
+              Visibility="{Binding IsStaffModalOpen, Converter={StaticResource BoolToVis}}">
+            <Border Width="560" MaxHeight="660" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    CornerRadius="14" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                    Padding="32,28">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Modal Header -->
+                    <DockPanel Grid.Row="0" Margin="0,0,0,22">
+                        <TextBlock Text="{Binding StaffModalTitle}" FontSize="18" FontWeight="Bold"
+                                   Foreground="{DynamicResource PrimaryTextBrush}" DockPanel.Dock="Left" VerticalAlignment="Center"/>
+                        <Button Content="✕" Command="{Binding CloseStaffModalCommand}"
+                                DockPanel.Dock="Right" HorizontalAlignment="Right"
+                                Background="Transparent" BorderThickness="0"
+                                Foreground="{DynamicResource SecondaryTextBrush}" FontSize="16" Cursor="Hand"/>
+                    </DockPanel>
+
+                    <!-- VIEW MODE -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsStaffModalEditing}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+
+                            <!-- ID badge + Status pill -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
+                                    <TextBlock Text="{Binding ViewingStaff.StaffNumber}" FontWeight="Bold"
+                                               Foreground="{DynamicResource ButtonTextBrush}" FontSize="11"/>
+                                </Border>
+                                <Border CornerRadius="10" Padding="8,3">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ViewingStaff.Status}" Value="Inactive">
+                                                    <Setter Property="Background" Value="{DynamicResource DangerBgBrush}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding ViewingStaff.Status}" FontWeight="Bold" FontSize="11">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ViewingStaff.Status}" Value="Inactive">
+                                                        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
+                            </StackPanel>
+
+                            <TextBlock Text="{Binding ViewingStaff.FullName}" FontSize="22" FontWeight="Bold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBlock Text="{Binding ViewingStaff.AssignmentRole}" FontSize="14"
+                                       Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" Margin="0,0,0,18"/>
+
+                            <Border BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0" Margin="0,0,0,18"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="DEPARTMENT" FontSize="10" FontWeight="Bold"
+                                               Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
+                                    <TextBlock Text="{Binding ViewingStaff.Department}" FontSize="13"
+                                               Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
+                                    <TextBlock Text="OFFICIAL EMAIL" FontSize="10" FontWeight="Bold"
+                                               Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
+                                    <TextBlock Text="{Binding ViewingStaff.Email}" FontSize="13"
+                                               Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="CONTACT PHONE" FontSize="10" FontWeight="Bold"
+                                               Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
+                                    <TextBlock Text="{Binding ViewingStaff.Phone}" FontSize="13"
+                                               Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
+                                    <TextBlock Text="MEMBER SINCE" FontSize="10" FontWeight="Bold"
+                                               Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
+                                    <TextBlock Text="{Binding ViewingStaff.CreatedAt, StringFormat='{}{0:MMM dd, yyyy}'}"
+                                               FontSize="13" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- EDIT / CREATE MODE -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsStaffModalEditing}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+
+                            <TextBlock Text="STAFF ID / NUMBER" FontSize="11" FontWeight="Bold"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditStaffNumber, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{DynamicResource ModernTextBoxStyle}" Height="38" Margin="0,0,0,14"/>
+
+                            <TextBlock Text="FULL NAME" FontSize="11" FontWeight="Bold"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditFullName, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{DynamicResource ModernTextBoxStyle}" Height="38" Margin="0,0,0,14"/>
+
+                            <TextBlock Text="DEPARTMENT" FontSize="11" FontWeight="Bold"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding Departments}" SelectedItem="{Binding EditDepartment}"
+                                      Height="38" VerticalContentAlignment="Center" Margin="0,0,0,14"
+                                      Style="{DynamicResource ModernComboBoxStyle}"/>
+
+                            <TextBlock Text="ASSIGNMENT ROLE" FontSize="11" FontWeight="Bold"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding AssignmentRoles}" SelectedItem="{Binding EditRole}"
+                                      Height="38" VerticalContentAlignment="Center" Margin="0,0,0,14"
+                                      Style="{DynamicResource ModernComboBoxStyle}"/>
+
+                            <TextBlock Text="OFFICIAL EMAIL" FontSize="11" FontWeight="Bold"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditEmail, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{DynamicResource ModernTextBoxStyle}" Height="38" Margin="0,0,0,14"/>
+
+                            <TextBlock Text="CONTACT PHONE" FontSize="11" FontWeight="Bold"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditPhone, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{DynamicResource ModernTextBoxStyle}" Height="38" Margin="0,0,0,6"/>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Modal Footer Buttons -->
+                    <Grid Grid.Row="2" Margin="0,20,0,0">
+                        <!-- VIEW mode footer -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsStaffModalEditing}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <Button Content="🔄 Toggle Status" Command="{Binding ToggleStaffStatusCommand}"
+                                    Style="{DynamicResource SecondaryButtonStyle}" Height="38" Padding="14,0"
+                                    Margin="0,0,10,0" FontSize="12"/>
+                            <Button Content="✏️ Edit Staff" Command="{Binding SwitchToStaffEditModeCommand}"
+                                    Style="{DynamicResource PrimaryButtonStyle}" Height="38" Padding="18,0" FontSize="13"/>
+                        </StackPanel>
+
+                        <!-- EDIT/CREATE mode footer -->
+                        <Grid>
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsStaffModalEditing}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="Cancel" Command="{Binding CancelStaffEditCommand}"
+                                    Style="{DynamicResource SecondaryButtonStyle}" Height="38" FontSize="13"/>
+                            <Button Grid.Column="2" Content="💾 Save Staff" Command="{Binding SaveStaffFromModalCommand}"
+                                    Style="{DynamicResource PrimaryButtonStyle}" Height="38" FontSize="13"/>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

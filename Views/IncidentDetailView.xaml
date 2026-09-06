@@ -1,0 +1,371 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.IncidentDetailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:models="clr-namespace:SmartSchoolIncidentManagementSystem.Models"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             d:DesignHeight="900" d:DesignWidth="1100">
+    <UserControl.Resources>
+        <ObjectDataProvider x:Key="StatusEnumValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="models:IncidentStatus"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="SeverityEnumValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="models:IncidentSeverity"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="RiskEnumValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="models:RiskLevel"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="32,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" Margin="0,0,0,20">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="4" Padding="8,4" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding IncidentNumber}" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF"/>
+                        </Border>
+                        <TextBlock Text="{Binding TitleText}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="Automatic classification and risk evaluation dynamically analyze incident narratives in real-time."
+                               FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="Cancel" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CancelCommand}" Margin="0,0,8,0"/>
+                    <Button Content="Save Incident" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveCommand}"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- LIVE RULE-BASED INTELLIGENCE CARD -->
+            <Border Grid.Row="1" Style="{DynamicResource CardBorderStyle}" Margin="0,0,0,20" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1.5">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Card Header -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="⚡" FontSize="16" Margin="0,0,8,0"/>
+                            <TextBlock Text="Rule-Based Automated Classification &amp; Risk Assessment Engine" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                        </StackPanel>
+                        <Button Content="✨ Apply Engine Recommendations"
+                                Style="{DynamicResource PrimaryButtonStyle}"
+                                HorizontalAlignment="Right"
+                                Padding="12,6"
+                                FontSize="12"
+                                Command="{Binding ApplyRuleRecommendationsCommand}"/>
+                    </Grid>
+
+                    <!-- Repeat Incident Alert Banner (if repeat offender) -->
+                    <Border Grid.Row="1" Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,12">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsRepeatAlertVisible}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⚠️ " FontSize="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding RepeatAlertText}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Real-time Predictions Display -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Suggested Category -->
+                        <Border Grid.Column="0" Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,10,0">
+                            <StackPanel>
+                                <TextBlock Text="DETECTED CATEGORY" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding LiveCategory}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Evaluated Severity -->
+                        <Border Grid.Column="1" Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,10,0">
+                            <StackPanel>
+                                <TextBlock Text="EVALUATED SEVERITY" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding LiveSeverity}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Evaluated Risk Level -->
+                        <Border Grid.Column="2" Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,10,0">
+                            <StackPanel>
+                                <TextBlock Text="ASSESSED RISK LEVEL" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding LiveRisk}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Recommended Action -->
+                        <Border Grid.Column="3" Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="12,10">
+                            <StackPanel>
+                                <TextBlock Text="RECOMMENDED RESPONSE / ACTION" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding LiveRecommendedAction}" FontSize="12" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Main Form Card -->
+            <Border Grid.Row="2" Style="{DynamicResource CardBorderStyle}">
+                <StackPanel Orientation="Vertical">
+
+                    <!-- Error Alert -->
+                    <Border Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,16">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ErrorMessage}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontWeight="Medium"/>
+                    </Border>
+
+                    <!-- Row 1: Title, Category, Location -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="1.2*"/>
+                            <ColumnDefinition Width="1.2*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Incident Title *" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="0,0,16,0">
+                            <TextBlock Text="Category" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding Categories}" SelectedItem="{Binding Category}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Location" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding Location, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Row 2: Status, Severity, Risk, Date -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.2*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Status" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding Source={StaticResource StatusEnumValues}}" SelectedItem="{Binding Status}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="0,0,16,0">
+                            <TextBlock Text="Severity" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding Source={StaticResource SeverityEnumValues}}" SelectedItem="{Binding Severity}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Margin="0,0,16,0">
+                            <TextBlock Text="Risk Level" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding Source={StaticResource RiskEnumValues}}" SelectedItem="{Binding Risk}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="3">
+                            <TextBlock Text="Date &amp; Time" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <DatePicker SelectedDate="{Binding IncidentDate}" FontSize="14" Padding="6,4"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Row 3: Involved Student & Reporting Staff -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Primary Involved Student *" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <Grid>
+                                <TextBox Style="{DynamicResource ModernTextBoxStyle}"
+                                         Text="{Binding PrimaryInvolvedStudent, UpdateSourceTrigger=PropertyChanged}"
+                                         x:Name="PrimaryStudentTextBox"/>
+                                <TextBlock Text="Enter primary involved student's name"
+                                           Foreground="{DynamicResource MutedTextBrush}"
+                                           FontSize="14"
+                                           IsHitTestVisible="False"
+                                           Margin="12,0,0,0"
+                                           VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding PrimaryInvolvedStudent}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <!-- Enrolled Student Autocomplete Suggestion Popup -->
+                                <Popup IsOpen="{Binding IsStudentSuggestionsOpen, Mode=TwoWay}"
+                                       PlacementTarget="{Binding ElementName=PrimaryStudentTextBox}"
+                                       Placement="Bottom"
+                                       StaysOpen="False"
+                                       AllowsTransparency="True"
+                                       PopupAnimation="Fade">
+                                    <Border Background="{DynamicResource CardBackgroundBrush}"
+                                            BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderThickness="1.5"
+                                            CornerRadius="8"
+                                            MinWidth="340"
+                                            MaxHeight="220"
+                                            Margin="0,3,0,0">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#000000" Opacity="0.12" BlurRadius="12" ShadowDepth="4"/>
+                                        </Border.Effect>
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                            <ItemsControl ItemsSource="{Binding StudentSuggestions}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button Style="{x:Null}"
+                                                                Command="{Binding DataContext.SelectStudentSuggestionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}"
+                                                                HorizontalContentAlignment="Stretch"
+                                                                Background="Transparent"
+                                                                BorderThickness="0"
+                                                                Cursor="Hand"
+                                                                Padding="12,8">
+                                                            <Button.Template>
+                                                                <ControlTemplate TargetType="Button">
+                                                                    <Border x:Name="itemBorder" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <TextBlock Text="👤" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                                            <TextBlock Text="{Binding}" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                                                                        </StackPanel>
+                                                                    </Border>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter TargetName="itemBorder" Property="Background" Value="{DynamicResource TableHoverBrush}"/>
+                                                                        </Trigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </Button.Template>
+                                                        </Button>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Reporting Staff / Teacher *" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <Grid>
+                                <TextBox Style="{DynamicResource ModernTextBoxStyle}"
+                                         Text="{Binding ReportingStaffTeacher, UpdateSourceTrigger=PropertyChanged}"
+                                         x:Name="ReportingStaffTextBox"/>
+                                <TextBlock Text="Enter reporting staff / teacher name"
+                                           Foreground="{DynamicResource MutedTextBrush}"
+                                           FontSize="14"
+                                           IsHitTestVisible="False"
+                                           Margin="12,0,0,0"
+                                           VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ReportingStaffTeacher}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Row 4: Other Involved Persons & Witnesses -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Other Persons Involved" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding InvolvedPersons, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Witnesses" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding Witnesses, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Row 5: Description -->
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="Incident Description / Narrative (Type details for live rule analysis) *" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                        <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Height="90" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                    </StackPanel>
+
+                    <!-- Row 6: Action Taken & Notes -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                            <TextBlock Text="Immediate Action Taken" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding ActionTaken, UpdateSourceTrigger=PropertyChanged}" Height="75" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Investigation / Disciplinary Notes" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" Height="75" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                        </StackPanel>
+                    </Grid>
+
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

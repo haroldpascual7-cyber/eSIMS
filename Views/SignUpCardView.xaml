@@ -1,0 +1,232 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.SignUpCardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,6,0,6">
+        <StackPanel Orientation="Vertical" Margin="36,10,36,16">
+            <!-- Top Banner: Avatar with Plus Badge & Theme Toggle -->
+            <Grid Margin="0,0,0,10">
+                <Grid Width="74" Height="74" HorizontalAlignment="Center">
+                    <Border Width="68" Height="68" CornerRadius="34"
+                            Background="{DynamicResource InputBackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1.5"
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Ellipse Width="20" Height="20" Fill="{DynamicResource PrimaryBrush}" Margin="0,0,0,14"/>
+                            <Path Fill="{DynamicResource PrimaryBrush}" Margin="0,18,0,0" Data="M 0,14 C 0,6 5,0 16,0 C 27,0 32,6 32,14 Z"/>
+                        </Grid>
+                    </Border>
+                    <!-- Plus Sign Badge at Bottom-Right -->
+                    <Border Width="24" Height="24" CornerRadius="12"
+                            Background="#2563EB"
+                            BorderBrush="#FFFFFF"
+                            BorderThickness="1.5"
+                            HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,1,1">
+                        <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.25" BlurRadius="6" ShadowDepth="2"/></Border.Effect>
+                        <TextBlock Text="+" FontSize="15" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"/>
+                    </Border>
+                </Grid>
+
+                <!-- Theme Toggle Button -->
+                <Button Command="{Binding ToggleThemeCommand}" ToolTip="Toggle Theme (Light / Dark)"
+                        HorizontalAlignment="Right" VerticalAlignment="Top" Width="34" Height="34" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="themeBtnBorder2" CornerRadius="17"
+                                    Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.15" BlurRadius="8" ShadowDepth="2"/></Border.Effect>
+                                <Canvas Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.3" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                          Data="M 8,1 V 3 M 8,13 V 15 M 1,8 H 3 M 13,8 H 15 M 3,3 L 4.5,4.5 M 11.5,11.5 L 13,13 M 3,13 L 4.5,11.5 M 11.5,4.5 L 13,3"/>
+                                    <Ellipse Canvas.Left="4" Canvas.Top="4" Width="8" Height="8" Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.2"/>
+                                    <Path Fill="{DynamicResource SecondaryTextBrush}" Data="M 8,4 A 4,4 0 0 1 8,12 Z"/>
+                                </Canvas>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="themeBtnBorder2" Property="Background" Value="{DynamicResource TableHoverBrush}"/></Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+
+            <TextBlock Text="Create Account" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center" Margin="0,0,0,2"/>
+            <TextBlock Text="Sign up to get started with eSIMS" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+            <!-- Alerts -->
+            <Border Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1" CornerRadius="8" Padding="10,5" Margin="0,0,0,8">
+                <Border.Style>
+                    <Style TargetType="Border"><Setter Property="Visibility" Value="Visible"/><Style.Triggers><DataTrigger Binding="{Binding SignUpErrorMessage}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style>
+                </Border.Style>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="⚠️" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding SignUpErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontWeight="Medium" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+            <Border Background="{DynamicResource SuccessBgBrush}" BorderBrush="{DynamicResource SuccessBrush}" BorderThickness="1" CornerRadius="8" Padding="10,5" Margin="0,0,0,8">
+                <Border.Style>
+                    <Style TargetType="Border"><Setter Property="Visibility" Value="Visible"/><Style.Triggers><DataTrigger Binding="{Binding SignUpSuccessMessage}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style>
+                </Border.Style>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="✓" FontSize="12" Foreground="{DynamicResource SuccessBrush}" FontWeight="Bold" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding SignUpSuccessMessage}" Foreground="{DynamicResource SuccessBrush}" FontWeight="Medium" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <!-- 1. Full Name -->
+            <Border Height="38" CornerRadius="8" Background="{DynamicResource InputBackgroundBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1" Padding="12,0" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="👤" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBox Grid.Column="1" x:Name="SignUpFullNameInput" Text="{Binding SignUpFullName, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" FontSize="13" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}" CaretBrush="{DynamicResource PrimaryBrush}" Padding="0"/>
+                    <TextBlock Grid.Column="1" Text="Full Name" FontSize="13" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center" IsHitTestVisible="False">
+                        <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=SignUpFullNameInput}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </Border>
+
+            <!-- 2. Email Address -->
+            <Border Height="38" CornerRadius="8" Background="{DynamicResource InputBackgroundBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1" Padding="12,0" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="✉" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBox Grid.Column="1" x:Name="SignUpEmailInput" Text="{Binding SignUpEmail, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" FontSize="13" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}" CaretBrush="{DynamicResource PrimaryBrush}" Padding="0"/>
+                    <TextBlock Grid.Column="1" Text="Email Address" FontSize="13" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center" IsHitTestVisible="False">
+                        <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=SignUpEmailInput}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </Border>
+
+            <!-- 3. Username -->
+            <Border Height="38" CornerRadius="8" Background="{DynamicResource InputBackgroundBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1" Padding="12,0" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="👤" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBox Grid.Column="1" x:Name="SignUpUsernameInput" Text="{Binding SignUpUsername, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" FontSize="13" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}" CaretBrush="{DynamicResource PrimaryBrush}" Padding="0"/>
+                    <TextBlock Grid.Column="1" Text="Username" FontSize="13" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center" IsHitTestVisible="False">
+                        <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=SignUpUsernameInput}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </Border>
+
+            <!-- 4. Password -->
+            <Border Height="38" CornerRadius="8" Background="{DynamicResource InputBackgroundBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1" Padding="12,0" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="🔒" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <PasswordBox Grid.Column="1" x:Name="SignUpPasswordBox" PasswordChanged="OnSignUpPasswordChanged" Visibility="{Binding SignUpIsPasswordVisible, Converter={StaticResource InverseBoolToVis}}" Background="Transparent" BorderThickness="0" FontSize="13" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}" CaretBrush="{DynamicResource PrimaryBrush}" Padding="0"/>
+                    <TextBox Grid.Column="1" x:Name="SignUpVisiblePasswordTextBox" Text="{Binding SignUpPassword, UpdateSourceTrigger=PropertyChanged}" TextChanged="OnSignUpVisiblePasswordTextChanged" Visibility="{Binding SignUpIsPasswordVisible, Converter={StaticResource BoolToVis}}" Background="Transparent" BorderThickness="0" FontSize="13" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}" CaretBrush="{DynamicResource PrimaryBrush}" Padding="0"/>
+                    <TextBlock Grid.Column="1" Text="Password" FontSize="13" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center" IsHitTestVisible="False">
+                        <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding SignUpPassword}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                    </TextBlock>
+                    <Button Grid.Column="2" Command="{Binding ToggleSignUpPasswordVisibilityCommand}" Background="Transparent" BorderThickness="0" Padding="4" Cursor="Hand" VerticalAlignment="Center" Margin="6,0,0,0">
+                        <Button.Template><ControlTemplate TargetType="Button"><TextBlock Text="{Binding SignUpPasswordEyeIcon}" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/></ControlTemplate></Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- 5. Confirm Password -->
+            <Border Height="38" CornerRadius="8" Background="{DynamicResource InputBackgroundBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1" Padding="12,0" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="🔒" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <PasswordBox Grid.Column="1" x:Name="SignUpConfirmPasswordBox" PasswordChanged="OnSignUpConfirmPasswordChanged" Visibility="{Binding SignUpIsConfirmPasswordVisible, Converter={StaticResource InverseBoolToVis}}" Background="Transparent" BorderThickness="0" FontSize="13" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}" CaretBrush="{DynamicResource PrimaryBrush}" Padding="0"/>
+                    <TextBox Grid.Column="1" x:Name="SignUpVisibleConfirmPasswordTextBox" Text="{Binding SignUpConfirmPassword, UpdateSourceTrigger=PropertyChanged}" TextChanged="OnSignUpVisibleConfirmPasswordTextChanged" Visibility="{Binding SignUpIsConfirmPasswordVisible, Converter={StaticResource BoolToVis}}" Background="Transparent" BorderThickness="0" FontSize="13" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextBrush}" CaretBrush="{DynamicResource PrimaryBrush}" Padding="0"/>
+                    <TextBlock Grid.Column="1" Text="Confirm Password" FontSize="13" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center" IsHitTestVisible="False">
+                        <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding SignUpConfirmPassword}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                    </TextBlock>
+                    <Button Grid.Column="2" Command="{Binding ToggleSignUpConfirmPasswordVisibilityCommand}" Background="Transparent" BorderThickness="0" Padding="4" Cursor="Hand" VerticalAlignment="Center" Margin="6,0,0,0">
+                        <Button.Template><ControlTemplate TargetType="Button"><TextBlock Text="{Binding SignUpConfirmPasswordEyeIcon}" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/></ControlTemplate></Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- 6. System Role Selector (4 Roles) -->
+            <StackPanel Margin="0,0,0,8">
+                <TextBlock Text="Role" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="2,0,0,3"/>
+                <Border Height="38" CornerRadius="8" Background="{DynamicResource InputBackgroundBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1" Padding="12,0,8,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="🛡️" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <ComboBox Grid.Column="1"
+                                  ItemsSource="{Binding AvailableRoles}"
+                                  SelectedItem="{Binding SignUpRole, UpdateSourceTrigger=PropertyChanged}"
+                                  FontSize="13"
+                                  Foreground="{DynamicResource PrimaryTextBrush}"
+                                  VerticalAlignment="Center"
+                                  BorderThickness="0"
+                                  Background="Transparent"/>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <!-- 7. Terms & Conditions CheckBox -->
+            <CheckBox IsChecked="{Binding SignUpAgreeTerms}" Margin="2,0,2,10" Cursor="Hand">
+                <TextBlock FontSize="11.5" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap">
+                    <Run Text="I agree to the "/><Run Text="Terms and Conditions" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold"/><Run Text=" and "/><Run Text="Privacy Policy" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold"/><Run Text="."/>
+                </TextBlock>
+            </CheckBox>
+
+            <!-- 8. Sign Up Button -->
+            <Button Command="{Binding SignUpCommand}" Height="42" Cursor="Hand" Margin="0,0,0,10">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="suBtnBorder" CornerRadius="8" Background="{DynamicResource PrimaryBrush}">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="Sign Up" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="→" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="suBtnBorder" Property="Background" Value="{DynamicResource PrimaryHoverBrush}"/></Trigger>
+                            <Trigger Property="IsPressed" Value="True"><Setter TargetName="suBtnBorder" Property="Background" Value="{DynamicResource PrimaryActiveBrush}"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <!-- Separator -->
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Height="1" Background="{DynamicResource DividerBrush}" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="or continue with" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="12,0" VerticalAlignment="Center"/>
+                <Border Grid.Column="2" Height="1" Background="{DynamicResource DividerBrush}" VerticalAlignment="Center"/>
+            </Grid>
+
+            <!-- School Account Option -->
+            <Button Background="Transparent" BorderThickness="0" Height="38" Cursor="Hand" ToolTip="Sign in with School Account">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="schoolBtnBorder2" CornerRadius="8" Background="{DynamicResource InputBackgroundBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Canvas Width="16" Height="18" Margin="0,0,10,0" VerticalAlignment="Center">
+                                    <Path Stroke="{DynamicResource PrimaryTextBrush}" StrokeThickness="1.5" Data="M 8,1 L 15,4 C 15,12 11,16 8,17.5 C 5,16 1,12 1,4 Z"/>
+                                    <Path Fill="{DynamicResource PrimaryTextBrush}" Data="M 8,1 L 8,17.5 C 5,16 1,12 1,4 Z"/>
+                                </Canvas>
+                                <TextBlock Text="School Account" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="schoolBtnBorder2" Property="Background" Value="{DynamicResource TableHoverBrush}"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <!-- Bottom Flip Link to Login -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,2">
+                <TextBlock Text="Already have an account? " FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                <Button Command="{Binding FlipToLoginCommand}" Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <TextBlock Text="Login" Foreground="{DynamicResource PrimaryBrush}" FontSize="12" FontWeight="Bold"/>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

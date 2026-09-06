@@ -1,0 +1,467 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.StudentInvestigationInquiryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:views="clr-namespace:SmartSchoolIncidentManagementSystem.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1200"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <Style x:Key="FilterPillStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24,18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 1. Header Toolbar -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                    <Button Content="&#x2190; Back to Reports &amp; Data" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackCommand}" Margin="0,0,14,0" Padding="12,6"/>
+                    <TextBlock Text="Student Incident &amp; Active Investigation Monitor" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock Text="Real-time case lookup for staff, teachers, and administrators to verify student incident status, location mapping, and investigation reports." FontSize="12.5" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Content="&#x21bb; Refresh Cases" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" Height="34" Padding="12,0"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- 2. Search & Metric Filter Bar -->
+        <Border Grid.Row="1" Style="{DynamicResource CardBorderStyle}" Padding="14,10" Margin="0,0,0,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Height="34" Style="{DynamicResource ModernTextBoxStyle}"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Search student name, ID, section, location, or investigator" Margin="0,0,12,0"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="All Cases" Command="{Binding FilterAllCommand}" Style="{StaticResource FilterPillStyle}"/>
+                    <Button Content="Under Active Investigation" Command="{Binding FilterActiveCommand}" Style="{StaticResource FilterPillStyle}"/>
+                    <Button Content="Resolved / Concluded" Command="{Binding FilterResolvedCommand}" Style="{StaticResource FilterPillStyle}" Margin="0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 3. Dual-Panel Body: Cases List (Left) + Detail Dossier & Map (Right) -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.05*"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="1.15*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT: Student Incident Cases List -->
+            <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="{DynamicResource TableHoverBrush}" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderBrush}" Padding="14,10">
+                        <Grid>
+                            <TextBlock Text="STUDENT INCIDENT DIRECTORY" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding FilteredCases.Count, StringFormat='{}{0} Records Found'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding FilteredCases}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="12,10" Cursor="Hand">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource TableHoverBrush}"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.SelectCaseCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                        </Border.InputBindings>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Avatar Circle -->
+                                            <Border Grid.Column="0" Width="38" Height="38" CornerRadius="19" Background="{DynamicResource InfoBgBrush}" Margin="0,0,10,0" VerticalAlignment="Center">
+                                                <TextBlock Text="👤" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+
+                                            <!-- Student & Incident Summary -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding StudentName}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding StudentNumber, StringFormat=' ({0})'}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding IncidentTitle}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,2,0,0"/>
+                                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                    <TextBlock Text="{Binding Location, StringFormat='📍 {0}'}" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource DangerBrush}"/>
+                                                    <TextBlock Text=" • " FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding GradeLevel}" FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text=" - " FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding Section}" FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text=" • " FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding IncidentDate, StringFormat='{}{0:yyyy-MM-dd}'}" FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <!-- Status Pill -->
+                                            <Border Grid.Column="2" CornerRadius="4" Padding="8,4" VerticalAlignment="Center">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="{DynamicResource TableHoverBrush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsActiveInvestigation}" Value="True">
+                                                                <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock Text="{Binding StatusBadgeText}" FontSize="10" FontWeight="Bold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsActiveInvestigation}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- RIGHT: Detailed Investigation Dossier & Location Map -->
+            <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Padding="16">
+                <Grid>
+                    <!-- Empty State (No selection) -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasSelectedCase}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="📋" FontSize="36" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                        <TextBlock Text="Select a Student Case" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Choose any student case on the left to inspect incident details, location map, and full report." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <!-- Active Selected Dossier View -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasSelectedCase}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header Info & Prominent Status Banner (Pending vs Solved) -->
+                        <StackPanel Grid.Row="0">
+                            <Grid Margin="0,0,0,8">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding SelectedCase.StudentName}" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="{Binding SelectedCase.StudentNumber, StringFormat='ID: {0}'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text=" • " FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding SelectedCase.GradeLevel}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text=" - " FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding SelectedCase.Section}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <Border HorizontalAlignment="Right" VerticalAlignment="Center" CornerRadius="4" Padding="8,4" Background="{DynamicResource TableHoverBrush}">
+                                    <TextBlock Text="{Binding SelectedCase.IncidentNumber}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                </Border>
+                            </Grid>
+
+                            <!-- Prominent Case Resolution Banner -->
+                            <Border CornerRadius="6" Padding="10,6" Margin="0,0,0,8">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource SuccessBrush}"/>
+                                        <Setter Property="BorderThickness" Value="1.5"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedCase.IsCasePendingOrUnsolved}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
+                                                <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="⚡" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SelectedCase.IsCasePendingOrUnsolved}" Value="False">
+                                                        <Setter Property="Text" Value="✅"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding SelectedCase.CaseResolutionStatusText}" FontSize="11" FontWeight="Bold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SelectedCase.IsCasePendingOrUnsolved}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding SelectedCase.CaseResolutionDescription}" FontSize="10.5" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap" Margin="0,1,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Segmented Tab Bar -->
+                        <Border Grid.Row="1" Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="3" Margin="0,0,0,8">
+                            <UniformGrid Columns="2">
+                                <Button Content="🗺️ Incident &amp; Campus Map" Command="{Binding SwitchToMapOverviewCommand}" Height="28" Padding="6,0">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsMapOverviewTab}" Value="True">
+                                                    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                                    <Setter Property="FontWeight" Value="Bold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                                <Button Content="📋 Complete Student Report" Command="{Binding SwitchToFullReportCommand}" Height="28" Padding="6,0">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsFullReportTab}" Value="True">
+                                                    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                                    <Setter Property="FontWeight" Value="Bold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </UniformGrid>
+                        </Border>
+
+                        <!-- Scrollable Tab Content -->
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <!-- TAB 1: Incident & Campus Map View -->
+                                <StackPanel Visibility="{Binding IsMapOverviewTab, Converter={StaticResource BoolToVis}}">
+                                    <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding SelectedCase.IncidentTitle}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Category / Infraction" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding SelectedCase.Category}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="Severity / Risk Rating" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding SelectedCase.Severity}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                        <TextBlock Text=" / " FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                        <TextBlock Text="{Binding SelectedCase.Risk}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Reported By" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding SelectedCase.ReportingParty}" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="Date &amp; Time" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding SelectedCase.IncidentDate, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Interactive Campus Location Map -->
+                                    <views:CampusIncidentLocationMapControl
+                                        LocationName="{Binding SelectedCase.Location}"
+                                        ZoneName="{Binding SelectedCase.MapZoneName}"
+                                        ZoneKey="{Binding SelectedCase.MapZoneKey}"
+                                        PinX="{Binding SelectedCase.MapPinX}"
+                                        PinY="{Binding SelectedCase.MapPinY}"
+                                        Margin="0,0,0,8"/>
+
+                                    <!-- Narrative Statement -->
+                                    <TextBlock Text="Incident Narrative Statement:" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="8" Margin="0,0,0,10">
+                                        <TextBlock Text="{Binding SelectedCase.IncidentDescription}" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                    </Border>
+
+                                    <Button Content="View Full Official Report &amp; Investigation Findings &#x2192;"
+                                            Style="{DynamicResource PrimaryButtonStyle}"
+                                            Command="{Binding SwitchToFullReportCommand}"
+                                            HorizontalAlignment="Stretch" Height="32"/>
+                                </StackPanel>
+
+                                <!-- TAB 2: Complete Official Student Incident Report -->
+                                <StackPanel Visibility="{Binding IsFullReportTab, Converter={StaticResource BoolToVis}}">
+                                    <!-- Student Profile & Infraction Frequency -->
+                                    <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="10" Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <TextBlock Text="STUDENT PROFILE &amp; CONDUCT RECORD" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Student Full Name" FontSize="9.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding SelectedCase.StudentName}" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="Student ID &amp; Section" FontSize="9.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding SelectedCase.StudentNumber, StringFormat='{}{0}'}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Class Adviser" FontSize="9.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding SelectedCase.Adviser}" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="Infraction History" FontSize="9.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding SelectedCase.RepeatIncidentCount, StringFormat='Repeat Offenses: {0}'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource DangerBrush}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Persons Involved & Witnesses -->
+                                    <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <TextBlock Text="WITNESSES &amp; INVOLVED PARTIES" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                            <Grid Margin="0,0,0,2">
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Involved Persons" FontSize="9.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding SelectedCase.InvolvedPersons}" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="Witnesses" FontSize="9.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding SelectedCase.Witnesses}" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Disciplinary Actions & Interventions -->
+                                    <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <TextBlock Text="DISCIPLINARY ACTIONS &amp; SANCTIONS" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                            <TextBlock Text="Action Taken:" FontSize="9.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            <TextBlock Text="{Binding SelectedCase.ActionTaken}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+
+                                            <TextBlock Text="Recommended Sanction:" FontSize="9.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            <TextBlock Text="{Binding SelectedCase.RecommendedAction}" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+
+                                            <TextBlock Text="Administrative Notes:" FontSize="9.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            <TextBlock Text="{Binding SelectedCase.Notes}" FontSize="10.5" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Formal Investigation Inquiry Findings -->
+                                    <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="10" Margin="0,0,0,10">
+                                        <StackPanel>
+                                            <TextBlock Text="OFFICIAL INVESTIGATION INQUIRY &amp; FINDINGS" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Lead Investigator" FontSize="9.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding SelectedCase.LeadInvestigator}" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="Formal Findings" FontSize="9.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding SelectedCase.Findings}" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <TextBlock Text="Official Notes &amp; Statements:" FontSize="9.5" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,3,0,1"/>
+                                            <TextBlock Text="{Binding SelectedCase.InvestigationNotes}" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+
+                                            <TextBlock Text="Interview Logs &amp; Testimonies:" FontSize="9.5" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,1"/>
+                                            <TextBlock Text="{Binding SelectedCase.InterviewLogs}" TextWrapping="Wrap" FontSize="10.5" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Button Content="&#x2190; Return to Campus Map View"
+                                            Style="{DynamicResource SecondaryButtonStyle}"
+                                            Command="{Binding SwitchToMapOverviewCommand}"
+                                            HorizontalAlignment="Left" Height="30" Padding="10,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

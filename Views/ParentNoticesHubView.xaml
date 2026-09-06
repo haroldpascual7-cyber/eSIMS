@@ -1,0 +1,104 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.ParentNoticesHubView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="32,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,24">
+                <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                <TextBlock Text="{Binding Subtitle}" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- 3-Card Grid -->
+            <Grid Grid.Row="1">
+                <UniformGrid Columns="3">
+
+                    <!-- CARD 1: Automated Letter Templates -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="6" Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="#EFF6FF" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="✉️" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="Automated Letter Templates" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <TextBlock Grid.Row="2" Text="Pre-filled PDF official parent notifications, summons letters, suspension orders, and warning disclosures with live dynamic tags." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+
+                            <Button Grid.Row="3" Content="Open Letter Templates →"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenLetterTemplatesCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="38"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- CARD 2: SMS & Email Dispatch -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="6" Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="#F0FDF4" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="📱" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="SMS &amp; Email Dispatch" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <TextBlock Grid.Row="2" Text="Send instant notification dispatches to guardians upon critical incident filings or urgent conference appointments." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+
+                            <Button Grid.Row="3" Content="Open Dispatcher →"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenDispatchCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="38"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- CARD 3: Acknowledgment Tracking -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="6" Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="#FFF7ED" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="✍️" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="Acknowledgment Tracking" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <TextBlock Grid.Row="2" Text="Track signed parent response slips, physical meeting attendance, and electronic disclosure receipts." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+
+                            <Button Grid.Row="3" Content="Open Tracking →"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenAcknowledgmentCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="38"/>
+                        </Grid>
+                    </Border>
+
+                </UniformGrid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

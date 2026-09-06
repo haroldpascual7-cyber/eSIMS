@@ -1,0 +1,132 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.ActivityLogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Grid Margin="32,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <Button Content="&#x2190; Back to Audit Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="10,4" Margin="0,0,0,10"/>
+            <TextBlock Text="System Audit Trail &amp; User Activity Logs" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+            <TextBlock Text="Real-time security monitoring of user authentication, incident mutations, and official report dispatches." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- TOP FILTER BAR -->
+        <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,16">
+            <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.03" BlurRadius="8" ShadowDepth="2"/></Border.Effect>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Search Input -->
+                <Grid Grid.Column="0">
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Padding="28,0,24,0" Height="36"/>
+                    <TextBlock Text="🔍" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="8,0,0,0" IsHitTestVisible="False"/>
+                    <Button Content="✕" Command="{Binding ClearSearchCommand}" Visibility="{Binding HasSearchText, Converter={StaticResource BoolToVis}}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource SecondaryTextBrush}" Cursor="Hand" Width="20" Height="20"/>
+                </Grid>
+
+                <!-- Action Type Filter -->
+                <ComboBox Grid.Column="2" ItemsSource="{Binding ActionFilters}" SelectedItem="{Binding SelectedActionFilter}" Height="36" VerticalContentAlignment="Center"/>
+
+                <!-- Module Filter -->
+                <ComboBox Grid.Column="4" ItemsSource="{Binding ModuleFilters}" SelectedItem="{Binding SelectedModuleFilter}" Height="36" VerticalContentAlignment="Center"/>
+
+                <!-- DatePicker Filter -->
+                <DatePicker Grid.Column="6" SelectedDate="{Binding SelectedDate}" Height="36" VerticalContentAlignment="Center"/>
+
+                <!-- Reset Button -->
+                <Button Grid.Column="8" Content="🔄 Reset Filters" Command="{Binding ResetFiltersCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="36" Padding="12,0"/>
+            </Grid>
+        </Border>
+
+        <!-- MAIN DATAGRID -->
+        <Border Grid.Row="2" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,16">
+            <DataGrid ItemsSource="{Binding FilteredLogsView}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{DynamicResource BorderBrush}" AlternatingRowBackground="{DynamicResource TableRowAltBrush}" Background="Transparent" RowBackground="Transparent" Foreground="{DynamicResource PrimaryTextBrush}" HeadersVisibility="Column" BorderThickness="0" RowHeight="42">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Timestamp" Binding="{Binding FormattedTimestamp}" Width="160">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock"><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Margin" Value="8,0"/></Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="User ID" Binding="{Binding UserId}" Width="120">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock"><Setter Property="FontWeight" Value="Bold"/><Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Margin" Value="8,0"/></Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTemplateColumn Header="Action Type" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ActionType}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ActionType}" Value="DELETE">
+                                                    <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ActionType}" Value="CREATE">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ActionType}" Value="LOGIN">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ActionType}" Value="UPDATE">
+                                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ActionType}" Value="EXPORT">
+                                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ActionType}" Value="LOGOUT">
+                                                    <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="Module" Binding="{Binding ModuleName}" Width="150">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock"><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Margin" Value="8,0"/></Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="Activity Description" Binding="{Binding Description}" Width="*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock"><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Margin" Value="8,0"/></Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- BOTTOM FOOTER PANEL -->
+        <Grid Grid.Row="3">
+            <Button Content="🖨️ Export Audit Ledger (PDF)" Command="{Binding ExportAuditLedgerCommand}" Style="{DynamicResource PrimaryButtonStyle}" HorizontalAlignment="Left" Height="36" Padding="16,0"/>
+            <TextBlock Text="{Binding TotalRecordsCount, StringFormat='Total Records Found: {0}'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+        </Grid>
+    </Grid>
+</UserControl>

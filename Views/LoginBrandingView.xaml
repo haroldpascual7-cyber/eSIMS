@@ -1,0 +1,66 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.LoginBrandingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d">
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+        <!-- MATTI NATIONAL HIGH SCHOOL PRIMARY BRANDING -->
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MaxWidth="460">
+            
+            <!-- 1. Large Matti National High School Official Seal (Top) -->
+            <Border Width="165" Height="165" 
+                    HorizontalAlignment="Center" 
+                    Margin="0,0,0,22"
+                    CornerRadius="82.5">
+                <Border.Effect>
+                    <DropShadowEffect Color="#38BDF8" Opacity="0.35" BlurRadius="32" ShadowDepth="0"/>
+                </Border.Effect>
+                <Image Source="pack://application:,,,/Assets/Matti_National_High_School_logo.png"
+                       Width="155" Height="155"
+                       Stretch="Uniform"
+                       RenderOptions.BitmapScalingMode="HighQuality"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+            </Border>
+
+            <!-- 2. Institution Name & Description at the Bottom of Logo -->
+            <StackPanel HorizontalAlignment="Center">
+                <TextBlock Text="MATTI NATIONAL HIGH SCHOOL"
+                           FontSize="24"
+                           FontWeight="ExtraBold"
+                           Foreground="#FFFFFF"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"/>
+                
+                <TextBlock Text="Digos City, Davao Del Sur"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           Foreground="#94A3B8"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           Margin="0,6,0,0"/>
+
+                <!-- Subtle Decorative Divider with Glowing Accent -->
+                <Grid Width="220" HorizontalAlignment="Center" Margin="0,18,0,18">
+                    <Border Height="1" Background="#1E3A8A" Opacity="0.8"/>
+                    <Border Width="6" Height="6" CornerRadius="3" Background="#38BDF8" HorizontalAlignment="Center"/>
+                </Grid>
+
+                <!-- System Title & Description -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
+                    <TextBlock Text="e" FontSize="19" FontWeight="ExtraBold" Foreground="#38BDF8"/>
+                    <TextBlock Text="SIMS" FontSize="19" FontWeight="ExtraBold" Foreground="#FFFFFF"/>
+                    <TextBlock Text=" • School Incident Management System" FontSize="14" FontWeight="SemiBold" Foreground="#CBD5E1" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                </StackPanel>
+
+                <TextBlock Text="Campus Safety • Behavioral Intelligence • Student Welfare"
+                           FontSize="12"
+                           FontWeight="Medium"
+                           Foreground="#64748B"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

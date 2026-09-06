@@ -1,0 +1,1 @@
+& "C:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\bin\Debug\net8.0-windows\SmartSchoolIncidentManagementSystem.exe"

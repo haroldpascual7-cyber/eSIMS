@@ -1,0 +1,103 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.InvestigationListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1100">
+    <Grid Margin="32,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Investigation &amp; Case Workspace" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                <TextBlock Text="Manage active investigations, interview statements, formal findings, and disciplinary actions." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Content="↻ Refresh" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" Margin="0,0,8,0"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Filter & Search Toolbar -->
+        <Border Grid.Row="1" Style="{DynamicResource CardBorderStyle}" Margin="0,0,0,16" Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Search Box -->
+                <TextBox Grid.Column="0" Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
+
+                <!-- Open Workspace -->
+                <Button Grid.Column="1" Content="🔍 Open Investigation Workspace" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding OpenWorkspaceCommand}"/>
+            </Grid>
+        </Border>
+
+        <!-- Investigations 4-Column Card Grid -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding Incidents}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{DynamicResource RecordCardStyle}">
+                            <Border.InputBindings>
+                                <MouseBinding MouseAction="LeftClick"
+                                              Command="{Binding DataContext.OpenIncidentWorkspaceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                              CommandParameter="{Binding}"/>
+                            </Border.InputBindings>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Top Row: Incident ID & Risk Rating -->
+                                <DockPanel Grid.Row="0" Margin="0,0,0,8">
+                                    <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource PrimaryBrush}" HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding IncidentNumber}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                    </Border>
+                                    <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Right">
+                                        <TextBlock Text="{Binding Risk, StringFormat='Risk: {0}'}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    </Border>
+                                </DockPanel>
+
+                                <!-- Case Title -->
+                                <TextBlock Grid.Row="1" Text="{Binding Title}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,4"/>
+
+                                <!-- Involved Student -->
+                                <TextBlock Grid.Row="2" Text="{Binding StudentDisplayName, StringFormat='👨‍🎓 {0}'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,4"/>
+
+                                <!-- Category & Date -->
+                                <StackPanel Grid.Row="3" Margin="0,0,0,8">
+                                    <TextBlock Text="{Binding Category, StringFormat='📁 {0}'}" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="{Binding IncidentDate, StringFormat='📅 {0:yyyy-MM-dd}'}" FontSize="10" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <!-- Bottom: Case Status Badge -->
+                                <DockPanel Grid.Row="4">
+                                    <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                    </Border>
+                                </DockPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

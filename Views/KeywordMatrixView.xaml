@@ -1,0 +1,435 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.KeywordMatrixView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="850" d:DesignWidth="1180">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid Margin="32,24">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- 1. Header & Navigation Back Button -->
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <Button Content="← Back to Rules Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToRulesHubCommand}" Margin="0,0,14,0" Padding="12,6"/>
+                            <TextBlock Text="Keyword Sensitivity Matrix &amp; NLP Scoring" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock Text="Manage infraction vocabulary, weight assignments, and automated risk triage rules." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button Content="+ Add Keyword Rule" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding OpenAddModalCommand}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Status Notification Banner -->
+                <Border Grid.Row="1" Background="{DynamicResource InfoBgBrush}" BorderBrush="{DynamicResource InfoBrush}" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,16">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding StatusMessage}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource InfoBrush}" FontWeight="Medium"/>
+                </Border>
+
+                <!-- 2. Top KPI Summary Cards -->
+                <Grid Grid.Row="2" Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Margin="0,0,12,0" Padding="16,14">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="FLAGGED KEYWORDS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding TotalKeywordsCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Margin="0,0,12,0" Padding="16,14">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="CRITICAL / HIGH TRIGGERS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding CriticalHighTriggersCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Margin="0,0,12,0" Padding="16,14">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="AUTO-ESCALATION TERMS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding AutoEscalationTermsCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="3" Style="{DynamicResource CardBorderStyle}" Padding="16,14">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="ACTIVE RULE DEFINITIONS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding ActiveRulesCount}" FontSize="24" FontWeight="Bold" Foreground="#10B981" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- 3. Workspace Split Layout (Keyword DataGrid Left + Live Sandbox Right) -->
+                <Grid Grid.Row="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="350"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- LEFT COLUMN: Toolbar & Keyword DataGrid -->
+                    <Grid Grid.Column="0" Margin="0,0,16,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Toolbar -->
+                        <Border Grid.Row="0" Style="{DynamicResource CardBorderStyle}" Margin="0,0,0,16" Padding="16,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.8*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                    <TextBlock Text="Search Keywords" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                    <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                                    <TextBlock Text="Infraction Category" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                    <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding CategoryFilterOptions}" SelectedItem="{Binding SelectedCategoryFilter}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Severity Tier" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                    <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding SeverityFilterOptions}" SelectedItem="{Binding SelectedSeverityFilter}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- DataGrid Table -->
+                        <Border Grid.Row="1" Style="{DynamicResource CardBorderStyle}" Padding="0">
+                            <DataGrid ItemsSource="{Binding KeywordRules}"
+                                      AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False"
+                                      SelectionMode="Single" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{DynamicResource BorderBrush}"
+                                      Background="Transparent" RowBackground="Transparent" AlternatingRowBackground="{DynamicResource TableRowAltBrush}"
+                                      Foreground="{DynamicResource PrimaryTextBrush}" BorderThickness="0" HeadersVisibility="Column"
+                                      CanUserResizeRows="False" RowDetailsVisibilityMode="Collapsed" RowHeight="48">
+
+                                <DataGrid.Resources>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="{DynamicResource HeaderBackgroundBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="FontSize" Value="12"/>
+                                        <Setter Property="Padding" Value="8,10"/>
+                                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+                                    </Style>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="DataGridCell">
+                                                    <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                    <Style TargetType="TextBlock" x:Key="CellTextStyle">
+                                        <Setter Property="Padding" Value="6,0"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="FontSize" Value="12"/>
+                                    </Style>
+                                </DataGrid.Resources>
+
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#E0F2FE"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="#BAE6FD"/>
+                                                <Setter Property="BorderThickness" Value="3,0,0,0"/>
+                                                <Setter Property="BorderBrush" Value="#0EA5E9"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.RowStyle>
+
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Rule ID" Binding="{Binding RuleId}" MinWidth="85" Width="85" ElementStyle="{StaticResource CellTextStyle}"/>
+                                    <DataGridTextColumn Header="Trigger Keyword" Binding="{Binding Keyword}" MinWidth="130" Width="1.2*" ElementStyle="{StaticResource CellTextStyle}"/>
+                                    <DataGridTextColumn Header="Category" Binding="{Binding Category}" MinWidth="140" Width="1.3*" ElementStyle="{StaticResource CellTextStyle}"/>
+
+                                    <!-- Severity Badge -->
+                                    <DataGridTemplateColumn Header="Severity" MinWidth="95" Width="95">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border CornerRadius="4" Padding="6,3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="#DBEAFE"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Severity}" Value="Low">
+                                                                    <Setter Property="Background" Value="#D1FAE5"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Severity}" Value="Medium">
+                                                                    <Setter Property="Background" Value="#FEF3C7"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Severity}" Value="High">
+                                                                    <Setter Property="Background" Value="#FFEDD5"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Severity}" Value="Critical">
+                                                                    <Setter Property="Background" Value="#FEE2E2"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding Severity}" FontSize="11" FontWeight="Bold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="#1E40AF"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Severity}" Value="Low">
+                                                                        <Setter Property="Foreground" Value="#065F46"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Severity}" Value="Medium">
+                                                                        <Setter Property="Foreground" Value="#92400E"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Severity}" Value="High">
+                                                                        <Setter Property="Foreground" Value="#C2410C"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Severity}" Value="Critical">
+                                                                        <Setter Property="Foreground" Value="#991B1B"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTextColumn Header="Weight" Binding="{Binding WeightScore, StringFormat='{}{0} pts'}" MinWidth="75" Width="75" ElementStyle="{StaticResource CellTextStyle}"/>
+
+                                    <!-- Auto Escalate Badge -->
+                                    <DataGridTemplateColumn Header="Auto-Escalate" MinWidth="100" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="#F3F4F6"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding AutoEscalate}" Value="True">
+                                                                    <Setter Property="Background" Value="#FEE2E2"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock FontSize="11" FontWeight="Bold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Text" Value="No ✕"/>
+                                                                <Setter Property="Foreground" Value="#6B7280"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding AutoEscalate}" Value="True">
+                                                                        <Setter Property="Text" Value="Yes ⚡"/>
+                                                                        <Setter Property="Foreground" Value="#991B1B"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <!-- Actions -->
+                                    <DataGridTemplateColumn Header="Actions" MinWidth="130" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button Content="Edit" Style="{DynamicResource SecondaryButtonStyle}" Padding="6,3" FontSize="11" Margin="0,0,4,0"
+                                                            Command="{Binding DataContext.OpenEditModalCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                            CommandParameter="{Binding}"/>
+                                                    <Button Content="Delete" Style="{DynamicResource SecondaryButtonStyle}" Padding="6,3" FontSize="11" Foreground="{DynamicResource DangerBrush}"
+                                                            Command="{Binding DataContext.DeleteRuleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                            CommandParameter="{Binding}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </Grid>
+
+                    <!-- RIGHT COLUMN: Live Narrative Rule Tester Sandbox -->
+                    <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Padding="20">
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="🧪" FontSize="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Live Narrative Rule Tester" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <TextBlock Text="Sample Incident Narrative" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding TestNarrativeText, UpdateSourceTrigger=PropertyChanged}" Height="110" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,12"/>
+
+                            <Button Content="⚡ Run Analysis" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding RunAnalysisCommand}" HorizontalAlignment="Stretch" Height="36" Margin="0,0,0,16"/>
+
+                            <!-- Result Display Panel -->
+                            <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="8" Padding="14" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="ANALYSIS RESULTS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,10"/>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <TextBlock Text="Composite Risk Score:" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding TestAnalysisResult.TotalScore, StringFormat='{}{0} / 100'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" HorizontalAlignment="Right"/>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <TextBlock Text="Triage Severity:" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <Border HorizontalAlignment="Right" CornerRadius="4" Padding="6,2" Background="#FEE2E2">
+                                            <TextBlock Text="{Binding TestAnalysisResult.SuggestedSeverity}" FontSize="11" FontWeight="Bold" Foreground="#991B1B"/>
+                                        </Border>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,10">
+                                        <TextBlock Text="Suggested Category:" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding TestAnalysisResult.SuggestedCategory}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Right"/>
+                                    </Grid>
+
+                                    <StackPanel Margin="0,4,0,0">
+                                        <TextBlock Text="Flagged Keywords Detected:" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                        <TextBlock Text="{Binding FlaggedKeywordsDisplay}" FontSize="12" FontWeight="SemiBold" Foreground="#2563EB" TextWrapping="Wrap"/>
+                                    </StackPanel>
+
+                                    <!-- Auto-Escalate Warning -->
+                                    <Border Background="#FEE2E2" BorderBrush="#EF4444" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="0,12,0,0">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding TestAnalysisResult.RequiresImmediateEscalation}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="⚡ IMMEDIATE ESCALATION REQUIRED (Dean / Security Flagged)" FontSize="11" FontWeight="Bold" Foreground="#991B1B" TextWrapping="Wrap"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- 4. MODAL POP-UP DIALOG ("+ Add / Edit Keyword Rule") -->
+        <Grid Background="#80000000">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsModalOpen}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
+            <Border Style="{DynamicResource CardBorderStyle}" Width="500" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24" CornerRadius="12">
+                <StackPanel Orientation="Vertical">
+                    <Grid Margin="0,0,0,14">
+                        <TextBlock Text="Configure Keyword Sensitivity Rule" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        <Button Content="✕" Width="28" Height="28" HorizontalAlignment="Right" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseModalCommand}"/>
+                    </Grid>
+
+                    <Border Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,12">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ModalErrorMessage}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding ModalErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontSize="12" FontWeight="Medium"/>
+                    </Border>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <TextBlock Text="Keyword / Trigger Phrase *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                        <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding ModalKeyword, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.4*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="Infraction Category *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding CategoryOptions}" SelectedItem="{Binding ModalCategory}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Severity Tier *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding SeverityOptions}" SelectedItem="{Binding ModalSeverity}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="Weight Score (1-100) *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding ModalWeightScore, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Match Type *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding MatchTypeOptions}" SelectedItem="{Binding ModalMatchType}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <CheckBox Content="Auto-Escalate (Flag for Dean/Security review)" IsChecked="{Binding ModalAutoEscalate}" Margin="0,4" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource DangerBrush}"/>
+                    <CheckBox Content="Rule Active Status" IsChecked="{Binding ModalIsActive}" Margin="0,4,0,16" FontSize="12"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Cancel" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseModalCommand}" Margin="0,0,10,0" Padding="14,6"/>
+                        <Button Content="Save Rule" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveRuleCommand}" Padding="14,6"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

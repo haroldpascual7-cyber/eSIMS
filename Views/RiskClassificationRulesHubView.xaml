@@ -1,0 +1,127 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.RiskClassificationRulesHubView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1100"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="32,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Grid Grid.Row="0" Margin="0,0,0,24">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <TextBlock Text="🛡️" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Risk &amp; Classification Rules Engine" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="Configure behavioral keyword matrices, risk level thresholds, location weights, and repeat offender triggers." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <Border HorizontalAlignment="Right" VerticalAlignment="Center" Background="{DynamicResource InfoBgBrush}" BorderBrush="{DynamicResource InfoBrush}" BorderThickness="1" CornerRadius="20" Padding="12,6">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🟢 " FontSize="11" VerticalAlignment="Center"/>
+                        <TextBlock Text="SECTION: DISCIPLINE &amp; CASE MANAGEMENT" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- 3-Card Grid Hub -->
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="RULES ENGINE MODULES" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="4,0,0,12"/>
+
+                <UniformGrid Grid.Row="1" Columns="3">
+
+                    <!-- CARD 1: Keyword Sensitivity Matrix (CLICKABLE) -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="6" Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="#E0F2FE" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="🔤" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="Keyword Sensitivity Matrix" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <TextBlock Grid.Row="2" Text="Manage infraction vocabulary, weight assignments, auto-escalation flags, and test narratives in the live NLP sandbox." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+
+                            <Button Grid.Row="3" Content="Open Workspace →"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenKeywordMatrixCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="38"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- CARD 2: Location Weighting Rules (CLICKABLE) -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="6" Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="#E0F2FE" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="📍" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="Location Weighting Rules" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <TextBlock Grid.Row="2" Text="Set elevated supervision factors and risk multipliers for unmonitored campus areas." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+
+                            <Button Grid.Row="3" Content="Open Workspace →"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenLocationWeightingCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="38"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- CARD 3: Repeat Offender Triggers (CLICKABLE) -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="6" Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="#E0F2FE" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="🔄" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="Repeat Offender Triggers" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <TextBlock Grid.Row="2" Text="Adjust 30-day lookback windows and automatic risk escalation thresholds for repeated infractions." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+
+                            <Button Grid.Row="3" Content="Open Workspace →"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenRepeatOffenderCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Height="38"/>
+                        </Grid>
+                    </Border>
+
+                </UniformGrid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

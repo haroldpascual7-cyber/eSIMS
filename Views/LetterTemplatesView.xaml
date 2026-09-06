@@ -1,0 +1,138 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.LetterTemplatesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="clr-namespace:SmartSchoolIncidentManagementSystem.Views"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Main Split Pane Grid (40/60) -->
+        <Grid Margin="24,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="6*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT COLUMN: Controls & Inputs (40%) -->
+            <Border Grid.Column="0" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="20">
+                <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.04" BlurRadius="10" ShadowDepth="2"/></Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                        <Button Content="&#x2190; Back to Parent Notices Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="10,4" Margin="0,0,0,10"/>
+                        <TextBlock Text="Automated Parent Notices" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        <TextBlock Text="Configure and generate pre-filled official letters linked to student records." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <!-- Inputs Area -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,0,4,0">
+                            <!-- 1. Select Template Type -->
+                            <TextBlock Text="1. Select Template Type" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <ComboBox ItemsSource="{Binding AvailableTemplates}" SelectedItem="{Binding SelectedTemplate}" DisplayMemberPath="TemplateName" Height="36" VerticalContentAlignment="Center" Margin="0,0,0,16"/>
+
+                            <!-- 2. Link Incident -->
+                            <TextBlock Text="2. Search &amp; Link Incident Record" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+
+                            <!-- Search Bar Row -->
+                            <Grid Margin="0,0,0,8">
+                                <TextBox Text="{Binding IncidentSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{DynamicResource ModernTextBoxStyle}"
+                                         Padding="28,0,24,0"
+                                         Height="36"/>
+                                <TextBlock Text="🔍" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="8,0,0,0" IsHitTestVisible="False"/>
+                                <Button Content="✕" Command="{Binding ClearIncidentSearchCommand}"
+                                        Visibility="{Binding HasIncidentSearchText, Converter={StaticResource BoolToVis}}"
+                                        HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0"
+                                        Background="Transparent" BorderThickness="0" Foreground="{DynamicResource SecondaryTextBrush}" Cursor="Hand" Width="20" Height="20"/>
+                            </Grid>
+
+                            <!-- Rich Searchable Incident ComboBox -->
+                            <ComboBox ItemsSource="{Binding FilteredIncidents}"
+                                      SelectedItem="{Binding SelectedIncident}"
+                                      Height="44"
+                                      VerticalContentAlignment="Center"
+                                      Margin="0,0,0,16">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,10,0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding IncidentNumber}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding StudentDisplayName}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                <TextBlock FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,0">
+                                                    <Run Text="{Binding Category}"/> | <Run Text="{Binding Location}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <!-- 3. Schedule / Action Date -->
+                            <TextBlock Text="3. Schedule / Action Date" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,6"/>
+                            <DatePicker SelectedDate="{Binding ActionDate}" Height="36" VerticalContentAlignment="Center" Margin="0,0,0,16"/>
+
+                            <!-- 4. Issuing Officer Name -->
+                            <TextBlock Text="4. Issuing Officer Name &amp; Title" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,6"/>
+                            <TextBox Text="{Binding OfficerName, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Margin="0,0,0,16"/>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Bottom Action Bar -->
+                    <StackPanel Grid.Row="2" Margin="0,16,0,0">
+                        <Button Content="⚙️ Manage Templates" Command="{Binding OpenTemplateManagerCommand}" Style="{DynamicResource SecondaryButtonStyle}" HorizontalAlignment="Stretch" Height="36" Margin="0,0,0,8"/>
+                        <Button Content="🖨️ Generate Official PDF" Command="{Binding GeneratePdfCommand}" Style="{DynamicResource PrimaryButtonStyle}" HorizontalAlignment="Stretch" Height="40" FontSize="13" FontWeight="Bold"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- RIGHT COLUMN: Physical Sheet Paper Live Preview (60%) -->
+            <Border Grid.Column="2" Background="{DynamicResource TableHoverBrush}" CornerRadius="10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="LIVE OFFICIAL DOCUMENT PREVIEW" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+
+                    <!-- Sheet of Paper -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="32,28" Width="520" HorizontalAlignment="Center" VerticalAlignment="Top">
+                            <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.15" BlurRadius="16" ShadowDepth="4"/></Border.Effect>
+                            <StackPanel>
+                                <!-- School Header Header Bar -->
+                                <StackPanel HorizontalAlignment="Center" Margin="0,0,0,20">
+                                    <TextBlock Text="SMART ACADEMY" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Office of Student Affairs &amp; Guidance Counseling" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                    <Border Height="1.5" Background="{DynamicResource PrimaryBrush}" Margin="0,10,0,0" Width="440"/>
+                                </StackPanel>
+
+                                <!-- Live Document Body Text -->
+                                <TextBox Text="{Binding LivePreviewText, Mode=OneWay}" IsReadOnly="True" BorderThickness="0" Background="Transparent" TextWrapping="Wrap" FontSize="12" FontFamily="Segoe UI" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            </StackPanel>
+                        </Border>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Manage Templates Modal Overlay -->
+        <views:EditTemplateModal Visibility="{Binding IsManageModalOpen, Converter={StaticResource BoolToVis}}"/>
+    </Grid>
+</UserControl>

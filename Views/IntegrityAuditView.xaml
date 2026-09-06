@@ -1,0 +1,124 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.IntegrityAuditView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="32,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <Button Content="&#x2190; Back to Audit Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="10,4" Margin="0,0,0,10"/>
+                <TextBlock Text="Data Integrity &amp; Cryptographic Compliance Audit" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                <TextBlock Text="Automated system diagnostic scanner verifying database B-Trees, relational integrity, and SHA-256 row immutability." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- TOP SCANNER CONTROL CARD -->
+            <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
+                <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.04" BlurRadius="10" ShadowDepth="2"/></Border.Effect>
+                <StackPanel>
+                    <Grid Margin="0,0,0,14">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Width="36" Height="36" CornerRadius="8" Background="{DynamicResource TableHoverBrush}" Margin="0,0,12,0">
+                                <TextBlock Text="🛡️" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="System Integrity Diagnostic Engine" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                <TextBlock Text="Run automated scans to detect database corruption, broken foreign keys, or tampered records." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Button Content="🛡️ Run Full Security &amp; Integrity Audit" Command="{Binding RunSystemAuditCommand}" Style="{DynamicResource PrimaryButtonStyle}" HorizontalAlignment="Right" Height="38" Padding="18,0" FontSize="12" FontWeight="Bold"/>
+                    </Grid>
+
+                    <!-- Progress Bar -->
+                    <ProgressBar Value="{Binding ScanProgress}" Minimum="0" Maximum="100" Height="14" Foreground="{DynamicResource PrimaryBrush}" Background="{DynamicResource TableHoverBrush}" BorderThickness="0" Margin="0,0,0,8"/>
+
+                    <!-- Status Indicator Text -->
+                    <TextBlock Text="{Binding ScanStatusText}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- MIDDLE SECTION: DIAGNOSTIC RESULTS DATAGRID -->
+            <Border Grid.Row="2" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="18" Margin="0,0,0,20">
+                <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.04" BlurRadius="10" ShadowDepth="2"/></Border.Effect>
+                <StackPanel>
+                    <TextBlock Text="Diagnostic Scan Results" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,12"/>
+
+                    <DataGrid ItemsSource="{Binding DiagnosticResults}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{DynamicResource BorderBrush}" AlternatingRowBackground="{DynamicResource TableRowAltBrush}" Background="{DynamicResource CardBackgroundBrush}" RowBackground="{DynamicResource CardBackgroundBrush}" HeadersVisibility="Column" BorderThickness="0" RowHeight="44">
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource TableHoverBrush}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Diagnostic Test" Binding="{Binding TestName}" Width="2.2*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock"><Setter Property="FontWeight" Value="Bold"/><Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Margin" Value="8,0"/></Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="Target Component" Binding="{Binding TargetComponent}" Width="1.5*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock"><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Margin" Value="8,0"/></Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTemplateColumn Header="Status" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Status}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="PASSED">
+                                                            <Setter Property="Foreground" Value="#059669"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="FAILED">
+                                                            <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="WARNING">
+                                                            <Setter Property="Foreground" Value="#D97706"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Diagnostic Details" Binding="{Binding Details}" Width="3.5*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock"><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Margin" Value="8,0"/><Setter Property="TextTrimming" Value="CharacterEllipsis"/></Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- BOTTOM FOOTER ACTION PANEL -->
+            <Grid Grid.Row="3">
+                <Button Content="🛠️ Repair Orphaned Records" Command="{Binding RepairOrphansCommand}" Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1" Foreground="{DynamicResource DangerBrush}" FontWeight="Bold" FontSize="12" Height="38" Padding="14,0" HorizontalAlignment="Left" Cursor="Hand"/>
+                <Button Content="🖨️ Export Compliance Certificate (PDF)" Command="{Binding ExportComplianceCertCommand}" Style="{DynamicResource PrimaryButtonStyle}" Height="38" Padding="18,0" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right"/>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
