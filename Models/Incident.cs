@@ -25,6 +25,7 @@ namespace SmartSchoolIncidentManagementSystem.Models
 
         public string InvolvedPersons { get; set; } = string.Empty;
         public string Witnesses { get; set; } = string.Empty;
+        public string EvidenceData { get; set; } = string.Empty;
 
         public IncidentStatus Status { get; set; } = IncidentStatus.Reported;
         public IncidentSeverity Severity { get; set; } = IncidentSeverity.Low;

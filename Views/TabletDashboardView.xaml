@@ -136,7 +136,7 @@
                 <!-- Right: Action Buttons, Profile Pill & Notification Badge -->
                 <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Content="🌓" Style="{StaticResource HeaderSquareButtonStyle}" Command="{Binding ToggleThemeCommand}" Width="32" Height="32" Margin="0,0,6,0" ToolTip="Toggle Light / Dark Mode"/>
-                    <Button Content="↻" Style="{StaticResource HeaderSquareButtonStyle}" Command="{Binding RefreshCommand}" Width="32" Height="32" Margin="0,0,8,0" ToolTip="Refresh Data"/>
+                    <Button Content="{Binding RefreshButtonIcon, FallbackValue='↻'}" Style="{StaticResource HeaderSquareButtonStyle}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}" Width="32" Height="32" Margin="0,0,8,0" ToolTip="Refresh Data"/>
                     <Border Background="#7F1D1D" BorderBrush="#991B1B" BorderThickness="1" CornerRadius="4" Padding="12,4" Margin="0,0,8,0">
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="{Binding DashboardTitle}" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Left"/>

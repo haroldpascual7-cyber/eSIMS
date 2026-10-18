@@ -1,0 +1,465 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.StudentInformationDetailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="850" d:DesignWidth="1260"
+             Background="{DynamicResource AppBackgroundBrush}">
+
+    <Grid Margin="18,10,18,14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Top Bar -->
+            <RowDefinition Height="*"/>    <!-- 3-Column Content -->
+        </Grid.RowDefinitions>
+
+        <!-- TOP BAR: BACK BUTTON & TITLE -->
+        <Border Grid.Row="0" Style="{DynamicResource CardBorderStyle}" Padding="14,8" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Command="{Binding BackToDirectoryCommand}" Style="{DynamicResource PrimaryButtonStyle}"
+                        Height="32" Padding="14,0" Margin="0,0,14,0" Cursor="Hand" ToolTip="Return to Student Directory">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="←" FontSize="13" FontWeight="Bold" Margin="0,0,6,0" Foreground="{DynamicResource ButtonTextBrush}"/>
+                        <TextBlock Text="Back" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                    </StackPanel>
+                </Button>
+                <TextBlock Text="👤" FontSize="18" Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock Text="Student Information" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding SelectedStudent.FullName, StringFormat=' • {0}'}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 3-COLUMN CONTENT SUITE -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="230"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="310"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- ==================== LEFT COLUMN (PROFILE, ACADEMICS, GUARDIAN) ==================== -->
+                <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                    <!-- 1. Profile & Avatar Card -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="14,14" Margin="0,0,0,10">
+                        <StackPanel HorizontalAlignment="Center">
+                            <Grid Width="92" Height="92" HorizontalAlignment="Center" Margin="0,0,0,8">
+                                <Ellipse Width="92" Height="92" Fill="{DynamicResource TableHoverBrush}"
+                                         Stroke="{DynamicResource PrimaryBrush}" StrokeThickness="2.5"
+                                         Visibility="{Binding HasSelectedStudentPhoto, Converter={StaticResource InverseBoolToVis}}"/>
+                                <TextBlock Text="👨‍🎓" FontSize="44" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Visibility="{Binding HasSelectedStudentPhoto, Converter={StaticResource InverseBoolToVis}}"/>
+                                <Ellipse Width="92" Height="92" Stroke="{DynamicResource PrimaryBrush}" StrokeThickness="2.5"
+                                         Visibility="{Binding HasSelectedStudentPhoto, Converter={StaticResource BoolToVis}}">
+                                    <Ellipse.Fill>
+                                        <ImageBrush ImageSource="{Binding SelectedStudentPhotoPath}" Stretch="UniformToFill" AlignmentX="Center" AlignmentY="Center"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                            </Grid>
+                            <TextBlock Text="{Binding SelectedStudent.FullName}" FontSize="15" FontWeight="Bold"
+                                       Foreground="{DynamicResource PrimaryTextBrush}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,2"/>
+                            <TextBlock Text="{Binding SelectedStudent.StudentNumber, StringFormat='Student ID: {0}'}"
+                                       FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" TextAlignment="Center" Margin="0,0,0,8"/>
+
+                            <Button Command="{Binding UploadStudentPhotoCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                                    Height="26" Padding="8,0" Margin="0,0,0,4" Cursor="Hand" ToolTip="Click to upload or change student photo">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="📷" FontSize="11" Margin="0,0,4,0"/>
+                                    <TextBlock Text="Upload Photo" FontSize="10" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding RemoveStudentPhotoCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                                    Height="20" Padding="6,0" Cursor="Hand" ToolTip="Remove custom photo"
+                                    Visibility="{Binding HasSelectedStudentPhoto, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="✕ Remove Photo" FontSize="9" Foreground="{DynamicResource DangerBrush}"/>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 2. Class & Section Card -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="12,10" Margin="0,0,0,10">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <TextBlock Text="🎓" FontSize="13" Margin="0,0,6,0"/>
+                                <TextBlock Text="Class &amp; Section" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            </StackPanel>
+                            <TextBlock FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}">
+                                <Run Text="{Binding SelectedStudent.GradeLevel, FallbackValue='Grade 10'}"/>
+                                <Run Text=" - "/>
+                                <Run Text="{Binding SelectedStudent.Section, FallbackValue='Section'}"/>
+                            </TextBlock>
+                            <TextBlock Text="{Binding SelectedStudent.TrackStrand, StringFormat='Track: {0}', TargetNullValue='Track: Academic'}"
+                                       FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,6"/>
+                            <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="10" Padding="8,2.5" HorizontalAlignment="Left">
+                                <TextBlock Text="{Binding DetailLevelCategory, FallbackValue='Junior High School'}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 3. Parent / Guardian & Emergency Contact Card -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="12,10">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <TextBlock Text="👤" FontSize="13" Margin="0,0,6,0"/>
+                                <TextBlock Text="Parent / Guardian" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            </StackPanel>
+                            <TextBlock Text="{Binding SelectedStudent.GuardianName, TargetNullValue='Not specified'}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            <TextBlock Text="{Binding SelectedStudent.GuardianRelation, StringFormat='Relationship: {0}', TargetNullValue='Relationship: Parent'}" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,4"/>
+                            <TextBlock Text="{Binding SelectedStudent.GuardianContact, StringFormat='📞 {0}', TargetNullValue='📞 Not provided'}" FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,3"/>
+                            <TextBlock Text="{Binding SelectedStudent.GuardianEmail, StringFormat='✉️ {0}', TargetNullValue='✉️ Not provided'}" FontSize="10" Foreground="{DynamicResource MutedTextBrush}" Margin="0,1,0,3" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding SelectedStudent.Address, StringFormat='📍 {0}', TargetNullValue='📍 Not specified'}" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ==================== CENTER COLUMN (PERSONAL INFO & STUDENT DETAILS) ==================== -->
+                <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                    <!-- 1. Personal Information Card -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="16,12" Margin="0,0,0,10">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <TextBlock Text="👤" FontSize="15" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,6,0"/>
+                                <TextBlock Text="Personal Information" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            </StackPanel>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Left Sub-Column -->
+                                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,0,8,7">
+                                    <TextBlock Text="👤 Name:" Width="110" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{Binding SelectedStudent.FullName}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,0,8,7">
+                                    <TextBlock Text="🪪 Student Number:" Width="110" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{Binding SelectedStudent.StudentNumber}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="0,0,8,7">
+                                    <TextBlock Text="✉️ Email:" Width="110" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{Binding SelectedStudent.Email, TargetNullValue='—'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Margin="0,0,8,7">
+                                    <TextBlock Text="📞 Phone:" Width="110" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{Binding SelectedStudent.Phone, FallbackValue='—', TargetNullValue='—'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Margin="0,0,8,7">
+                                    <TextBlock Text="🏛️ School:" Width="110" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{Binding DetailSchoolName}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal" Margin="0,0,8,0">
+                                    <TextBlock Text="🎓 Grade Level:" Width="110" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{Binding SelectedStudent.GradeLevel}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+
+                                <!-- Right Sub-Column -->
+                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="8,0,0,7">
+                                    <TextBlock Text="⚧ Gender:" Width="105" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{Binding SelectedStudent.Gender, TargetNullValue='Male'}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="8,0,0,7">
+                                    <TextBlock Text="📅 Date of Birth:" Width="105" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{Binding SelectedStudent.DateOfBirth, StringFormat='MMM dd, yyyy', TargetNullValue='Not specified'}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="8,0,0,7">
+                                    <TextBlock Text="👤 Age:" Width="105" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{Binding DetailStudentAge}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="8,0,0,7">
+                                    <TextBlock Text="📍 Address:" Width="105" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{Binding SelectedStudent.Address, TargetNullValue='Not specified'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="8,0,0,7">
+                                    <TextBlock Text="📚 Track / Strand:" Width="105" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{Binding SelectedStudent.TrackStrand, TargetNullValue='Academic'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" Margin="8,0,0,0">
+                                    <TextBlock Text="👨‍🏫 Class Adviser:" Width="105" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    <TextBlock Text="{Binding SelectedStudent.Adviser, TargetNullValue='Unassigned'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 2. Student Details (Editable Form) -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="16,12">
+                        <StackPanel>
+                            <!-- Card Header & Toggle Edit Controls -->
+                            <Grid Margin="0,0,0,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="📋" FontSize="15" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,6,0"/>
+                                    <TextBlock Text="Student Details" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Command="{Binding ToggleEditModeCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                                            Height="26" Padding="10,0" Margin="0,0,6,0" Visibility="{Binding IsModalReadOnly, Converter={StaticResource BoolToVis}}" ToolTip="Edit profile">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="✏️" FontSize="11" Margin="0,0,4,0"/>
+                                            <TextBlock Text="Edit Profile" FontSize="11" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{Binding BackToDirectoryCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                                            Height="26" Width="26" Padding="0" Content="✕" ToolTip="Close" Visibility="{Binding IsModalReadOnly, Converter={StaticResource BoolToVis}}"/>
+
+                                    <Button Command="{Binding SaveStudentCommand}" Style="{DynamicResource PrimaryButtonStyle}"
+                                            Height="26" Padding="10,0" Margin="0,0,6,0" Visibility="{Binding IsModalEditing, Converter={StaticResource BoolToVis}}" ToolTip="Save changes">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="💾" FontSize="11" Margin="0,0,4,0" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                            <TextBlock Text="Save Changes" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{Binding CancelEditModeCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                                            Height="26" Padding="8,0" Visibility="{Binding IsModalEditing, Converter={StaticResource BoolToVis}}" ToolTip="Cancel edit">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="✕" FontSize="11" Margin="0,0,3,0"/>
+                                            <TextBlock Text="Cancel" FontSize="11" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Form Fields -->
+                            <Grid Margin="0,0,0,7">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                    <TextBlock Text="Student ID Number *" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <TextBox Text="{Binding ModalStudentNumber, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" FontSize="12" IsReadOnly="{Binding IsModalReadOnly}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                    <TextBlock Text="Gender" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <ComboBox ItemsSource="{Binding GenderOptions}" SelectedItem="{Binding ModalGender}" Style="{DynamicResource ModernComboBoxStyle}" Height="32" FontSize="12" IsEnabled="{Binding IsModalEditing}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,7">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                    <TextBlock Text="First Name *" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <TextBox Text="{Binding ModalFirstName, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" FontSize="12" IsReadOnly="{Binding IsModalReadOnly}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="4,0,4,0">
+                                    <TextBlock Text="Middle Name" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <TextBox Text="{Binding ModalMiddleName, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" FontSize="12" IsReadOnly="{Binding IsModalReadOnly}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Margin="4,0,0,0">
+                                    <TextBlock Text="Last Name *" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <TextBox Text="{Binding ModalLastName, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" FontSize="12" IsReadOnly="{Binding IsModalReadOnly}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                    <TextBlock Text="Grade Level *" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <ComboBox ItemsSource="{Binding GradeOptions}" SelectedItem="{Binding ModalGradeLevel}" Style="{DynamicResource ModernComboBoxStyle}" Height="32" FontSize="12" IsEnabled="{Binding IsModalEditing}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="4,0,4,0">
+                                    <TextBlock Text="Section *" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <TextBox Text="{Binding ModalSection, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" FontSize="12" IsReadOnly="{Binding IsModalReadOnly}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Margin="4,0,0,0">
+                                    <TextBlock Text="Adviser" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <TextBox Text="{Binding ModalAdviser, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" FontSize="12" IsReadOnly="{Binding IsModalReadOnly}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="Parent / Guardian Contact Information" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,6"/>
+
+                            <Grid Margin="0,0,0,7">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                    <TextBlock Text="Parent / Guardian Name *" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <TextBox Text="{Binding ModalGuardianName, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" FontSize="12" IsReadOnly="{Binding IsModalReadOnly}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                    <TextBlock Text="Parent Email (For Alerts) *" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <TextBox Text="{Binding ModalGuardianEmail, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" FontSize="12" IsReadOnly="{Binding IsModalReadOnly}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                    <TextBlock Text="Contact Number" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <TextBox Text="{Binding ModalGuardianContact, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" FontSize="12" IsReadOnly="{Binding IsModalReadOnly}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                    <TextBlock Text="Residential Address" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <TextBox Text="{Binding ModalAddress, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" FontSize="12" IsReadOnly="{Binding IsModalReadOnly}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Bottom Action Row (View Mode: Disciplinary Actions & Close) -->
+                            <Grid Margin="0,6,0,0" Visibility="{Binding IsModalReadOnly, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Command="{Binding FileIncidentForStudentCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                                            Height="28" Padding="10,0" Margin="0,0,6,0" ToolTip="File incident report">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="🚨" Margin="0,0,4,0"/>
+                                            <TextBlock Text="File Incident" FontSize="11" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{Binding ExportStudentDossierCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                                            Height="28" Padding="10,0" Margin="0,0,6,0" ToolTip="Export behavioral dossier">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="📋" Margin="0,0,4,0"/>
+                                            <TextBlock Text="Dossier" FontSize="11" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{Binding PrintGoodMoralCertCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                                            Height="28" Padding="10,0" ToolTip="Generate Good Moral Certificate">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="📜" Margin="0,0,4,0"/>
+                                            <TextBlock Text="Good Moral" FontSize="11" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                                <Button Grid.Column="1" Content="Close" Command="{Binding BackToDirectoryCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                                        Height="28" Padding="16,0" VerticalAlignment="Center" ToolTip="Return to directory"/>
+                            </Grid>
+
+                            <!-- Bottom Action Row (Edit Mode: Cancel & Update) -->
+                            <Grid Margin="0,6,0,0" Visibility="{Binding IsModalEditing, Converter={StaticResource BoolToVis}}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <Button Command="{Binding CancelEditModeCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                                            Height="28" Padding="12,0" Margin="0,0,8,0" ToolTip="Cancel changes">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="✕" FontSize="11" Margin="0,0,4,0"/>
+                                            <TextBlock Text="Cancel" FontSize="11" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{Binding SaveStudentCommand}" Style="{DynamicResource PrimaryButtonStyle}"
+                                            Height="28" Padding="16,0" ToolTip="Update student information">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="💾" FontSize="11" Margin="0,0,5,0" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                            <TextBlock Text="Update" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ==================== RIGHT COLUMN (AUTHENTIC SYSTEM DATA ONLY) ==================== -->
+                <StackPanel Grid.Column="2">
+                    <!-- 1. Disciplinary Standing & Analytics Card (Live SQLite Data) -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="14,12" Margin="0,0,0,10">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,8">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="🛡️" FontSize="13" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,6,0"/>
+                                    <TextBlock Text="Disciplinary Standing" FontSize="12.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+                                <Button Command="{Binding PrintGoodMoralCertCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                                        Height="22" Padding="6,0" HorizontalAlignment="Right" ToolTip="Generate Good Moral Certificate">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="📜" FontSize="9.5" Margin="0,0,3,0"/>
+                                        <TextBlock Text="Certificate" FontSize="10" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+
+                            <!-- Live Standing & Incidents Summary -->
+                            <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Incidents on Record" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding DetailIncidentCount}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                    </StackPanel>
+                                    <Border Grid.Column="1" Background="{DynamicResource SuccessBgBrush}" BorderBrush="{DynamicResource SuccessBrush}" BorderThickness="1"
+                                            CornerRadius="4" Padding="6,3" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding DetailDisciplinaryStanding}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Text="Conduct Score Impact:" FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding DetailConductScore, StringFormat='{}{0} / 100'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Text="Latest Incident Type:" FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding DetailRecentIncident}" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis" MaxWidth="150"/>
+                            </Grid>
+                            <Grid>
+                                <TextBlock Text="Last Incident Date:" FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding DetailLastIncidentDate}" FontSize="10.5" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 2. Academic & Guidance Profile (Real System Model Fields) -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="14,12" Margin="0,0,0,10">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <TextBlock Text="📘" FontSize="13" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,6,0"/>
+                                <TextBlock Text="Academic &amp; Guidance Profile" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            </StackPanel>
+
+                            <Grid Margin="0,0,0,3">
+                                <TextBlock Text="Track / Strand:" FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding SelectedStudent.TrackStrand, TargetNullValue='Academic'}" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,3">
+                                <TextBlock Text="Class Adviser:" FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding SelectedStudent.Adviser, TargetNullValue='Unassigned'}" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,5">
+                                <TextBlock Text="Enrolled In System:" FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding SelectedStudent.CreatedAt, StringFormat='MMM dd, yyyy'}" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Right"/>
+                            </Grid>
+
+                            <TextBlock Text="Medical / Health Remarks:" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,2"/>
+                            <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="4" Padding="8,5">
+                                <TextBlock Text="{Binding SelectedStudent.MedicalNotes, TargetNullValue='No recorded health restrictions or medical notes.'}"
+                                           FontSize="10" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap"/>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 3. Student Directory & System Records Card -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="14,12">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <TextBlock Text="📖" FontSize="13" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,6,0"/>
+                                <TextBlock Text="Student Directory &amp; Records" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            </StackPanel>
+
+                            <Button Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ViewIncidentHistoryCommand}" Height="30" Margin="0,0,0,4" HorizontalContentAlignment="Stretch" Padding="8,0" Cursor="Hand" ToolTip="View incident history log">
+                                <Grid><StackPanel Orientation="Horizontal" VerticalAlignment="Center"><TextBlock Text="🛡️" Margin="0,0,8,0"/><TextBlock Text="Incident History" FontSize="11" FontWeight="SemiBold"/></StackPanel><TextBlock Text="›" HorizontalAlignment="Right" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}"/></Grid>
+                            </Button>
+                            <Button Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ViewBehavioralProfileCommand}" Height="30" Margin="0,0,0,4" HorizontalContentAlignment="Stretch" Padding="8,0" Cursor="Hand" ToolTip="Open behavioral transcripts">
+                                <Grid><StackPanel Orientation="Horizontal" VerticalAlignment="Center"><TextBlock Text="📋" Margin="0,0,8,0"/><TextBlock Text="Behavioral Transcripts" FontSize="11" FontWeight="SemiBold"/></StackPanel><TextBlock Text="›" HorizontalAlignment="Right" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}"/></Grid>
+                            </Button>
+                            <Button Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ViewConsequenceTrackingCommand}" Height="30" Margin="0,0,0,4" HorizontalContentAlignment="Stretch" Padding="8,0" Cursor="Hand" ToolTip="Review consequence assignments">
+                                <Grid><StackPanel Orientation="Horizontal" VerticalAlignment="Center"><TextBlock Text="📅" Margin="0,0,8,0"/><TextBlock Text="Consequence Tracking" FontSize="11" FontWeight="SemiBold"/></StackPanel><TextBlock Text="›" HorizontalAlignment="Right" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}"/></Grid>
+                            </Button>
+                            <Button Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ViewRestorativeInterventionsCommand}" Height="30" Margin="0,0,0,4" HorizontalContentAlignment="Stretch" Padding="8,0" Cursor="Hand" ToolTip="Access restorative interventions">
+                                <Grid><StackPanel Orientation="Horizontal" VerticalAlignment="Center"><TextBlock Text="👥" Margin="0,0,8,0"/><TextBlock Text="Restorative Interventions" FontSize="11" FontWeight="SemiBold"/></StackPanel><TextBlock Text="›" HorizontalAlignment="Right" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}"/></Grid>
+                            </Button>
+                            <Button Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ViewSuspensionCalendarCommand}" Height="30" HorizontalContentAlignment="Stretch" Padding="8,0" Cursor="Hand" ToolTip="Inspect suspension calendar">
+                                <Grid><StackPanel Orientation="Horizontal" VerticalAlignment="Center"><TextBlock Text="📅" Margin="0,0,8,0"/><TextBlock Text="Suspension Calendar" FontSize="11" FontWeight="SemiBold"/></StackPanel><TextBlock Text="›" HorizontalAlignment="Right" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}"/></Grid>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

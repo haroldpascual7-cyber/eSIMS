@@ -14,6 +14,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
         public static string Email { get; set; } = string.Empty;
         public static bool IsAuthenticated { get; set; }
 
+        public static string CurrentUsername => !string.IsNullOrWhiteSpace(FullName) ? FullName : (!string.IsNullOrWhiteSpace(Username) ? Username : "System User");
+
         public static void SetSession(string username, string fullName, string role, string email = "")
         {
             Username = username;

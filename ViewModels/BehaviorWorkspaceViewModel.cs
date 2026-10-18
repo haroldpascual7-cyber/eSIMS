@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using Microsoft.Win32;
 
 namespace SmartSchoolIncidentManagementSystem.ViewModels
 {
@@ -136,6 +137,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             ExportTranscriptCommand = new RelayCommand(async () => await ExportTranscriptAsync(), () => SelectedStudent != null);
             PrintGoodMoralCommand = new RelayCommand(async () => await PrintGoodMoralAsync(), () => SelectedStudent != null);
 
+            InitializeCounselingWorkspace();
             _ = InitializeStudentsAsync();
         }
 
@@ -149,7 +151,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public ObservableCollection<RestorativePlan> RestorativePlans => _restorativePlans;
         public ObservableCollection<IndividualActionPlan> ActionPlans => _actionPlans;
 
-        public bool CanManageBehavior => SessionManager.HasPermission("System Administrator,Discipline Officer,Guidance Counselor");
+        public bool CanManageBehavior => SessionManager.HasPermission("System Administrator,Administrator,Discipline Officer,Guidance Counselor,Teacher,Staff");
 
         public Student? SelectedStudent
         {
@@ -422,9 +424,20 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                     return;
                 }
 
-                string path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"Transcript_{SelectedStudent.StudentNumber}.pdf");
-                _pdfService.GenerateConductTranscript(path, transcript);
-                MessageBox.Show($"Behavioral Transcript exported to:\n{path}", "Export Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                string sanitizedName = string.Concat(SelectedStudent.FullName.Split(System.IO.Path.GetInvalidFileNameChars())).Replace(" ", "_");
+                var saveDialog = new SaveFileDialog
+                {
+                    Title = "Save Behavioral Transcript PDF",
+                    Filter = "PDF Document (*.pdf)|*.pdf|All Files (*.*)|*.*",
+                    FileName = $"Transcript_{sanitizedName}_{SelectedStudent.StudentNumber}.pdf",
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+                };
+
+                if (saveDialog.ShowDialog() == true)
+                {
+                    _pdfService.GenerateConductTranscript(saveDialog.FileName, transcript);
+                    MessageBox.Show($"Behavioral Transcript successfully saved to:\n{saveDialog.FileName}", "Export Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             catch (Exception ex)
             {
@@ -444,9 +457,20 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                     return;
                 }
 
-                string path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"GoodMoral_{SelectedStudent.StudentNumber}.pdf");
-                _pdfService.GenerateGoodMoralCertificate(path, transcript);
-                MessageBox.Show($"Certificate of Good Moral Character exported to:\n{path}", "Export Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                string sanitizedName = string.Concat(SelectedStudent.FullName.Split(System.IO.Path.GetInvalidFileNameChars())).Replace(" ", "_");
+                var saveDialog = new SaveFileDialog
+                {
+                    Title = "Save Certificate of Good Moral Character PDF",
+                    Filter = "PDF Document (*.pdf)|*.pdf|All Files (*.*)|*.*",
+                    FileName = $"GoodMoral_{sanitizedName}_{SelectedStudent.StudentNumber}.pdf",
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+                };
+
+                if (saveDialog.ShowDialog() == true)
+                {
+                    _pdfService.GenerateGoodMoralCertificate(saveDialog.FileName, transcript);
+                    MessageBox.Show($"Certificate of Good Moral Character successfully saved to:\n{saveDialog.FileName}", "Export Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             catch (Exception ex)
             {

@@ -1,0 +1,282 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.AcademicStructureView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="640" d:DesignWidth="1050">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 1. Header & Status Banner -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,14">
+            <TextBlock Text="Academic Structure &amp; Institutional Units" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+            <TextBlock Text="Define official Grade Levels, class Sections, and school Departments to standardize student enrollment, behavioral tracking, and staff assignments."
+                       FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,3,0,10"/>
+
+            <!-- Status Notice -->
+            <Border Background="{DynamicResource InfoBgBrush}" BorderBrush="{DynamicResource InfoBrush}"
+                    BorderThickness="1" CornerRadius="6" Padding="14,9" Margin="0,0,0,4">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StatusMessage}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource InfoBrush}" FontSize="12" FontWeight="SemiBold"/>
+            </Border>
+        </StackPanel>
+
+        <!-- 2. 3-Column Manager Grid -->
+        <Grid Grid.Row="1" Margin="0,0,0,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="14"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="14"/>
+                <ColumnDefinition Width="1.15*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Column 1: Grade Levels -->
+            <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Padding="16,14" Background="{DynamicResource CardBackgroundBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="📚 Grade Levels" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    <TextBlock Grid.Row="1" Text="Official grade offerings (e.g. Grade 7 to 12)." FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,10"/>
+
+                    <!-- List of Grade Levels with Stretched Items -->
+                    <ListBox Grid.Row="2" ItemsSource="{Binding GradeLevels}"
+                             Background="Transparent" BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             Margin="0,0,0,10">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0,0,0,5"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" CornerRadius="6" Padding="12,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding}" FontSize="12.5" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" Margin="0,0,10,0"/>
+                                        <Button Grid.Column="1" Content="✕"
+                                                Command="{Binding DataContext.RemoveGradeLevelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                VerticalAlignment="Center" HorizontalAlignment="Right"
+                                                Background="Transparent" BorderThickness="0"
+                                                Foreground="{DynamicResource DangerBrush}" FontWeight="Bold" Cursor="Hand"
+                                                Width="24" Height="24" Padding="0" FontSize="12" ToolTip="Remove Grade Level"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Add Input -->
+                    <Grid Grid.Row="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Style="{DynamicResource ModernTextBoxStyle}"
+                                 Text="{Binding NewGradeLevel, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="34" Margin="0,0,6,0" Padding="10,0" ToolTip="Enter grade level name (e.g. Grade 11)"/>
+                        <Button Grid.Column="1" Content="+ Add" Style="{DynamicResource PrimaryButtonStyle}"
+                                Command="{Binding AddGradeLevelCommand}" Height="34" Padding="14,0" FontWeight="SemiBold"/>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Column 2: Class Sections -->
+            <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Padding="16,14" Background="{DynamicResource CardBackgroundBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="🏷️ Class Sections" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    <TextBlock Grid.Row="1" Text="Section identifiers (e.g. Emerald, Magnolia, Ruby)." FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,10"/>
+
+                    <!-- List of Sections with Stretched Items -->
+                    <ListBox Grid.Row="2" ItemsSource="{Binding Sections}"
+                             Background="Transparent" BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             Margin="0,0,0,10">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0,0,0,5"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" CornerRadius="6" Padding="12,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding}" FontSize="12.5" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" Margin="0,0,10,0"/>
+                                        <Button Grid.Column="1" Content="✕"
+                                                Command="{Binding DataContext.RemoveSectionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                VerticalAlignment="Center" HorizontalAlignment="Right"
+                                                Background="Transparent" BorderThickness="0"
+                                                Foreground="{DynamicResource DangerBrush}" FontWeight="Bold" Cursor="Hand"
+                                                Width="24" Height="24" Padding="0" FontSize="12" ToolTip="Remove Section"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Add Input -->
+                    <Grid Grid.Row="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Style="{DynamicResource ModernTextBoxStyle}"
+                                 Text="{Binding NewSection, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="34" Margin="0,0,6,0" Padding="10,0" ToolTip="Enter section name (e.g. Magnolia, Sapphire)"/>
+                        <Button Grid.Column="1" Content="+ Add" Style="{DynamicResource PrimaryButtonStyle}"
+                                Command="{Binding AddSectionCommand}" Height="34" Padding="14,0" FontWeight="SemiBold"/>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Column 3: Departments -->
+            <Border Grid.Column="4" Style="{DynamicResource CardBorderStyle}" Padding="16,14" Background="{DynamicResource CardBackgroundBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="🏢 School Departments" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    <TextBlock Grid.Row="1" Text="Administrative &amp; academic offices." FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,10"/>
+
+                    <!-- List of Departments with Stretched Items -->
+                    <ListBox Grid.Row="2" ItemsSource="{Binding Departments}"
+                             Background="Transparent" BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             Margin="0,0,0,10">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0,0,0,5"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1" CornerRadius="6" Padding="12,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding}" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" Margin="0,0,10,0"/>
+                                        <Button Grid.Column="1" Content="✕"
+                                                Command="{Binding DataContext.RemoveDepartmentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                VerticalAlignment="Center" HorizontalAlignment="Right"
+                                                Background="Transparent" BorderThickness="0"
+                                                Foreground="{DynamicResource DangerBrush}" FontWeight="Bold" Cursor="Hand"
+                                                Width="24" Height="24" Padding="0" FontSize="12" ToolTip="Remove Department"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Add Input -->
+                    <Grid Grid.Row="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Style="{DynamicResource ModernTextBoxStyle}"
+                                 Text="{Binding NewDepartment, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="34" Margin="0,0,6,0" Padding="10,0" ToolTip="Enter department name (e.g. Science Department)"/>
+                        <Button Grid.Column="1" Content="+ Add" Style="{DynamicResource PrimaryButtonStyle}"
+                                Command="{Binding AddDepartmentCommand}" Height="34" Padding="14,0" FontWeight="SemiBold"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- 3. Bottom Actions -->
+        <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}" Padding="0,12,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="↺ Reset to DepEd Defaults" Style="{DynamicResource SecondaryButtonStyle}"
+                        Command="{Binding ResetToDefaultsCommand}" Height="36" Padding="14,0" Margin="0,0,10,0"/>
+                <Button Content="💾 Save Academic Configuration" Style="{DynamicResource PrimaryButtonStyle}"
+                        Command="{Binding SaveChangesCommand}" Height="36" Padding="18,0" FontWeight="Bold"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,494 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.IncidentRecordModalControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:SmartSchoolIncidentManagementSystem.Views"
+             mc:Ignorable="d">
+    <Grid Visibility="{Binding IsIncidentModalOpen, Converter={StaticResource BoolToVis}}">
+        <!-- Semi-transparent backdrop -->
+        <Border Background="{DynamicResource PrimaryTextBrush}" Opacity="0.45"/>
+
+        <!-- Spacious Desktop Modal Surface (1240px wide desktop canvas) -->
+        <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1" CornerRadius="12" Padding="22,18" MaxWidth="1260" MaxHeight="870" Margin="24,14"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+
+                <!-- Header Bar -->
+                <Grid Grid.Row="0" Margin="0,0,0,12">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ModalTitle}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="4" Padding="8,2" Margin="12,0,0,0">
+                            <TextBlock Text="{Binding ModalIncidentNumber}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                        </Border>
+                    </StackPanel>
+                    <Button Content="&#x2715;" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CancelModalCommand}"
+                            HorizontalAlignment="Right" Width="32" Height="32" Padding="0" FontSize="14" FontWeight="Bold"/>
+                </Grid>
+
+                <!-- Scrollable 2-Column Desktop Grid -->
+                <ScrollViewer Grid.Row="1" MaxHeight="720" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,0,6,0">
+                        <!-- Validation / Error Notice -->
+                        <Border Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1"
+                                CornerRadius="6" Padding="10" Margin="0,0,0,10" Visibility="{Binding HasModalError, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="{Binding ModalErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                        </Border>
+
+                        <!-- Incident Lifecycle Progression Bar (Reported -> Investigating -> Action Taken -> Resolved -> Closed) -->
+                        <views:IncidentLifecycleProgressionControl Margin="0,0,0,10"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="1.15*"/><ColumnDefinition Width="14"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+
+                            <!-- ==================== LEFT COLUMN: STUDENT, CASE PARTICULARS & RULE ENGINE ==================== -->
+                            <StackPanel Grid.Column="0">
+                                <!-- 1. INVOLVED STUDENTS & CONFIRMATION -->
+                                <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="8" Padding="12,10" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <Grid Margin="0,0,0,8">
+                                            <TextBlock Text="1. Involved Students &amp; Confirmation" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                            <Button Content="{Binding PrimaryStudentConfirmationStatusText}" Style="{DynamicResource SecondaryButtonStyle}"
+                                                    Command="{Binding ConfirmPrimaryStudentCommand}" HorizontalAlignment="Right" Height="24" Padding="8,0" FontSize="10" IsEnabled="{Binding CanEditIncidentIntake}"/>
+                                        </Grid>
+
+                                        <!-- Primary Student Picker -->
+                                        <Grid Margin="0,0,0,6">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                                <TextBlock Text="Primary Involved Student *" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                                <TextBox Text="{Binding ModalStudentName, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" IsReadOnly="{Binding IsIncidentIntakeReadOnly}"/>
+                                                <ListBox ItemsSource="{Binding StudentSuggestions}" Visibility="{Binding IsStudentSuggestionsOpen, Converter={StaticResource BoolToVis}}"
+                                                         MaxHeight="110" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,2,0,0">
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Button Content="{Binding DisplayName}" Style="{DynamicResource SecondaryButtonStyle}"
+                                                                    Command="{Binding DataContext.SelectStudentSuggestionCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                                    CommandParameter="{Binding}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Height="26" Padding="6,0"/>
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
+                                                </ListBox>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Margin="0,0,6,0">
+                                                <TextBlock Text="Student ID" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                                <TextBox Text="{Binding ModalStudentNumber, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" IsReadOnly="{Binding IsIncidentIntakeReadOnly}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Grade &amp; Section" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                                <TextBox Text="{Binding ModalGradeSection, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" IsReadOnly="{Binding IsIncidentIntakeReadOnly}"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Confirmed Student Badge Card -->
+                                        <Border Background="{DynamicResource SuccessBgBrush}" BorderBrush="{DynamicResource SuccessBrush}" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,8"
+                                                Visibility="{Binding IsPrimaryStudentConfirmed, Converter={StaticResource BoolToVis}}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="&#x2713; Confirmed Student Record" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource SuccessBrush}"/>
+                                                    <TextBlock Text="{Binding ModalStudentName}" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,1,0,0"/>
+                                                    <TextBlock Margin="0,1,0,0" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}">
+                                                        <Run Text="ID: "/><Run Text="{Binding ModalStudentNumber}" FontWeight="SemiBold"/><Run Text=" | Grade: "/><Run Text="{Binding ModalGradeSection}" FontWeight="SemiBold"/><Run Text=" | Guardian: "/><Run Text="{Binding ModalParentName}"/><Run Text=" ("/><Run Text="{Binding ModalParentEmail}"/><Run Text=")"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                                <Border Grid.Column="1" Background="{DynamicResource SuccessBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                                    <TextBlock Text="VERIFIED" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Additional Involved Persons Form -->
+                                        <TextBlock Text="Additional Involved Students / Individuals" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,4"/>
+                                        <Grid Margin="0,0,0,4" Visibility="{Binding CanEditIncidentIntake, Converter={StaticResource BoolToVis}}">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="1.8*"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                                <TextBox Text="{Binding NewInvolvedName, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="28" Tag="Involved Name..."/>
+                                                <ListBox ItemsSource="{Binding InvolvedStudentSuggestions}" Visibility="{Binding IsInvolvedStudentSuggestionsOpen, Converter={StaticResource BoolToVis}}"
+                                                         MaxHeight="90" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,2,0,0">
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Button Content="{Binding DisplayName}" Style="{DynamicResource SecondaryButtonStyle}"
+                                                                    Command="{Binding DataContext.SelectInvolvedStudentSuggestionCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                                    CommandParameter="{Binding}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Height="24" Padding="4,0" FontSize="10"/>
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
+                                                </ListBox>
+                                            </StackPanel>
+                                            <ComboBox Grid.Column="1" SelectedValue="{Binding NewInvolvedRole}" SelectedValuePath="Content" Style="{DynamicResource ModernComboBoxStyle}" Height="28" Margin="0,0,4,0">
+                                                <ComboBoxItem Content="Participant"/><ComboBoxItem Content="Primary Offender"/><ComboBoxItem Content="Accomplice"/><ComboBoxItem Content="Victim"/><ComboBoxItem Content="Bystander"/>
+                                            </ComboBox>
+                                            <TextBox Grid.Column="2" Text="{Binding NewInvolvedStudentNumber, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="28" Margin="0,0,4,0" Tag="ID/Section"/>
+                                            <Button Grid.Column="3" Content="+ Add" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding AddInvolvedPersonCommand}" Height="28" Padding="8,0" FontSize="11"/>
+                                        </Grid>
+
+                                        <!-- List of Additional Involved -->
+                                        <ItemsControl ItemsSource="{Binding InvolvedPersonsList}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="6,3" Margin="0,0,0,3">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                            <Border Grid.Column="0" Background="{DynamicResource InfoBgBrush}" CornerRadius="3" Padding="5,1" Margin="0,0,6,0">
+                                                                <TextBlock Text="{Binding RoleBadgeText}" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}"/>
+                                                            </Border>
+                                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                                <TextBlock Text="{Binding DisplayText}" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" Margin="6,0,0,0"/>
+                                                            </StackPanel>
+                                                            <Button Grid.Column="2" Content="&#x2715;" Style="{DynamicResource SecondaryButtonStyle}"
+                                                                    Command="{Binding DataContext.RemoveInvolvedPersonCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                    CommandParameter="{Binding}" Height="18" Width="18" Padding="0" FontSize="9"
+                                                                    Visibility="{Binding DataContext.CanEditIncidentIntake, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource BoolToVis}}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 2. INCIDENT PARTICULARS -->
+                                <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="8" Padding="12,10" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="2. Incident Particulars &amp; Narrative" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,8"/>
+                                        <Grid Margin="0,0,0,6">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                                <TextBlock Text="Incident Title *" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                                <TextBox Text="{Binding ModalTitleField, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" IsReadOnly="{Binding IsIncidentIntakeReadOnly}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Margin="0,0,6,0">
+                                                <TextBlock Text="Category" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                                <ComboBox SelectedValue="{Binding ModalCategory}" SelectedValuePath="Content" Style="{DynamicResource ModernComboBoxStyle}" Height="32" IsEnabled="{Binding CanEditIncidentIntake}">
+                                                    <ComboBoxItem Content="Classroom Disruption"/><ComboBoxItem Content="Truancy"/><ComboBoxItem Content="Vandalism"/><ComboBoxItem Content="Bullying"/><ComboBoxItem Content="Physical Altercation"/><ComboBoxItem Content="Defiance of Authority"/><ComboBoxItem Content="Academic Dishonesty"/><ComboBoxItem Content="Substance Misuse"/><ComboBoxItem Content="Theft"/><ComboBoxItem Content="General Misconduct"/>
+                                                </ComboBox>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Location / Zone" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                                <TextBox Text="{Binding ModalLocation, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" IsReadOnly="{Binding IsIncidentIntakeReadOnly}"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Grid Margin="0,0,0,6">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="1.5*"/></Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                                <TextBlock Text="Incident Date" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                                <DatePicker SelectedDate="{Binding ModalDate}" Height="32" IsEnabled="{Binding CanEditIncidentIntake}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Margin="0,0,6,0">
+                                                <TextBlock Text="Time (HH:mm)" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                                <TextBox Text="{Binding ModalTime, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" IsReadOnly="{Binding IsIncidentIntakeReadOnly}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Reporting Staff / Teacher" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                                <TextBox Text="{Binding ModalReporter, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="32" IsReadOnly="{Binding IsReporterFieldReadOnly}"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <TextBlock Text="Incident Narrative / Detailed Description *" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                        <TextBox Text="{Binding ModalDescription, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}"
+                                                 Height="70" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="{Binding IsIncidentIntakeReadOnly}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 3. INTELLIGENT RULE ENGINE ASSESSMENT -->
+                                <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="8" Padding="12,10">
+                                    <StackPanel>
+                                        <Grid Margin="0,0,0,6">
+                                            <TextBlock Text="3. Rule Engine Decision Support" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                            <Button Content="&#x26A1; Apply Recommendations" Style="{DynamicResource SecondaryButtonStyle}"
+                                                    Command="{Binding ApplyRuleRecommendationsCommand}" HorizontalAlignment="Right" Height="24" Padding="8,0" FontSize="10"
+                                                    Visibility="{Binding CanApplyRuleRecommendations, Converter={StaticResource BoolToVis}}"/>
+                                        </Grid>
+
+                                        <!-- Repeat Offender Banner -->
+                                        <Border Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1"
+                                                CornerRadius="6" Padding="8,5" Margin="0,0,0,6" Visibility="{Binding IsRepeatOffenderAlert, Converter={StaticResource BoolToVis}}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="&#x26A0; REPEAT OFFENDER WARNING: " FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" FontSize="11"/>
+                                                <TextBlock Text="{Binding RepeatAlertMessage}" Foreground="{DynamicResource DangerBrush}" FontSize="11"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <Grid Margin="0,0,0,6">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="4" Padding="8,4" Margin="0,0,4,0">
+                                                <StackPanel>
+                                                    <TextBlock Text="Assessed Category" FontSize="9" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding LiveSuggestedCategory}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Grid.Column="1" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="4" Padding="8,4" Margin="0,0,4,0">
+                                                <StackPanel>
+                                                    <TextBlock Text="Suggested Severity" FontSize="9" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding LiveSuggestedSeverity}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource DangerBrush}"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="4" Padding="8,4">
+                                                <StackPanel>
+                                                    <TextBlock Text="Calculated Risk" FontSize="9" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding LiveSuggestedRisk}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource WarningBrush}"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
+
+                                        <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="4" Padding="8,5">
+                                            <StackPanel>
+                                                <TextBlock Text="Recommended Disciplinary Action:" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                <TextBlock Text="{Binding LiveRecommendedAction}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- ==================== RIGHT COLUMN: WITNESSES, EVIDENCE PHOTOS & RESOLUTION ==================== -->
+                            <StackPanel Grid.Column="2">
+                                <!-- 4. WITNESSES & TESTIMONIES -->
+                                <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="8" Padding="12,10" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="4. Witnesses &amp; Statements" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,6"/>
+
+                                        <!-- Add Witness Controls -->
+                                        <StackPanel Visibility="{Binding CanEditIncidentIntake, Converter={StaticResource BoolToVis}}" Margin="0,0,0,6">
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                <TextBox Grid.Column="0" Text="{Binding NewWitnessName, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="28" Margin="0,0,4,0" Tag="Witness Name..."/>
+                                                <ComboBox Grid.Column="1" SelectedValue="{Binding NewWitnessRole}" SelectedValuePath="Content" Style="{DynamicResource ModernComboBoxStyle}" Height="28" Margin="0,0,4,0">
+                                                    <ComboBoxItem Content="Student Witness"/><ComboBoxItem Content="Teacher / Faculty"/><ComboBoxItem Content="Security Guard"/><ComboBoxItem Content="School Staff"/><ComboBoxItem Content="Parent / External"/><ComboBoxItem Content="Other Witness"/>
+                                                </ComboBox>
+                                                <Button Grid.Column="2" Content="+ Save Witness" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding AddWitnessCommand}" Height="28" Padding="8,0" FontSize="10"/>
+                                            </Grid>
+                                            <TextBox Text="{Binding NewWitnessStatement, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}"
+                                                     Height="36" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Tag="Record witness statement or testimony summary..."/>
+                                        </StackPanel>
+
+                                        <!-- Recorded Witnesses List -->
+                                        <ItemsControl ItemsSource="{Binding WitnessesList}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="0,0,0,4">
+                                                        <StackPanel>
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                                    <Border Background="{DynamicResource InfoBgBrush}" CornerRadius="3" Padding="5,1" Margin="6,0,0,0">
+                                                                        <TextBlock Text="{Binding RoleOrAffiliation}" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource InfoBrush}"/>
+                                                                    </Border>
+                                                                    <TextBlock Text="{Binding FormattedDate}" FontSize="9" Foreground="{DynamicResource SecondaryTextBrush}" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                                                </StackPanel>
+                                                                <Button Grid.Column="1" Content="&#x2715;" Style="{DynamicResource SecondaryButtonStyle}"
+                                                                        Command="{Binding DataContext.RemoveWitnessCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                        CommandParameter="{Binding}" Height="18" Width="18" Padding="0" FontSize="9"
+                                                                        Visibility="{Binding DataContext.CanEditIncidentIntake, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource BoolToVis}}"/>
+                                                            </Grid>
+                                                            <TextBlock Text="{Binding Statement}" TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,3,0,0"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 5. EVIDENCE & PHOTO DOCUMENTATION (WITH INLINE IMAGE PREVIEWS) -->
+                                <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="8" Padding="12,10" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="5. Attach Evidence &amp; Photo Documentation" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,6"/>
+
+                                        <!-- Add Evidence Form -->
+                                        <StackPanel Visibility="{Binding CanEditIncidentIntake, Converter={StaticResource BoolToVis}}" Margin="0,0,0,6">
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="2*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                <ComboBox Grid.Column="0" SelectedValue="{Binding NewEvidenceType}" SelectedValuePath="Content" Style="{DynamicResource ModernComboBoxStyle}" Height="28" Width="70" Margin="0,0,4,0">
+                                                    <ComboBoxItem Content="File"/><ComboBoxItem Content="Link"/>
+                                                </ComboBox>
+                                                <TextBox Grid.Column="1" Text="{Binding NewEvidenceTitle, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="28" Margin="0,0,4,0" Tag="Evidence Title..."/>
+                                                <TextBox Grid.Column="2" Text="{Binding NewEvidenceDescription, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="28" Margin="0,0,4,0" Tag="What does it represent?..."/>
+                                                <Button Grid.Column="3" Content="+ Attach" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding AddEvidenceCommand}" Height="28" Padding="8,0" FontSize="10"/>
+                                            </Grid>
+
+                                            <!-- File Picker Row -->
+                                            <Grid Margin="0,0,0,4" Visibility="{Binding IsFileEvidenceMode, Converter={StaticResource BoolToVis}}">
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                <TextBox Grid.Column="0" Text="{Binding NewEvidenceFilePathOrUrl, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="28" Margin="0,0,4,0" Tag="Selected Evidence File Path" IsReadOnly="True"/>
+                                                <Button Grid.Column="1" Content="&#x1F5C1; Browse File..." Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BrowseEvidenceFileCommand}" Height="28" Padding="8,0" FontSize="10"/>
+                                            </Grid>
+
+                                            <!-- Link Input Row -->
+                                            <Grid Margin="0,0,0,4" Visibility="{Binding IsLinkEvidenceMode, Converter={StaticResource BoolToVis}}">
+                                                <TextBox Text="{Binding NewEvidenceFilePathOrUrl, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="28" Tag="Enter supported evidence link URL (e.g. CCTV stream, Drive link)..."/>
+                                            </Grid>
+
+                                            <!-- Live Image Thumbnail Preview (Before Attaching) -->
+                                            <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="6" Margin="0,0,0,4"
+                                                    Visibility="{Binding HasNewEvidenceImagePreview, Converter={StaticResource BoolToVis}}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                    <Image Grid.Column="0" Source="{Binding NewEvidencePreviewPath}" Width="65" Height="65" Stretch="UniformToFill" Margin="0,0,8,0"/>
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                        <TextBlock Text="&#x1F5BC; Photo Selected for Evidence" FontWeight="Bold" FontSize="10" Foreground="{DynamicResource PrimaryBrush}"/>
+                                                        <TextBlock Text="{Binding NewEvidenceFileName}" FontWeight="SemiBold" FontSize="10" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,1,0,0"/>
+                                                        <TextBlock Text="Click '+ Attach' above to save this photo to the incident." FontSize="9" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,0"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <!-- Empty evidence state notice -->
+                                        <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,0,6"
+                                                Visibility="{Binding HasNoAttachedEvidence, Converter={StaticResource BoolToVis}}">
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <TextBlock Text="📷 No Photo or Evidence Attached" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="Click 'Edit Incident' below to attach incident photos or documents." FontSize="10" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"
+                                                           Visibility="{Binding CanShowEditModalButton, Converter={StaticResource BoolToVis}}"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Prominent Photo Gallery (visible whenever images exist) -->
+                                        <Border Margin="0,0,0,8" Visibility="{Binding HasAttachedImages, Converter={StaticResource BoolToVis}}">
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                                    <TextBlock Text="📷" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Incident Photos" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center"/>
+                                                    <Border Background="{DynamicResource AccentBrush}" CornerRadius="8" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding AttachedImageCount, StringFormat='{}{0} photo(s)'}" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                                    </Border>
+                                                </StackPanel>
+
+                                                <!-- Photo grid -->
+                                                <ItemsControl ItemsSource="{Binding EvidenceImageList}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate><WrapPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Width="148" Height="140" CornerRadius="8" ClipToBounds="True" Margin="0,0,8,8" Cursor="Hand"
+                                                                    BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1.5" ToolTip="Click to open full-size image">
+                                                                <Border.Effect>
+                                                                    <DropShadowEffect BlurRadius="6" ShadowDepth="2" Opacity="0.18"/>
+                                                                </Border.Effect>
+                                                                <Grid>
+                                                                    <Image Source="{Binding ImageDisplaySource}" Stretch="UniformToFill"/>
+                                                                    <Border VerticalAlignment="Bottom" Background="{DynamicResource HeaderBackgroundBrush}" Opacity="0.9" Padding="6,4">
+                                                                        <StackPanel>
+                                                                            <TextBlock Text="{Binding Title}" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                                                            <TextBlock Text="{Binding FormattedDate}" FontSize="8" Foreground="{DynamicResource MutedTextBrush}"/>
+                                                                        </StackPanel>
+                                                                    </Border>
+                                                                    <Button Style="{x:Null}" Background="Transparent" BorderThickness="0"
+                                                                            Command="{Binding DataContext.OpenEvidenceCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                            CommandParameter="{Binding}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Opacity="0" Cursor="Hand"/>
+                                                                </Grid>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                                <TextBlock Text="Click any photo to open full size." FontSize="9" Foreground="{DynamicResource MutedTextBrush}" Margin="0,-2,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Attached Evidence List (Showing Live Photo Thumbnails) -->
+                                        <ItemsControl ItemsSource="{Binding EvidenceList}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="0,0,0,4">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                            <!-- Thumbnail preview if image, otherwise icon -->
+                                                            <Grid Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                                <Border Width="50" Height="50" CornerRadius="4" ClipToBounds="True" Background="{DynamicResource SurfaceBackgroundBrush}"
+                                                                        Visibility="{Binding IsImage, Converter={StaticResource BoolToVis}}">
+                                                                    <Image Source="{Binding ImageDisplaySource}" Stretch="UniformToFill"/>
+                                                                </Border>
+                                                                <TextBlock Text="{Binding TypeIcon}" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                                           Visibility="{Binding IsImage, Converter={StaticResource InverseBoolToVis}}"/>
+                                                            </Grid>
+                                                            <!-- Title & Details -->
+                                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                                    <TextBlock Text="{Binding FormattedFileSize}" FontSize="9" Foreground="{DynamicResource SecondaryTextBrush}" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                                                    <TextBlock Text="{Binding FormattedDate}" FontSize="9" Foreground="{DynamicResource SecondaryTextBrush}" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                                                </StackPanel>
+                                                                <TextBlock Text="{Binding Description}" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                                            </StackPanel>
+                                                            <!-- Action Buttons -->
+                                                            <Button Grid.Column="2" Content="&#x1F4C2; Open / View" Style="{DynamicResource SecondaryButtonStyle}"
+                                                                    Command="{Binding DataContext.OpenEvidenceCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                    CommandParameter="{Binding}" Height="24" Padding="6,0" FontSize="10" Margin="0,0,4,0"/>
+                                                            <Button Grid.Column="3" Content="&#x2715;" Style="{DynamicResource SecondaryButtonStyle}"
+                                                                    Command="{Binding DataContext.RemoveEvidenceCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                    CommandParameter="{Binding}" Height="18" Width="18" Padding="0" FontSize="9"
+                                                                    Visibility="{Binding DataContext.CanEditIncidentIntake, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource BoolToVis}}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 6. CLASSIFICATION, SEVERITY & STATUS -->
+                                <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="8" Padding="12,10" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="6. Classification &amp; Severity Assessment" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,6"/>
+                                        <Grid Margin="0,0,0,6">
+                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                                <TextBlock Text="Status" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                                <ComboBox SelectedValue="{Binding ModalStatus}" SelectedValuePath="Content" Style="{DynamicResource ModernComboBoxStyle}" Height="30" IsEnabled="{Binding CanEditOfficialIncidentFlow}"><ComboBoxItem Content="Reported"/><ComboBoxItem Content="UnderInvestigation"/><ComboBoxItem Content="ActionTaken"/><ComboBoxItem Content="Resolved"/><ComboBoxItem Content="Closed"/></ComboBox>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Margin="0,0,4,0">
+                                                <TextBlock Text="Severity" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                                <ComboBox SelectedValue="{Binding ModalSeverity}" SelectedValuePath="Content" Style="{DynamicResource ModernComboBoxStyle}" Height="30" IsEnabled="{Binding CanEditOfficialIncidentFlow}"><ComboBoxItem Content="Low"/><ComboBoxItem Content="Medium"/><ComboBoxItem Content="High"/><ComboBoxItem Content="Critical"/></ComboBox>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Risk Level" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                                <ComboBox SelectedValue="{Binding ModalRisk}" SelectedValuePath="Content" Style="{DynamicResource ModernComboBoxStyle}" Height="30" IsEnabled="{Binding CanEditOfficialIncidentFlow}"><ComboBoxItem Content="Low"/><ComboBoxItem Content="Medium"/><ComboBoxItem Content="High"/><ComboBoxItem Content="Critical"/></ComboBox>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Text="Action Taken / Resolution Summary" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                        <TextBox Text="{Binding ModalActionTaken, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="40" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="{Binding IsActionTakenReadOnly}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 7. INCIDENT COUNSELING & DISCIPLINARY CONSEQUENCES -->
+                                <views:IncidentCounselingSectionControl/>
+
+                                <!-- Automated Parent Email Notice -->
+                                <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <CheckBox Content="Dispatch Automated Parent Email Notification Upon Saving" IsChecked="{Binding SendParentNotification}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}" IsEnabled="{Binding CanSendParentNotification}"/>
+                                            <TextBlock Text="An official email disclosure will be automatically transmitted to parent's stored email address." FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" Margin="20,2,0,0"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{Binding NotificationStatusText}" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Bottom Actions Bar (Clear, Prominent Buttons) -->
+                <Grid Grid.Row="2" Margin="0,14,0,0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <Button Content="&#x270E; Edit Incident" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ToggleEditModeCommand}" Margin="0,0,8,0" Height="36" Padding="14,0" FontSize="12" FontWeight="SemiBold" Visibility="{Binding CanShowEditModalButton, Converter={StaticResource BoolToVis}}"/>
+                        <Button Content="&#x2715; Cancel Edit" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CancelEditModeCommand}" Margin="0,0,8,0" Height="36" Padding="12,0" FontSize="12" Visibility="{Binding CanCancelEdit, Converter={StaticResource BoolToVis}}"/>
+                        <Button Content="&#x1F5D1; Delete Incident" Style="{DynamicResource DangerButtonStyle}" Command="{Binding DeleteCurrentModalIncidentCommand}" Margin="0,0,8,0" Height="36" Padding="12,0" FontSize="12" Visibility="{Binding CanDeleteModalIncident, Converter={StaticResource BoolToVis}}"/>
+                        <Button Content="&#x1F50D; Investigate Case" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding InvestigateCurrentModalIncidentCommand}" Height="36" Padding="14,0" FontSize="12" Visibility="{Binding CanInvestigateModalIncident, Converter={StaticResource BoolToVis}}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button Content="Close" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CancelModalCommand}" Margin="0,0,8,0" Height="36" Width="80" FontSize="12"/>
+                        <Button Content="{Binding SaveModalButtonText}" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveModalCommand}" Height="36" Padding="16,0" FontSize="12" FontWeight="Bold" Visibility="{Binding IsModalEditing, Converter={StaticResource BoolToVis}}"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -5,8 +5,6 @@ using SmartSchoolIncidentManagementSystem.ViewModels.Common;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -36,6 +34,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         private string _selectedStatusFilter = "All";
         private int _selectedTabIndex;
         private bool _isLoading;
+        private bool _isRefreshing;
 
         private int _totalDispatchedCount;
         private int _pendingCount;
@@ -82,7 +81,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             ComplianceOptions = new List<string> { "Acknowledged", "Non-Compliant", "Pending" };
 
             // Commands
-            RefreshCommand = new RelayCommand(async () => await LoadDataAsync());
+            RefreshCommand = new RelayCommand(async () => await ExecuteRefreshAsync(), () => IsNotRefreshing);
             OpenCreateNoticeCommand = new RelayCommand(OpenCreateNotice, () => CanManageNotices);
             CloseCreateNoticeCommand = new RelayCommand(() => IsCreateNoticeModalOpen = false);
             SendNoticeCommand = new RelayCommand(async () => await SendNoticeAsync());
@@ -126,6 +125,22 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             set => SetProperty(ref _isLoading, value);
         }
 
+        public bool IsRefreshing
+        {
+            get => _isRefreshing;
+            set
+            {
+                if (SetProperty(ref _isRefreshing, value))
+                {
+                    OnPropertyChanged(nameof(IsNotRefreshing));
+                    OnPropertyChanged(nameof(RefreshButtonText));
+                }
+            }
+        }
+
+        public bool IsNotRefreshing => !IsRefreshing && !IsLoading;
+        public string RefreshButtonText => (IsRefreshing || IsLoading) ? "⌛ Refreshing..." : "↻ Refresh";
+
         public string SearchText
         {
             get => _searchText;
@@ -146,23 +161,10 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             }
         }
 
-        public AcknowledgmentLog? SelectedNotice
-        {
-            get => _selectedNotice;
-            set => SetProperty(ref _selectedNotice, value);
-        }
+        public AcknowledgmentLog? SelectedNotice { get => _selectedNotice; set => SetProperty(ref _selectedNotice, value); }
+        public DispatchLog? SelectedDispatch { get => _selectedDispatch; set => SetProperty(ref _selectedDispatch, value); }
+        public LetterTemplate? SelectedTemplate { get => _selectedTemplate; set => SetProperty(ref _selectedTemplate, value); }
 
-        public DispatchLog? SelectedDispatch
-        {
-            get => _selectedDispatch;
-            set => SetProperty(ref _selectedDispatch, value);
-        }
-
-        public LetterTemplate? SelectedTemplate
-        {
-            get => _selectedTemplate;
-            set => SetProperty(ref _selectedTemplate, value);
-        }
 
         public int TotalDispatchedCount { get => _totalDispatchedCount; set => SetProperty(ref _totalDispatchedCount, value); }
         public int PendingCount { get => _pendingCount; set => SetProperty(ref _pendingCount, value); }
@@ -231,33 +233,63 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public ICommand ExportOverdueReportCommand { get; }
         public ICommand SelectStudentCommand { get; }
 
+        public async Task ExecuteRefreshAsync()
+        {
+            if (IsRefreshing || IsLoading) return;
+            try
+            {
+                IsRefreshing = true;
+                IsLoading = true;
+                OnPropertyChanged(nameof(IsNotRefreshing));
+                OnPropertyChanged(nameof(RefreshButtonText));
+                await Task.Yield();
+                await LoadDataInternalAsync();
+                await Task.Delay(600);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ParentNoticesVM] Refresh error: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+                IsRefreshing = false;
+                OnPropertyChanged(nameof(IsNotRefreshing));
+                OnPropertyChanged(nameof(RefreshButtonText));
+            }
+        }
+
         public async Task LoadDataAsync()
         {
             IsLoading = true;
             try
             {
-                _allStudents = await _studentService.GetAllStudentsAsync();
-                _allNotices = await _ackService.GetAllLogsAsync();
-
-                var dispatches = await _commService.GetRecentDispatchesAsync(100);
-                _recentDispatches.Clear();
-                foreach (var d in dispatches) _recentDispatches.Add(d);
-
-                var tpls = await _templateService.GetAllTemplatesAsync();
-                _templates.Clear();
-                foreach (var t in tpls) _templates.Add(t);
-
-                TotalDispatchedCount = dispatches.Count;
-                PendingCount = _allNotices.Count(n => n.DisplayStatus == "Pending");
-                OverdueCount = _allNotices.Count(n => n.DisplayStatus == "Overdue");
-                AcknowledgedCount = _allNotices.Count(n => n.Status == "Acknowledged");
-
-                ApplyFilters();
+                await LoadDataInternalAsync();
             }
             finally
             {
                 IsLoading = false;
             }
+        }
+
+        private async Task LoadDataInternalAsync()
+        {
+            _allStudents = await _studentService.GetAllStudentsAsync();
+            _allNotices = await _ackService.GetAllLogsAsync();
+
+            var dispatches = await _commService.GetRecentDispatchesAsync(100);
+            _recentDispatches.Clear();
+            foreach (var d in dispatches) _recentDispatches.Add(d);
+
+            var tpls = await _templateService.GetAllTemplatesAsync();
+            PopulateEnhancedTemplates(tpls);
+
+            TotalDispatchedCount = dispatches.Count;
+            PendingCount = _allNotices.Count(n => n.DisplayStatus == "Pending");
+            OverdueCount = _allNotices.Count(n => n.DisplayStatus == "Overdue");
+            AcknowledgedCount = _allNotices.Count(n => n.Status == "Acknowledged");
+
+            ApplyFilters();
         }
 
         private void ApplyFilters()
@@ -452,41 +484,5 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             }
         }
 
-        private void ExportNoticePdf(AcknowledgmentLog? log)
-        {
-            if (log == null) return;
-            try
-            {
-                string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"Notice_{log.NoticeId}.pdf");
-                string body = string.IsNullOrWhiteSpace(log.Remarks) ? $"Official Disciplinary Notice issued to {log.StudentName} regarding school behavioral policy." : log.Remarks;
-                _pdfService.GenerateParentNoticePdf(path, body, SessionManager.FullName, $"NOTICE REF: {log.NoticeId}");
-                MessageBox.Show($"Official Notice PDF exported to:\n{path}", "Export Successful", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"PDF Export error: {ex.Message}", "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void ExportOverdueReport()
-        {
-            try
-            {
-                var overdueList = _allNotices.Where(n => n.DisplayStatus == "Overdue").ToList();
-                if (overdueList.Count == 0)
-                {
-                    MessageBox.Show("There are no overdue parent notices at this time.", "Compliance Report", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
-
-                string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"Overdue_Parent_Notices_{DateTime.Today:yyyyMMdd}.pdf");
-                _pdfService.GenerateOverdueComplianceReport(path, overdueList);
-                MessageBox.Show($"Overdue Compliance Report exported to:\n{path}", "Export Successful", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Export error: {ex.Message}", "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
     }
 }

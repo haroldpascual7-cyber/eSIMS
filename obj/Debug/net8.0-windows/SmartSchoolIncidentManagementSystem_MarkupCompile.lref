@@ -1,13 +1,21 @@
-﻿
+﻿C:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs
 
 FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\MainWindow.xaml;;
 FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Styles\CoreStyles.xaml;;
 FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\AcknowledgmentTrackingView.xaml;;
+FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\BehaviorWorkspaceView.xaml;;
 FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\IncidentDetailView.xaml;;
+FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\IncidentLifecycleProgressionControl.xaml;;
+FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\IncidentListView.xaml;;
+FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\IncidentRecordModalControl.xaml;;
 FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\IndividualActionPlansView.xaml;;
 FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\InvestigationDetailView.xaml;;
 FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\LetterTemplatesView.xaml;;
 FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\LoginView.xaml;;
+FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\ParentNoticesView.xaml;;
+FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\ReportsAnalyticsView.xaml;;
 FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\SettingsWorkspaceView.xaml;;
 FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\StudentInvestigationInquiryView.xaml;;
+FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\StudentsView.xaml;;
+FC:\Users\DELL\Documents\dvo project folder\SmartSchoolIncidentManagementSystem\Views\UserManagementView.xaml;;
 

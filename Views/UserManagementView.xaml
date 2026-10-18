@@ -1,153 +1,249 @@
 <UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.UserManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:SmartSchoolIncidentManagementSystem.Converters"
              Background="{DynamicResource AppBackgroundBrush}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis"/>
     </UserControl.Resources>
 
     <Grid Margin="32,24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <!-- HEADER WITH ONLINE ADMIN BADGE -->
-        <Grid Grid.Row="0" Margin="0,0,0,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Title & Subtitle -->
-            <StackPanel Grid.Column="0">
-                <Button Content="&#x2190; Back to Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="10,4" Margin="0,0,0,10"/>
-                <TextBlock Text="User Credentials &amp; Management" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                <TextBlock Text="Create and manage system user accounts, role assignments, credential resets, and account status controls." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
-            </StackPanel>
-
-            <!-- 1. TOP HEADER ONLINE ADMIN BADGE PILL -->
-            <Border Grid.Column="1" VerticalAlignment="Bottom" Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="16" Padding="12,6">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Width="10" Height="10" CornerRadius="5" Background="{DynamicResource SuccessBrush}" Margin="0,0,8,0"/>
-                    <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}">
-                        <Run Text="Online Admin: " Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <Run Text="{Binding OnlineAdminText, Mode=OneWay}" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                    </TextBlock>
-                </StackPanel>
-            </Border>
-        </Grid>
-
-        <!-- MAIN CONTENT AREA -->
-        <Grid Grid.Row="1">
+        <!-- ==================== 1. USER DIRECTORY & CREDENTIALS VIEW ==================== -->
+        <Grid Visibility="{Binding IsUserModalOpen, Converter={StaticResource InverseBoolToVis}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- TOOLBAR: SEARCH, ROLE FILTER, + ADD USER BUTTON -->
-            <Border Grid.Row="0" Style="{DynamicResource CardBorderStyle}" Padding="16,12" Margin="0,0,0,16">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="320"/>
-                        <ColumnDefinition Width="220"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+            <!-- HEADER WITH ONLINE ADMIN BADGE -->
+            <Grid Grid.Row="0" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                    <!-- Search Box -->
-                    <Grid Grid.Column="0" Margin="0,0,12,0">
-                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{DynamicResource ModernTextBoxStyle}" Height="36" Padding="28,0,24,0"/>
-                        <TextBlock Text="🔍" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="8,0,0,0" IsHitTestVisible="False"/>
-                        <Button Content="✕" Command="{Binding ClearSearchCommand}" Visibility="{Binding HasSearchText, Converter={StaticResource BoolToVis}}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource SecondaryTextBrush}" Cursor="Hand" Width="20" Height="20"/>
+                <!-- Title & Subtitle -->
+                <StackPanel Grid.Column="0">
+                    <Button Content="&#x2190; Back to Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="10,4" Margin="0,0,0,10"/>
+                    <TextBlock Text="User Credentials &amp; Management" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    <TextBlock Text="Create and manage system user accounts, role assignments, credential resets, and account status controls." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <!-- TOP HEADER ONLINE ADMIN BADGE PILL -->
+                <Border Grid.Column="1" VerticalAlignment="Bottom" Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="16" Padding="12,6">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="10" Height="10" CornerRadius="5" Background="{DynamicResource SuccessBrush}" Margin="0,0,8,0"/>
+                        <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}">
+                            <Run Text="Online Admin: " Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <Run Text="{Binding OnlineAdminText, Mode=OneWay}" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- MAIN CONTENT AREA -->
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- TOOLBAR: SEARCH, ROLE FILTER, + ADD USER BUTTON -->
+                <Border Grid.Row="0" Style="{DynamicResource CardBorderStyle}" Padding="16,12" Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="320"/>
+                            <ColumnDefinition Width="220"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Search Box -->
+                        <Grid Grid.Column="0" Margin="0,0,12,0">
+                            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{DynamicResource ModernTextBoxStyle}" Height="36" Padding="28,0,24,0"/>
+                            <TextBlock Text="🔍" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="8,0,0,0" IsHitTestVisible="False"/>
+                            <Button Content="✕" Command="{Binding ClearSearchCommand}" Visibility="{Binding HasSearchText, Converter={StaticResource BoolToVis}}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource SecondaryTextBrush}" Cursor="Hand" Width="20" Height="20"/>
+                        </Grid>
+
+                        <!-- Role Filter -->
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding RoleFilterOptions}" SelectedItem="{Binding SelectedRoleFilter}"
+                                  Style="{DynamicResource ModernComboBoxStyle}" Height="36" Margin="0,0,12,0"/>
+
+                        <!-- Add User Button -->
+                        <Button Grid.Column="3" Content="+ Add New User" Style="{DynamicResource PrimaryButtonStyle}"
+                                Command="{Binding OpenCreateUserModalCommand}" Height="36" Padding="16,0"/>
                     </Grid>
+                </Border>
 
-                    <!-- Role Filter -->
-                    <ComboBox Grid.Column="1" ItemsSource="{Binding RoleFilterOptions}" SelectedItem="{Binding SelectedRoleFilter}"
-                              Style="{DynamicResource ModernComboBoxStyle}" Height="36" Margin="0,0,12,0"/>
+                <!-- 4-COLUMN RESPONSIVE USER CARDS -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding UsersView}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="4"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{DynamicResource RecordCardStyle}">
+                                    <Border.InputBindings>
+                                        <MouseBinding MouseAction="LeftClick"
+                                                      Command="{Binding DataContext.OpenUserCardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      CommandParameter="{Binding}"/>
+                                    </Border.InputBindings>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
-                    <!-- Add User Button -->
-                    <Button Grid.Column="3" Content="+ Add New User" Style="{DynamicResource PrimaryButtonStyle}"
-                            Command="{Binding OpenCreateUserModalCommand}" Height="36" Padding="16,0"/>
-                </Grid>
-            </Border>
+                                        <!-- Top Row: Role Badge & Status Pill -->
+                                        <DockPanel Grid.Row="0" Margin="0,0,0,8">
+                                            <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource PrimaryBrush}" HorizontalAlignment="Left">
+                                                <TextBlock Text="{Binding Role}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                            </Border>
+                                            <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Right">
+                                                <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                            </Border>
+                                        </DockPanel>
 
-            <!-- 4-COLUMN RESPONSIVE USER CARDS -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <ItemsControl ItemsSource="{Binding UsersView}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <UniformGrid Columns="4"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Style="{DynamicResource RecordCardStyle}">
-                                <Border.InputBindings>
-                                    <MouseBinding MouseAction="LeftClick"
-                                                  Command="{Binding DataContext.OpenUserCardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                  CommandParameter="{Binding}"/>
-                                </Border.InputBindings>
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
+                                        <!-- Full Name -->
+                                        <TextBlock Grid.Row="1" Text="{Binding FullName}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,2"/>
 
-                                    <!-- Top Row: Role Badge & Status Pill -->
-                                    <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                                        <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource PrimaryBrush}" HorizontalAlignment="Left">
-                                            <TextBlock Text="{Binding Role}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
-                                        </Border>
-                                        <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Right">
-                                            <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                        </Border>
-                                    </DockPanel>
+                                        <!-- Username -->
+                                        <TextBlock Grid.Row="2" Text="{Binding Username, StringFormat='@{0}'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
 
-                                    <!-- Full Name -->
-                                    <TextBlock Grid.Row="1" Text="{Binding FullName}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,2"/>
-
-                                    <!-- Username -->
-                                    <TextBlock Grid.Row="2" Text="{Binding Username, StringFormat='@{0}'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
-
-                                    <!-- Email -->
-                                    <TextBlock Grid.Row="3" Text="{Binding Email}" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis"/>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+                                        <!-- Email -->
+                                        <TextBlock Grid.Row="3" Text="{Binding Email}" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
         </Grid>
 
-        <!-- USER MODAL (VIEW & EDIT WITH IN-MODAL CRUD) -->
-        <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Background="{DynamicResource ModalOverlayBrush}"
-              Visibility="{Binding IsUserModalOpen, Converter={StaticResource BoolToVis}}">
-            <Border Style="{DynamicResource CardBorderStyle}" Width="560" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
-                <StackPanel>
-                    <!-- Header -->
-                    <DockPanel Margin="0,0,0,16">
-                        <TextBlock Text="{Binding ModalTitle}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                        <Button Content="✕" Style="{DynamicResource SecondaryButtonStyle}" HorizontalAlignment="Right" Command="{Binding CloseUserModalCommand}" Width="30" Height="30" Padding="0"/>
-                    </DockPanel>
+        <!-- ==================== 2. USER ACCOUNT DETAILS VIEW (TARGET 2ND IMAGE) ==================== -->
+        <Grid Visibility="{Binding IsUserModalOpen, Converter={StaticResource BoolToVis}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Top Bar -->
+                <RowDefinition Height="*"/>    <!-- 2 Cards Layout -->
+            </Grid.RowDefinitions>
 
-                    <!-- VIEW MODE (When IsModalEditing == false) -->
-                    <StackPanel>
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Setter Property="Visibility" Value="Visible"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsModalEditing}" Value="True">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                        <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,16">
-                            <Grid>
+            <!-- Top Bar: Back to Dashboard & Header Title -->
+            <Grid Grid.Row="0" Margin="0,0,0,20">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{DynamicResource PrimaryButtonStyle}"
+                            Command="{Binding CloseUserModalCommand}"
+                            Height="34" Padding="14,0" Margin="0,0,16,0" Cursor="Hand" ToolTip="Return to User Accounts">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="←" FontSize="14" FontWeight="Bold" Margin="0,0,6,0" Foreground="{DynamicResource ButtonTextBrush}"/>
+                            <TextBlock Text="Back to Dashboard" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                        </StackPanel>
+                    </Button>
+
+                    <TextBlock Text="{Binding ModalTitle}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- 2-Card Layout (Left: Avatar Box, Right: Account Information Box) -->
+            <Grid Grid.Row="1" HorizontalAlignment="Left">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="230"/>
+                    <ColumnDefinition Width="650"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- LEFT CARD: PROFILE AVATAR & PHOTO CONTROLS -->
+                <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Padding="20,24" Margin="0,0,16,0" VerticalAlignment="Top">
+                    <StackPanel HorizontalAlignment="Center">
+                        <!-- Circular Avatar Container with Ellipse Masking -->
+                        <Grid Width="120" Height="120" HorizontalAlignment="Center" Margin="0,0,0,14">
+                            <!-- Silhouette Placeholder (when no photo uploaded) -->
+                            <Ellipse Width="120" Height="120" Fill="{DynamicResource TableHoverBrush}"
+                                     Stroke="{DynamicResource BorderBrush}" StrokeThickness="2"
+                                     Visibility="{Binding HasSelectedUserPhoto, Converter={StaticResource InverseBoolToVis}}"/>
+                            <Path Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"
+                                  Fill="{DynamicResource MutedTextBrush}" Stretch="Uniform" Width="56" Height="56"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  Visibility="{Binding HasSelectedUserPhoto, Converter={StaticResource InverseBoolToVis}}"/>
+
+                            <!-- Uploaded Photo: Perfectly clipped circular avatar with ImageBrush -->
+                            <Ellipse Width="120" Height="120" Stroke="{DynamicResource PrimaryBrush}" StrokeThickness="2.5"
+                                     Visibility="{Binding HasSelectedUserPhoto, Converter={StaticResource BoolToVis}}">
+                                <Ellipse.Fill>
+                                    <ImageBrush ImageSource="{Binding SelectedUserPhotoPath}" Stretch="UniformToFill" AlignmentX="Center" AlignmentY="Center"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                        </Grid>
+
+                        <!-- User Name & Role Tag -->
+                        <TextBlock Text="{Binding SelectedUser.FullName, TargetNullValue='User Account'}"
+                                   FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"
+                                   TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                        <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="4" Padding="8,2" HorizontalAlignment="Center" Margin="0,0,0,14">
+                            <TextBlock Text="{Binding SelectedUser.Role, TargetNullValue='System Role'}" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}"/>
+                        </Border>
+
+                        <!-- Upload Photo Button -->
+                        <Button Style="{DynamicResource SecondaryButtonStyle}"
+                                Command="{Binding UploadPhotoCommand}"
+                                Height="34" Padding="14,0" HorizontalAlignment="Center" Margin="0,0,0,6">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="📷" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Upload Photo" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Remove Photo Option (visible when a photo is uploaded) -->
+                        <Button Style="{DynamicResource SecondaryButtonStyle}"
+                                Command="{Binding RemovePhotoCommand}"
+                                Visibility="{Binding HasSelectedUserPhoto, Converter={StaticResource BoolToVis}}"
+                                BorderThickness="0" Background="Transparent" Foreground="{DynamicResource DangerBrush}"
+                                FontSize="11" Height="24" Padding="6,0" HorizontalAlignment="Center" Cursor="Hand">
+                            <TextBlock Text="✕ Remove Photo" FontSize="11"/>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- RIGHT CARD: ACCOUNT INFORMATION (VIEW & EDIT) -->
+                <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Padding="24,20" VerticalAlignment="Top">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header with Close Button -->
+                        <Grid Grid.Row="0" Margin="0,0,0,18">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="👤" FontSize="15" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Account Information" FontSize="15.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <Button Content="✕" Style="{DynamicResource SecondaryButtonStyle}"
+                                    Command="{Binding CloseUserModalCommand}"
+                                    HorizontalAlignment="Right" Width="28" Height="28" Padding="0"/>
+                        </Grid>
+
+                        <!-- VIEW MODE (When IsModalEditing == false) -->
+                        <StackPanel Grid.Row="1">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsModalEditing}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+
+                            <!-- Information Grid with Dedicated Icons -->
+                            <Grid Margin="0,0,0,24">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
@@ -156,83 +252,167 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="160"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Full Name:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8"/>
-                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedUser.FullName}" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
+                                <!-- Row 0: Full Name -->
+                                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,14">
+                                    <TextBlock Text="👤" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Full Name:" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedUser.FullName}" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center" Margin="0,0,0,14"/>
 
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Username:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedUser.Username, StringFormat='@{0}'}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
+                                <!-- Row 1: Username -->
+                                <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,14">
+                                    <TextBlock Text="👤" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Username:" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedUser.Username, StringFormat='@{0}'}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center" Margin="0,0,0,14"/>
 
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Email Address:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedUser.Email}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
+                                <!-- Row 2: Email Address -->
+                                <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,14">
+                                    <TextBlock Text="✉️" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Email Address:" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedUser.Email}" FontSize="13" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center" Margin="0,0,0,14"/>
 
-                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Assigned Role:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8"/>
-                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedUser.Role}" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,8"/>
+                                <!-- Row 3: Assigned Role -->
+                                <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,14">
+                                    <TextBlock Text="🛡️" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Assigned Role:" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedUser.Role}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center" Margin="0,0,0,14"/>
 
-                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Account Status:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedUser.Status}" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                <!-- Row 4: Account Status with Dynamic Active/Suspended Styling -->
+                                <StackPanel Grid.Row="4" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="🔘" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Account Status:" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <Border Grid.Row="4" Grid.Column="1" CornerRadius="4" Padding="10,3" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource SuccessBrush}"/>
+                                            <Setter Property="BorderThickness" Value="1"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedUser.IsActive}" Value="False">
+                                                    <Setter Property="Background" Value="{DynamicResource DangerBgBrush}"/>
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource DangerBrush}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding SelectedUser.Status}" FontSize="11" FontWeight="Bold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SelectedUser.IsActive}" Value="False">
+                                                        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
                             </Grid>
-                        </Border>
 
-                        <!-- In-Modal Actions -->
-                        <DockPanel>
-                            <Button Content="🗑️ Terminate Account" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding DeleteFromModalCommand}" Foreground="{DynamicResource DangerBrush}" DockPanel.Dock="Left" Height="36"/>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <Button Content="🔄 Toggle Status" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ToggleStatusFromModalCommand}" Margin="0,0,8,0" Height="36"/>
-                                <Button Content="✏️ Edit Account" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SwitchToEditModeCommand}" Margin="0,0,8,0" Height="36"/>
-                                <Button Content="Close" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseUserModalCommand}" Height="36" Width="70"/>
-                            </StackPanel>
-                        </DockPanel>
-                    </StackPanel>
+                            <!-- Bottom Actions (Spacious, Zero Overlap) -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                    <!-- EDIT / CREATE MODE (When IsModalEditing == true) -->
-                    <StackPanel>
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsModalEditing}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                        <!-- Username -->
-                        <TextBlock Text="USERNAME *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                        <TextBox Text="{Binding NewUsername, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{DynamicResource ModernTextBoxStyle}" Height="36" Margin="0,0,0,10"/>
+                                <!-- Left Actions: Terminate & Toggle Status -->
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Style="{DynamicResource SecondaryButtonStyle}"
+                                            Command="{Binding DeleteFromModalCommand}"
+                                            BorderBrush="{DynamicResource DangerBrush}"
+                                            Foreground="{DynamicResource DangerBrush}"
+                                            Height="36" Padding="14,0" Margin="0,0,10,0">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="🗑️" Margin="0,0,6,0"/>
+                                            <TextBlock Text="Terminate Account" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
 
-                        <!-- Full Name -->
-                        <TextBlock Text="FULL NAME *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                        <TextBox Text="{Binding NewFullName, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{DynamicResource ModernTextBoxStyle}" Height="36" Margin="0,0,0,10"/>
+                                    <Button Style="{DynamicResource SecondaryButtonStyle}"
+                                            Command="{Binding ToggleStatusFromModalCommand}"
+                                            Height="36" Padding="14,0">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="🔄" Margin="0,0,6,0"/>
+                                            <TextBlock Text="{Binding SelectedUser.ToggleLabel, FallbackValue='Toggle Status'}" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
 
-                        <!-- Email -->
-                        <TextBlock Text="EMAIL ADDRESS *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                        <TextBox Text="{Binding NewEmail, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{DynamicResource ModernTextBoxStyle}" Height="36" Margin="0,0,0,10"/>
+                                <!-- Right Actions: Edit Account & Close -->
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Style="{DynamicResource PrimaryButtonStyle}"
+                                            Command="{Binding SwitchToEditModeCommand}"
+                                            Height="36" Padding="16,0" Margin="0,0,10,0">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="✏️" Margin="0,0,6,0"/>
+                                            <TextBlock Text="Edit Account" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
 
-                        <!-- System Role -->
-                        <TextBlock Text="SYSTEM ROLE *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                        <ComboBox ItemsSource="{Binding AvailableRoles}" SelectedItem="{Binding SelectedRole}"
-                                  Style="{DynamicResource ModernComboBoxStyle}" Height="36" Margin="0,0,0,10"/>
-
-                        <!-- Password -->
-                        <TextBlock Text="PASSWORD (LEAVE BLANK TO KEEP EXISTING)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                        <TextBox Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{DynamicResource ModernTextBoxStyle}" Height="36" Margin="0,0,0,18"/>
-
-                        <!-- In-Modal Edit Actions -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="✕ Cancel" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CancelEditModeCommand}" Margin="0,0,8,0" Height="36" Width="90"/>
-                            <Button Content="💾 Save Account" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveFromModalCommand}" Height="36" Width="130"/>
+                                    <Button Content="Close" Style="{DynamicResource SecondaryButtonStyle}"
+                                            Command="{Binding CloseUserModalCommand}"
+                                            Height="36" Padding="16,0" Width="80"/>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
+
+                        <!-- EDIT / CREATE MODE (When IsModalEditing == true) -->
+                        <StackPanel Grid.Row="1">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsModalEditing}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+
+                            <!-- Username -->
+                            <TextBlock Text="USERNAME *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding NewUsername, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{DynamicResource ModernTextBoxStyle}" Height="34" Margin="0,0,0,10"/>
+
+                            <!-- Full Name -->
+                            <TextBlock Text="FULL NAME *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding NewFullName, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{DynamicResource ModernTextBoxStyle}" Height="34" Margin="0,0,0,10"/>
+
+                            <!-- Email -->
+                            <TextBlock Text="EMAIL ADDRESS *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding NewEmail, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{DynamicResource ModernTextBoxStyle}" Height="34" Margin="0,0,0,10"/>
+
+                            <!-- System Role -->
+                            <TextBlock Text="SYSTEM ROLE *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding AvailableRoles}" SelectedItem="{Binding SelectedRole}"
+                                      Style="{DynamicResource ModernComboBoxStyle}" Height="34" Margin="0,0,0,10"/>
+
+                            <!-- Password -->
+                            <TextBlock Text="PASSWORD (LEAVE BLANK TO KEEP EXISTING)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{DynamicResource ModernTextBoxStyle}" Height="34" Margin="0,0,0,18"/>
+
+                            <!-- In-Modal Edit Actions -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="✕ Cancel" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CancelEditModeCommand}" Margin="0,0,10,0" Height="36" Width="90"/>
+                                <Button Content="💾 Save Account" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveFromModalCommand}" Height="36" Padding="16,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>

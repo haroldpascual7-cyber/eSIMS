@@ -55,9 +55,18 @@ namespace SmartSchoolIncidentManagementSystem.Services
                     PasswordHash TEXT NOT NULL,
                     Role TEXT NOT NULL,
                     Status TEXT DEFAULT 'Active',
-                    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+                    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    ProfilePicturePath TEXT
                 );";
             createCmd.ExecuteNonQuery();
+
+            try
+            {
+                using var alterCmd = conn.CreateCommand();
+                alterCmd.CommandText = "ALTER TABLE SystemUsers ADD COLUMN ProfilePicturePath TEXT;";
+                alterCmd.ExecuteNonQuery();
+            }
+            catch { /* Column already exists */ }
 
             using var countCmd = conn.CreateCommand();
             countCmd.CommandText = "SELECT COUNT(*) FROM SystemUsers;";
@@ -215,18 +224,21 @@ namespace SmartSchoolIncidentManagementSystem.Services
         {
             var accounts = new[]
             {
-                ("admin",      "Administrator",      "admin@smartschool.edu",      "admin123",      "Administrator"),
-                ("guidance",   "Guidance Counselor", "guidance@smartschool.edu",   "guidance123",   "Guidance Counselor"),
-                ("discipline", "Discipline Officer", "discipline@smartschool.edu", "discipline123", "Discipline Officer"),
-                ("teacher",    "Teacher",            "teacher@smartschool.edu",    "teacher123",    "Teacher"),
-                ("staff",      "School Staff",       "staff@smartschool.edu",      "staff123",      "Staff")
+                ("Admin",              "Administrator",      "Admin",              "Admin123",      "Administrator"),
+                ("staff",              "School Staff",       "staff",              "staff123",      "Staff"),
+                ("discipline_lead",    "Discipline Officer", "discipline_lead",    "discipline123", "Discipline Officer"),
+                ("guidance_counselor", "Guidance Counselor", "guidance_counselor", "guidance123", "Guidance Counselor"),
+                ("admin",              "Administrator",      "admin@smartschool.edu", "Admin123",   "Administrator"),
+                ("discipline",         "Discipline Officer", "discipline@smartschool.edu", "discipline123", "Discipline Officer"),
+                ("guidance",           "Guidance Counselor", "guidance@smartschool.edu",   "guidance123",   "Guidance Counselor")
             };
 
             foreach (var (username, fullName, email, password, role) in accounts)
             {
                 using var checkCmd = conn.CreateCommand();
-                checkCmd.CommandText = "SELECT COUNT(*) FROM SystemUsers WHERE LOWER(Username) = LOWER(@Username);";
+                checkCmd.CommandText = "SELECT COUNT(*) FROM SystemUsers WHERE LOWER(Username) = LOWER(@Username) OR LOWER(Email) = LOWER(@Email);";
                 checkCmd.Parameters.AddWithValue("@Username", username);
+                checkCmd.Parameters.AddWithValue("@Email", email);
                 long exists = (long)(checkCmd.ExecuteScalar() ?? 0);
 
                 if (exists == 0)
@@ -247,10 +259,11 @@ namespace SmartSchoolIncidentManagementSystem.Services
                     using var updateCmd = conn.CreateCommand();
                     updateCmd.CommandText = @"
                         UPDATE SystemUsers
-                        SET PasswordHash = @PasswordHash, Role = @Role, FullName = @FullName, Status = 'Active'
-                        WHERE LOWER(Username) = LOWER(@Username);";
+                        SET Username = @Username, PasswordHash = @PasswordHash, Role = @Role, FullName = @FullName, Email = @Email, Status = 'Active'
+                        WHERE LOWER(Username) = LOWER(@Username) OR LOWER(Email) = LOWER(@Email);";
                     updateCmd.Parameters.AddWithValue("@Username", username);
                     updateCmd.Parameters.AddWithValue("@FullName", fullName);
+                    updateCmd.Parameters.AddWithValue("@Email", email);
                     updateCmd.Parameters.AddWithValue("@PasswordHash", HashPassword(password));
                     updateCmd.Parameters.AddWithValue("@Role", role);
                     updateCmd.ExecuteNonQuery();

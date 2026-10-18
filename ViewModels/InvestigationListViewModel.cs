@@ -19,6 +19,20 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         private string _searchText = string.Empty;
         private Incident? _selectedIncident;
         private bool _isLoading;
+        private bool _isIncidentModalOpen;
+        private Incident? _viewingIncident;
+
+        public bool IsIncidentModalOpen
+        {
+            get => _isIncidentModalOpen;
+            set => SetProperty(ref _isIncidentModalOpen, value);
+        }
+
+        public Incident? ViewingIncident
+        {
+            get => _viewingIncident;
+            set => SetProperty(ref _viewingIncident, value);
+        }
 
         public InvestigationListViewModel(
             IIncidentService incidentService,
@@ -34,21 +48,34 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
             Incidents = new ObservableCollection<Incident>();
 
+            // Card click -> show detail modal
+            OpenIncidentWorkspaceCommand = new RelayCommand<Incident>(inc =>
+            {
+                if (inc == null) return;
+                SelectedIncident    = inc;
+                ViewingIncident     = inc;
+                IsIncidentModalOpen = true;
+            });
+
+            CloseIncidentModalCommand = new RelayCommand(() =>
+            {
+                IsIncidentModalOpen = false;
+                ViewingIncident     = null;
+            });
+
+            OpenWorkspaceFromModalCommand = new RelayCommand(() =>
+            {
+                if (ViewingIncident == null) return;
+                IsIncidentModalOpen = false;
+                _openWorkspaceAction(ViewingIncident);
+            });
+
             OpenWorkspaceCommand = new RelayCommand(() =>
             {
                 if (SelectedIncident != null) _openWorkspaceAction(SelectedIncident);
             }, () => SelectedIncident != null);
 
-            OpenIncidentWorkspaceCommand = new RelayCommand<Incident>(inc =>
-            {
-                if (inc != null)
-                {
-                    SelectedIncident = inc;
-                    _openWorkspaceAction(inc);
-                }
-            });
-
-            RefreshCommand = new RelayCommand(async () => await LoadIncidentsAsync());
+            RefreshCommand = new RelayCommand(async () => await ExecuteRefreshAsync(), () => !IsLoading && !IsRefreshing);
 
             _ = LoadIncidentsAsync();
         }
@@ -61,9 +88,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             set
             {
                 if (SetProperty(ref _searchText, value))
-                {
                     _ = LoadIncidentsAsync();
-                }
             }
         }
 
@@ -76,12 +101,77 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public bool IsLoading
         {
             get => _isLoading;
-            set => SetProperty(ref _isLoading, value);
+            set
+            {
+                if (SetProperty(ref _isLoading, value))
+                {
+                    OnPropertyChanged(nameof(IsNotRefreshing));
+                    OnPropertyChanged(nameof(RefreshButtonText));
+                }
+            }
         }
 
-        public ICommand OpenWorkspaceCommand { get; }
-        public ICommand OpenIncidentWorkspaceCommand { get; }
-        public ICommand RefreshCommand { get; }
+        private bool _isRefreshing;
+        public bool IsRefreshing
+        {
+            get => _isRefreshing;
+            set
+            {
+                if (SetProperty(ref _isRefreshing, value))
+                {
+                    OnPropertyChanged(nameof(IsNotRefreshing));
+                    OnPropertyChanged(nameof(RefreshButtonText));
+                }
+            }
+        }
+
+        public bool IsNotRefreshing => !IsRefreshing && !IsLoading;
+        public string RefreshButtonText => (IsRefreshing || IsLoading) ? "⌛ Refreshing..." : "↻ Refresh";
+
+        public async Task ExecuteRefreshAsync()
+        {
+            if (IsRefreshing || IsLoading) return;
+            try
+            {
+                IsRefreshing = true;
+                IsLoading = true;
+                OnPropertyChanged(nameof(IsNotRefreshing));
+                OnPropertyChanged(nameof(RefreshButtonText));
+                await Task.Yield();
+                var all = await _incidentService.SearchIncidentsAsync(SearchText);
+                Incidents.Clear();
+                foreach (var inc in all)
+                    Incidents.Add(inc);
+
+                if (_preselectedIncidentId.HasValue)
+                {
+                    var match = Incidents.FirstOrDefault(i => i.Id == _preselectedIncidentId.Value);
+                    if (match != null) SelectedIncident = match;
+                }
+                else if (SelectedIncident != null)
+                {
+                    SelectedIncident = Incidents.FirstOrDefault(i => i.Id == SelectedIncident.Id);
+                }
+                await Task.Delay(750);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error refreshing investigations: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+                IsRefreshing = false;
+                OnPropertyChanged(nameof(IsNotRefreshing));
+                OnPropertyChanged(nameof(RefreshButtonText));
+            }
+        }
+
+        public ICommand OpenWorkspaceCommand        { get; }
+        public ICommand OpenIncidentWorkspaceCommand{ get; }
+        public ICommand CloseIncidentModalCommand   { get; }
+        public ICommand OpenWorkspaceFromModalCommand{ get; }
+        public ICommand RefreshCommand              { get; }
 
         public async Task LoadIncidentsAsync()
         {
@@ -91,17 +181,12 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 var all = await _incidentService.SearchIncidentsAsync(SearchText);
                 Incidents.Clear();
                 foreach (var inc in all)
-                {
                     Incidents.Add(inc);
-                }
 
                 if (_preselectedIncidentId.HasValue)
                 {
                     var match = Incidents.FirstOrDefault(i => i.Id == _preselectedIncidentId.Value);
-                    if (match != null)
-                    {
-                        SelectedIncident = match;
-                    }
+                    if (match != null) SelectedIncident = match;
                 }
                 else if (SelectedIncident != null)
                 {

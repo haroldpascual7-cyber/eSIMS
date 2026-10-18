@@ -42,4 +42,13 @@
     <SolidColorBrush x:Key="InputBorderBrush" Color="#CBD5E1"/>
     <SolidColorBrush x:Key="DividerBrush" Color="#E2E8F0"/>
 
+    <!-- Login Branding Dynamic Brushes (Light Theme: Light Text on Dark Campus Background) -->
+    <SolidColorBrush x:Key="LoginBrandingTextBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="LoginBrandingSubtextBrush" Color="#E2E8F0"/>
+    <SolidColorBrush x:Key="LoginBrandingMutedBrush" Color="#CBD5E1"/>
+    <SolidColorBrush x:Key="LoginBrandingDividerBrush" Color="#93C5FD"/>
+    <SolidColorBrush x:Key="LoginBrandingBackdropBrush" Color="#00000000"/>
+    <SolidColorBrush x:Key="LoginBrandingBorderBrush" Color="#00000000"/>
+    <Thickness x:Key="LoginBrandingBorderThickness">0</Thickness>
+
 </ResourceDictionary>

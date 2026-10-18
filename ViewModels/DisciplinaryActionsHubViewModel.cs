@@ -12,31 +12,37 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         private readonly IConsequenceService? _consequenceService;
         private readonly IRestorativeService? _restorativeService;
         private readonly ISuspensionService? _suspensionService;
+        private readonly IProbationService? _probationService;
         private readonly ILetterTemplateService? _letterService;
 
         private int _activeSanctionsCount = 0;
         private int _restorativePlansCount = 0;
         private int _activeSuspensionsCount = 0;
+        private int _activeProbationsCount = 0;
         private int _parentNoticesCount = 0;
 
         public DisciplinaryActionsHubViewModel(
             Action onOpenConsequenceTracking,
             Action onOpenRestorativeInterventions,
             Action onOpenSuspensionCalendar,
+            Action onOpenProbationTracking,
             Action? onOpenParentSummons = null,
             IConsequenceService? consequenceService = null,
             IRestorativeService? restorativeService = null,
             ISuspensionService? suspensionService = null,
+            IProbationService? probationService = null,
             ILetterTemplateService? letterService = null)
         {
             _consequenceService = consequenceService;
             _restorativeService = restorativeService;
             _suspensionService = suspensionService;
+            _probationService = probationService;
             _letterService = letterService;
 
             OpenConsequenceTrackingCommand = new RelayCommand(onOpenConsequenceTracking);
             OpenRestorativeInterventionsCommand = new RelayCommand(onOpenRestorativeInterventions);
             OpenSuspensionCalendarCommand = new RelayCommand(onOpenSuspensionCalendar);
+            OpenProbationTrackingCommand = new RelayCommand(onOpenProbationTracking);
             OpenParentSummonsCommand = new RelayCommand(() => onOpenParentSummons?.Invoke());
 
             _ = LoadStatsAsync();
@@ -45,6 +51,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public ICommand OpenConsequenceTrackingCommand { get; }
         public ICommand OpenRestorativeInterventionsCommand { get; }
         public ICommand OpenSuspensionCalendarCommand { get; }
+        public ICommand OpenProbationTrackingCommand { get; }
         public ICommand OpenParentSummonsCommand { get; }
 
         public int ActiveSanctionsCount
@@ -71,10 +78,24 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             set => SetProperty(ref _parentNoticesCount, value);
         }
 
+        private bool _isLoading;
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set => SetProperty(ref _isLoading, value);
+        }
+
+        public int ActiveProbationsCount
+        {
+            get => _activeProbationsCount;
+            set => SetProperty(ref _activeProbationsCount, value);
+        }
+
         private async Task LoadStatsAsync()
         {
             try
             {
+                IsLoading = true;
                 if (_consequenceService != null)
                 {
                     var logs = await _consequenceService.GetAllConsequenceLogsAsync();
@@ -114,13 +135,30 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 {
                     ParentNoticesCount = 6;
                 }
+
+                if (_probationService != null)
+                {
+                    var records = await _probationService.GetAllAsync();
+                    ActiveProbationsCount = records.Count(p => p.IsOpen);
+                }
+                else
+                {
+                    ActiveProbationsCount = 0;
+                }
             }
             catch
             {
                 ActiveSanctionsCount = 8;
                 RestorativePlansCount = 5;
                 ActiveSuspensionsCount = 3;
+                ActiveProbationsCount = 0;
                 ParentNoticesCount = 6;
+            }
+            finally
+            {
+                // Quick, snappy feedback so loading finishes real quick and never gets stuck
+                await Task.Delay(150);
+                IsLoading = false;
             }
         }
     }

@@ -5,8 +5,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="750" d:DesignWidth="1200"
-             Background="#020916">
+              d:DesignHeight="750" d:DesignWidth="1200"
+              Background="{DynamicResource AppBackgroundBrush}">
 
     <Grid>
         <!-- Authentic School Campus Background Image -->
@@ -50,12 +50,12 @@
                     <Grid>
                         <!-- Flowing / Spiral Blue Wave Curves -->
                         <Grid IsHitTestVisible="False">
-                            <Path Fill="#1A38BDF8" Stretch="Fill" Height="90" VerticalAlignment="Top" HorizontalAlignment="Stretch"
-                                  Data="M 0,0 L 450,0 L 450,35 C 360,70 270,15 170,45 C 80,70 25,25 0,40 Z"/>
-                            <Path Fill="#1538BDF8" Stretch="Fill" Height="140" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
-                                  Data="M 0,140 C 120,80 240,110 330,60 C 390,30 420,10 450,0 L 450,140 Z"/>
-                            <Path Fill="#222563EB" Stretch="Fill" Height="95" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
-                                  Data="M 0,95 C 150,55 260,85 360,40 C 410,18 435,5 450,0 L 450,95 Z"/>
+                            <Path Fill="{DynamicResource PrimaryBrush}" Opacity="0.10" Stretch="Fill" Height="90" VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                                   Data="M 0,0 L 450,0 L 450,35 C 360,70 270,15 170,45 C 80,70 25,25 0,40 Z"/>
+                            <Path Fill="{DynamicResource PrimaryBrush}" Opacity="0.08" Stretch="Fill" Height="140" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
+                                   Data="M 0,140 C 120,80 240,110 330,60 C 390,30 420,10 450,0 L 450,140 Z"/>
+                            <Path Fill="{DynamicResource AccentBrush}" Opacity="0.13" Stretch="Fill" Height="95" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
+                                   Data="M 0,95 C 150,55 260,85 360,40 C 410,18 435,5 450,0 L 450,95 Z"/>
                         </Grid>
 
                         <!-- Face A: Login Card -->
@@ -67,5 +67,46 @@
                 </Border>
             </Grid>
         </Grid>
+
+        <!-- Top-Right Transparent Exit Button (X only) -->
+        <Button HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,16,16,0"
+                Padding="8,6"
+                MinWidth="40"
+                Command="{Binding ExitCommand}"
+                ToolTip="Exit Application"
+                Cursor="Hand"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                Foreground="{DynamicResource PrimaryTextBrush}"
+                BorderThickness="0"
+                Panel.ZIndex="100">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}">
+                        <TextBlock Text="✕"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource DangerBrush}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource TableHoverBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryActiveBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
     </Grid>
 </UserControl>

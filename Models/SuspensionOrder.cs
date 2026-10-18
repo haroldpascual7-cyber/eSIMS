@@ -5,7 +5,11 @@ namespace SmartSchoolIncidentManagementSystem.Models
     public class SuspensionOrder : EntityBase
     {
         public string OrderId { get; set; } = string.Empty;
+        public int? IncidentId { get; set; }
+        public Incident? Incident { get; set; }
         public string IncidentNumber { get; set; } = string.Empty;
+        public int? StudentId { get; set; }
+        public Student? Student { get; set; }
         public string StudentIdNumber { get; set; } = string.Empty;
         public string StudentName { get; set; } = string.Empty;
         public string SuspensionType { get; set; } = "In-School Suspension (ISS)"; // ISS, OSS, Preventative Exclusion
@@ -14,6 +18,7 @@ namespace SmartSchoolIncidentManagementSystem.Models
         public int TotalDays { get; set; } = 5;
         public DateTime ReentryDate { get; set; } = DateTime.Now.AddDays(6);
         public string IssuedBy { get; set; } = "Prefect of Discipline";
+        public string Reason { get; set; } = string.Empty;
         public string Terms { get; set; } = string.Empty;
 
         // Re-entry Checklist Required Flags

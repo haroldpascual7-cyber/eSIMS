@@ -11,9 +11,10 @@ using System.Windows.Input;
 
 namespace SmartSchoolIncidentManagementSystem.ViewModels
 {
-    public class DashboardViewModel : ObservableObject
+    public partial class DashboardViewModel : ObservableObject
     {
         private readonly IIncidentService _incidentService;
+        private readonly ISettingsService _settingsService;
         private readonly Action<Incident?> _openDetailAction;
         private readonly Action _openIncidentListAction;
 
@@ -32,11 +33,16 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             IIncidentService incidentService,
             Action<Incident?> openDetailAction,
             Action openIncidentListAction,
-            Action? returnToTabletDashboardAction = null)
+            Action? returnToTabletDashboardAction = null,
+            ISettingsService? settingsService = null)
         {
             _incidentService = incidentService ?? throw new ArgumentNullException(nameof(incidentService));
+            _settingsService = settingsService ?? new SettingsService(new AppDbContext());
             _openDetailAction = openDetailAction ?? throw new ArgumentNullException(nameof(openDetailAction));
             _openIncidentListAction = openIncidentListAction ?? throw new ArgumentNullException(nameof(openIncidentListAction));
+
+            _settingsService.SettingsChanged += RefreshBranding;
+            _ = _settingsService.LoadSettingsAsync();
 
             RecentIncidents = new ObservableCollection<Incident>();
 
@@ -65,7 +71,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
             NewIncidentCommand = NavigateReportNewIncidentCommand;
             ViewAllIncidentsCommand = new RelayCommand(() => NavigateTo(vm => vm.ShowIncidents()));
-            RefreshCommand = NavigateDashboardCommand;
+            RefreshCommand = new RelayCommand(async () => await ExecuteRefreshAsync(), () => !IsRefreshing);
             ViewNotificationsCommand = new RelayCommand(ViewNotifications);
             ToggleThemeCommand = new RelayCommand(() => NavigateTo(vm => vm.ToggleThemeCommand.Execute(null)));
             LogoutCommand = new RelayCommand(() => NavigateTo(vm => vm.LogoutCommand.Execute(null)));
@@ -78,6 +84,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 }
             });
 
+            InitializeCaseloadSupport();
             _ = LoadDataAsync();
         }
 
@@ -137,9 +144,31 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
         public string FullGreetingHeader => $"{TimeGreeting}, {UserFullName}!";
 
-        public string RoleSubheader => $"You are logged in as {UserRole}. Welcome to your personalized Smart School workspace.";
+        public string SchoolName => _settingsService.SchoolName;
+        public string SystemTitle => _settingsService.SystemTitle;
+        public object? DashboardLogoSource => _settingsService.DashboardLogoSource;
+        public string LogoIcon => _settingsService.LogoIcon;
+        public bool HasDashboardLogo => DashboardLogoSource != null;
 
-        // ---------- Metric Card Properties ----------
+        private void RefreshBranding()
+        {
+            OnPropertyChanged(nameof(SchoolName));
+            OnPropertyChanged(nameof(SystemTitle));
+            OnPropertyChanged(nameof(DashboardLogoSource));
+            OnPropertyChanged(nameof(LogoIcon));
+            OnPropertyChanged(nameof(HasDashboardLogo));
+            OnPropertyChanged(nameof(RoleSubheader));
+        }
+
+        public string RoleSubheader => $"You are logged in as {UserRole} • {SchoolName}";
+
+        private string _totalIncidentsSubtitle = "All safety reports";
+        public string TotalIncidentsSubtitle
+        {
+            get => _totalIncidentsSubtitle;
+            set => SetProperty(ref _totalIncidentsSubtitle, value);
+        }
+
         public int TotalIncidents
         {
             get => _totalIncidents;
@@ -252,59 +281,77 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public ICommand LogoutCommand { get; }
         public ICommand SelectIncidentCommand { get; }
 
+        private bool _isRefreshing;
+        public bool IsRefreshing
+        {
+            get => _isRefreshing;
+            set
+            {
+                if (SetProperty(ref _isRefreshing, value))
+                {
+                    OnPropertyChanged(nameof(IsNotRefreshing));
+                    OnPropertyChanged(nameof(IsLoading));
+                    OnPropertyChanged(nameof(RefreshButtonText));
+                }
+            }
+        }
+
+        public bool IsLoading => IsRefreshing;
+        public bool IsNotRefreshing => !IsRefreshing;
+        public string RefreshButtonText => IsRefreshing ? "⌛ Refreshing..." : "↻ Refresh";
+
+        public async Task ExecuteRefreshAsync()
+        {
+            if (IsRefreshing) return;
+            try
+            {
+                IsRefreshing = true;
+                await LoadDataAsync();
+                await Task.Delay(750);
+            }
+            finally
+            {
+                IsRefreshing = false;
+            }
+        }
+
         public async Task LoadDataAsync()
         {
             var all = (await _incidentService.GetAllIncidentsAsync()).ToList();
-
-            // Teacher & Staff Role Filtering: Filter dashboard metrics and recent incidents to user's filed reports
-            if (SessionManager.Role.Equals("Teacher", StringComparison.OrdinalIgnoreCase) ||
-                SessionManager.Role.Equals("Staff", StringComparison.OrdinalIgnoreCase))
-            {
-                var userAccount = SessionManager.Username;
-                var userFullName = SessionManager.FullName;
-
-                all = all.Where(i =>
-                    (!string.IsNullOrWhiteSpace(i.CreatedBy) && i.CreatedBy.Equals(userAccount, StringComparison.OrdinalIgnoreCase)) ||
-                    (!string.IsNullOrWhiteSpace(i.ReportingStaffTeacher) &&
-                     (i.ReportingStaffTeacher.Equals(userAccount, StringComparison.OrdinalIgnoreCase) ||
-                      i.ReportingStaffTeacher.Equals(userFullName, StringComparison.OrdinalIgnoreCase))) ||
-                    (i.Reporter != null &&
-                     i.Reporter.FullName.Equals(userFullName, StringComparison.OrdinalIgnoreCase))).ToList();
-            }
-
-            TotalIncidents = all.Count;
-            OpenIncidents = all.Count(i => i.Status == IncidentStatus.Reported);
-            InProgressIncidents = all.Count(i => i.Status == IncidentStatus.UnderInvestigation || i.Status == IncidentStatus.ActionTaken);
-            ResolvedIncidents = all.Count(i => i.Status == IncidentStatus.Resolved || i.Status == IncidentStatus.Closed);
-            CriticalIncidents = all.Count(i => i.Risk == RiskLevel.Critical || i.Risk == RiskLevel.High);
-            NewIncidentCount = all.Count(i => i.Status == IncidentStatus.Reported);
-
-            RecentIncidents.Clear();
-            foreach (var inc in all.Take(5))
-            {
-                RecentIncidents.Add(inc);
-            }
+            ProcessScopeData(all);
 
             try
             {
                 using var context = new AppDbContext();
                 TotalStudents = await context.Students.CountAsync();
                 TotalStaff = await context.StaffMembers.CountAsync();
-                TotalInvestigations = await context.Investigations.CountAsync();
+
+                // Active inquiries: count investigations currently open (ClosedDate == null) or InProgressIncidents
+                var activeInvCount = await context.Investigations.CountAsync(inv => inv.ClosedDate == null);
+                TotalInvestigations = activeInvCount > 0 ? activeInvCount : InProgressIncidents;
+
                 int plans = await context.RestorativePlans.CountAsync();
                 int merits = await context.StudentMeritLogs.CountAsync();
                 TotalActionPlans = plans + merits;
-                var commService = new CommunicationService(context);
-                var logs = await commService.GetRecentDispatchesAsync();
-                TotalParentNotices = logs?.Count > 0 ? logs.Count : 12;
+
+                try
+                {
+                    var commService = new CommunicationService(context);
+                    var logs = await commService.GetRecentDispatchesAsync();
+                    TotalParentNotices = logs?.Count ?? 6;
+                }
+                catch
+                {
+                    TotalParentNotices = 6;
+                }
             }
             catch
             {
-                TotalStudents = 45;
-                TotalStaff = 18;
-                TotalInvestigations = 6;
-                TotalActionPlans = 8;
-                TotalParentNotices = 12;
+                TotalStudents = 7;
+                TotalStaff = 4;
+                TotalInvestigations = InProgressIncidents > 0 ? InProgressIncidents : 3;
+                TotalActionPlans = 6;
+                TotalParentNotices = 6;
             }
 
             OnPropertyChanged(nameof(TimeGreeting));

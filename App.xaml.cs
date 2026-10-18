@@ -19,6 +19,7 @@ namespace SmartSchoolIncidentManagementSystem
         private IConsequenceService _consequenceService = null!;
         private IRestorativeService _restorativeService = null!;
         private ISuspensionService _suspensionService = null!;
+        private IProbationService _probationService = null!;
         private IIncidentClassificationService _classificationService = null!;
         private IBehavioralTranscriptService _transcriptService = null!;
         private IAnalyticsService _analyticsService = null!;
@@ -61,6 +62,7 @@ namespace SmartSchoolIncidentManagementSystem
                 _consequenceService = new ConsequenceService(_context);
                 _restorativeService = new RestorativeService(_context);
                 _suspensionService = new SuspensionService(_context);
+                _probationService = new ProbationService(_context);
                 _classificationService = new IncidentClassificationService(_context);
                 _transcriptService = new BehavioralTranscriptService(_context);
                 _analyticsService = new AnalyticsService(_context);
@@ -88,6 +90,7 @@ namespace SmartSchoolIncidentManagementSystem
                     _consequenceService,
                     _restorativeService,
                     _suspensionService,
+                    _probationService,
                     _classificationService,
                     _transcriptService,
                     _analyticsService,

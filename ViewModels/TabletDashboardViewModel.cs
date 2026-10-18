@@ -57,11 +57,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             ViewNotificationsCommand = new RelayCommand(ViewNotifications);
             ToggleThemeCommand = new RelayCommand(() => NavigateTo(vm => vm.ToggleThemeCommand.Execute(null)));
             LogoutCommand = new RelayCommand(() => NavigateTo(vm => vm.LogoutCommand.Execute(null)));
-            RefreshCommand = new RelayCommand(async () =>
-            {
-                RefreshPermissions();
-                await LoadNotificationsAsync();
-            });
+            RefreshCommand = new RelayCommand(async () => await ExecuteRefreshAsync(), () => !IsRefreshing);
 
             SessionManager.PermissionsChanged += RefreshPermissions;
             RebuildVisibleCards();
@@ -398,6 +394,42 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             catch
             {
                 NewIncidentCount = 0;
+            }
+        }
+
+        private bool _isRefreshing;
+        public bool IsRefreshing
+        {
+            get => _isRefreshing;
+            set
+            {
+                if (SetProperty(ref _isRefreshing, value))
+                {
+                    OnPropertyChanged(nameof(IsNotRefreshing));
+                    OnPropertyChanged(nameof(IsLoading));
+                    OnPropertyChanged(nameof(RefreshButtonIcon));
+                }
+            }
+        }
+
+        public bool IsLoading => IsRefreshing;
+        public bool IsNotRefreshing => !IsRefreshing;
+        public string RefreshButtonIcon => IsRefreshing ? "⌛" : "↻";
+
+        public async Task ExecuteRefreshAsync()
+        {
+            if (IsRefreshing) return;
+            try
+            {
+                IsRefreshing = true;
+                RefreshPermissions();
+                await LoadNotificationsAsync();
+                RebuildVisibleCards();
+                await Task.Delay(750);
+            }
+            finally
+            {
+                IsRefreshing = false;
             }
         }
 

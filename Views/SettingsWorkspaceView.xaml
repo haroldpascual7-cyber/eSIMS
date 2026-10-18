@@ -116,47 +116,202 @@
                             <TabItem Header="🔄 Repeat Offender Triggers" FontSize="12">
                                 <views:RepeatOffenderTriggersView DataContext="{Binding RepeatOffenderVM}" Margin="0,8,0,0"/>
                             </TabItem>
+                            <TabItem Header="🏫 Grade Levels, Sections &amp; Departments" FontSize="12">
+                                <views:AcademicStructureView DataContext="{Binding AcademicVM}" Margin="0,8,0,0"/>
+                            </TabItem>
                         </TabControl>
                     </Border>
                 </TabItem>
 
                 <!-- Tab 5: Branding & Maintenance -->
                 <TabItem Header="🎨 Branding &amp; Maintenance" FontSize="13" FontWeight="SemiBold">
-                    <Border Style="{DynamicResource CardBorderStyle}" Padding="24" Margin="0,12,0,0">
+                    <Border Style="{DynamicResource CardBorderStyle}" Padding="20,16" Margin="0,12,0,0">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <StackPanel MaxWidth="680" HorizontalAlignment="Left">
-                                <TextBlock Text="Institutional Identity &amp; Branding" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,16"/>
+                            <StackPanel MaxWidth="920" HorizontalAlignment="Left">
+                                <!-- Header & Description -->
+                                <TextBlock Text="Institutional Identity &amp; Visual Branding" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBlock Text="Customize school identity, application titles, official login seal, and dashboard navigation logos." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,16"/>
 
-                                <TextBlock Text="School Name:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SchoolName}" Margin="0,0,0,12"/>
+                                <!-- Status Notice -->
+                                <Border Background="{DynamicResource SuccessBgBrush}" BorderBrush="{DynamicResource SuccessBrush}" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,14">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding BrandingStatusMessage}" Value="">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding BrandingStatusMessage}" Foreground="{DynamicResource SuccessBrush}" FontSize="12" FontWeight="SemiBold"/>
+                                </Border>
 
-                                <TextBlock Text="Application Title:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SystemTitle}" Margin="0,0,0,12"/>
+                                <Grid Margin="0,0,0,16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1.2*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                                <TextBlock Text="School Motto:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding Motto}" Margin="0,0,0,12"/>
+                                    <!-- LEFT COLUMN: Institutional Names & Titles -->
+                                    <Border Grid.Column="0" Background="{DynamicResource TableHoverBrush}" CornerRadius="8" Padding="16,14">
+                                        <StackPanel>
+                                            <TextBlock Text="🏫 Institutional Names &amp; Details" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,12"/>
 
-                                <TextBlock Text="Tagline:" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding Tagline}" Margin="0,0,0,16"/>
+                                            <TextBlock Text="School / Institution Name *" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SchoolName, UpdateSourceTrigger=PropertyChanged}" Height="32" Margin="0,0,0,10"/>
 
-                                <Button Content="💾 Save School Branding" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveBrandingCommand}" HorizontalAlignment="Left" Width="180" Margin="0,0,0,24"/>
+                                            <TextBlock Text="Division / District / Location" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SchoolAddress, UpdateSourceTrigger=PropertyChanged}" Height="32" Margin="0,0,0,10"/>
 
-                                <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}" Margin="0,0,0,16"/>
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="1.8*"/><ColumnDefinition Width="1*"/></Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                                    <TextBlock Text="Application Title *" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                                    <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SystemTitle, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="Acronym / Short Code" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                                    <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SystemAcronym, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                                                </StackPanel>
+                                            </Grid>
 
-                                <!-- Interface Theme -->
+                                            <TextBlock Text="School Motto" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding Motto, UpdateSourceTrigger=PropertyChanged}" Height="32" Margin="0,0,0,10"/>
+
+                                            <TextBlock Text="System Tagline / Welfare Mission" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                            <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding Tagline, UpdateSourceTrigger=PropertyChanged}" Height="32"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- RIGHT COLUMN: Visual Logos & Seals -->
+                                    <StackPanel Grid.Column="2">
+                                        <!-- 1. Login Screen Official Seal -->
+                                        <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="8" Padding="14,12" Margin="0,0,0,12">
+                                            <StackPanel>
+                                                <TextBlock Text="🖼️ Login Screen Official Seal" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,8"/>
+                                                <Grid Margin="0,0,0,8">
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                    <Border Grid.Column="0" Width="76" Height="76" CornerRadius="38" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1.5" Margin="0,0,12,0" ClipToBounds="True">
+                                                        <Image Source="{Binding LoginLogoPreview}" Width="68" Height="68" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                        <TextBlock Text="Official Institutional Seal" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                        <TextBlock Text="Appears prominently on Login screen." FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,6"/>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Button Content="📁 Browse Logo..." Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BrowseLoginLogoCommand}" Height="26" Padding="8,0" FontSize="10" Margin="0,0,6,0"/>
+                                                            <Button Content="↺ Default" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ResetLoginLogoCommand}" Height="26" Padding="8,0" FontSize="10" ToolTip="Revert to packaged default seal"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- 2. Dashboard & Sidebar Logo -->
+                                        <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="8" Padding="14,12">
+                                            <StackPanel>
+                                                <TextBlock Text="🧭 Dashboard &amp; Sidebar Logo" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,6"/>
+                                                <CheckBox Content="Use Same Logo as School Seal" IsChecked="{Binding UseSameLogoForDashboard}" Foreground="{DynamicResource PrimaryTextBrush}" FontSize="11" Margin="0,0,0,8"/>
+
+                                                <Grid Visibility="{Binding CanEditDashboardLogoCustom, Converter={StaticResource BoolToVis}}">
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                    <Border Grid.Column="0" Width="60" Height="60" CornerRadius="30" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1.5" Margin="0,0,12,0" ClipToBounds="True">
+                                                        <Image Source="{Binding DashboardLogoPreview}" Width="52" Height="52" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                        <TextBlock Text="Sidebar Header Emblem" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                        <TextBlock Text="Displayed at top of left navigation bar." FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,6"/>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Button Content="📁 Browse..." Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BrowseDashboardLogoCommand}" Height="26" Padding="8,0" FontSize="10" Margin="0,0,6,0"/>
+                                                            <Button Content="↺ Default" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ResetDashboardLogoCommand}" Height="26" Padding="8,0" FontSize="10"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- LIVE OFFICIAL DOCUMENT LETTERHEAD PREVIEW -->
+                                <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                        BorderThickness="1.5" CornerRadius="8" Padding="20,16" Margin="0,0,0,18">
+                                    <StackPanel>
+                                        <Grid Margin="0,0,0,12">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="📄 Live Official Document Letterhead Preview" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                <Border Background="{DynamicResource InfoBgBrush}" BorderBrush="{DynamicResource InfoBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="10,0,0,0">
+                                                    <TextBlock Text="DepEd Memorandum Format" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}"/>
+                                                </Border>
+                                            </StackPanel>
+                                            <TextBlock Text="Updates in real-time as you type" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                        </Grid>
+
+                                        <!-- Mock Official Letterhead Sheet -->
+                                        <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="1" CornerRadius="6" Padding="24,18">
+                                            <StackPanel>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- Left: School Seal Emblem -->
+                                                    <Border Grid.Column="0" Width="64" Height="64" CornerRadius="32" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,16,0" ClipToBounds="True">
+                                                        <Image Source="{Binding LoginLogoPreview}" Width="56" Height="56" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                                    </Border>
+
+                                                    <!-- Center: DepEd Official School Heading -->
+                                                    <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <TextBlock Text="Republic of the Philippines" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center"/>
+                                                        <TextBlock Text="DEPARTMENT OF EDUCATION" FontSize="12.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center" Margin="0,1,0,1"/>
+                                                        <TextBlock Text="{Binding SchoolAddress, FallbackValue='Division of Davao del Sur'}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding SchoolName, FallbackValue='Matti National High School'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" HorizontalAlignment="Center" Margin="0,3,0,1"/>
+                                                        <TextBlock Text="{Binding Motto, FallbackValue='Safe Campus • Real-time Reporting • Smart Resolution'}" FontSize="10.5" FontStyle="Italic" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center"/>
+                                                    </StackPanel>
+
+                                                    <!-- Right: Republic of the Philippines DepEd Emblem Badge -->
+                                                    <Border Grid.Column="2" Width="64" Height="64" CornerRadius="32" Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="16,0,0,0">
+                                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                            <TextBlock Text="🇵🇭" FontSize="20" HorizontalAlignment="Center"/>
+                                                            <TextBlock Text="DepEd" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </Grid>
+
+                                                <!-- Official Memorandum Divider Lines (Thick + Thin) -->
+                                                <Border Height="2" Background="{DynamicResource PrimaryBrush}" Margin="0,12,0,2"/>
+                                                <Border Height="1" Background="{DynamicResource PrimaryBrush}" Margin="0,0,0,10"/>
+
+                                                <Grid>
+                                                    <TextBlock Text="OFFICE OF THE PREFECT OF DISCIPLINE &amp; STUDENT WELFARE" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                    <TextBlock Text="{Binding SystemAcronym, StringFormat='SYSTEM REF: {0}-OFFICIAL'}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Right"/>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Save Branding Button -->
+                                <Button Content="💾 Save School Branding &amp; Logos" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveBrandingCommand}" HorizontalAlignment="Left" Width="240" Height="36" Margin="0,0,0,20"/>
+
+                                <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}" Margin="0,0,0,14"/>
+
+                                <!-- Interface Theme Customization -->
                                 <TextBlock Text="Interface Theme Customization" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                                     <TextBlock Text="{Binding ThemeModeText, StringFormat='Current Theme: {0}'}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,16,0"/>
-                                    <Button Content="🌓 Toggle Dark / Light Theme" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ToggleThemeCommand}"/>
+                                    <Button Content="🌓 Toggle Dark / Light Theme" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ToggleThemeCommand}" Height="30" Padding="12,0"/>
                                 </StackPanel>
 
-                                <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}" Margin="0,0,0,16"/>
+                                <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}" Margin="0,0,0,14"/>
 
                                 <!-- Database Maintenance -->
-                                <TextBlock Text="Database Backup &amp; Disaster Recovery" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
-                                <TextBlock Text="{Binding LastBackupDate, StringFormat='Last Snapshot: {0}'}" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,12"/>
-                                <Button Content="💾 Create Backup Snapshot Now" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CreateBackupCommand}" HorizontalAlignment="Left"/>
-                                <TextBlock Text="{Binding BackupStatusMessage}" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,8,0,0"/>
+                                <TextBlock Text="Database Backup &amp; Disaster Recovery" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                                <TextBlock Text="{Binding LastBackupDate, StringFormat='Last Snapshot: {0}'}" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,10"/>
+                                <Button Content="💾 Create Backup Snapshot Now" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CreateBackupCommand}" HorizontalAlignment="Left" Height="30" Padding="12,0"/>
+                                <TextBlock Text="{Binding BackupStatusMessage}" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,6,0,0"/>
                             </StackPanel>
                         </ScrollViewer>
                     </Border>

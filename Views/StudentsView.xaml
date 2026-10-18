@@ -3,14 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:views="clr-namespace:SmartSchoolIncidentManagementSystem.Views"
              mc:Ignorable="d" 
              d:DesignHeight="850" d:DesignWidth="1200"
              Background="{DynamicResource AppBackgroundBrush}"
              ClipToBounds="False">
 
     <Grid ClipToBounds="False">
-        <!-- 1. MAIN WORKSPACE CONTENT -->
-        <Grid Margin="24,16">
+        <!-- 1. MAIN WORKSPACE CONTENT: STUDENT DIRECTORY & RECORDS -->
+        <Grid Margin="24,16" Visibility="{Binding IsStudentDetailOpen, Converter={StaticResource InverseBoolToVis}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -42,8 +43,8 @@
                                 Command="{Binding OpenAddStudentCommand}" Margin="0,0,8,0" Height="36"
                                 Visibility="{Binding CanManageStudents, Converter={StaticResource BoolToVis}}"/>
 
-                        <Button Content="↻" Style="{DynamicResource SecondaryButtonStyle}"
-                                Command="{Binding RefreshCommand}" Width="36" Height="36" Padding="0" ToolTip="Refresh Student Records"/>
+                        <Button Content="{Binding RefreshButtonIcon, FallbackValue='↻'}" Style="{DynamicResource SecondaryButtonStyle}"
+                                Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}" Width="36" Height="36" Padding="0" ToolTip="Refresh Student Records"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -158,8 +159,12 @@
             </ScrollViewer>
         </Grid>
 
-        <!-- 2. FULL-SCREEN MODAL OVERLAY: CREATE / VIEW / EDIT STUDENT -->
-        <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        <!-- 2. STUDENT DETAIL INFORMATION VIEW (MATCHING DESIGN REFERENCE) -->
+        <views:StudentInformationDetailView DataContext="{Binding}"
+                                            Visibility="{Binding IsStudentDetailOpen, Converter={StaticResource BoolToVis}}"/>
+
+        <!-- 3. FULL-SCREEN MODAL OVERLAY: CREATE / ADD STUDENT -->
+        <Grid Margin="0" Panel.ZIndex="1000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
               Visibility="{Binding IsStudentModalOpen, Converter={StaticResource BoolToVis}}"
               Background="{DynamicResource ModalOverlayBrush}">
             <Border Width="700" VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -318,8 +323,8 @@
             </Border>
         </Grid>
 
-        <!-- 3. FULL-SCREEN MODAL OVERLAY: CSV / EXCEL ROSTER IMPORT -->
-        <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        <!-- 4. FULL-SCREEN MODAL OVERLAY: CSV / EXCEL ROSTER IMPORT -->
+        <Grid Margin="0" Panel.ZIndex="1000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
               Visibility="{Binding IsImportModalOpen, Converter={StaticResource BoolToVis}}"
               Background="{DynamicResource ModalOverlayBrush}">
             <Border Width="850" VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -335,7 +340,8 @@
 
                     <Grid Grid.Row="0" Margin="0,0,0,14">
                         <TextBlock Text="📥 Batch Import Student Roster (CSV / Excel .xlsx)" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                        <Button Content="✕" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseImportModalCommand}" HorizontalAlignment="Right" Width="30" Height="30"/>
+                        <Button Content="✕" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseImportModalCommand}"
+                                HorizontalAlignment="Right" Width="30" Height="30" Padding="0" FontSize="13" FontWeight="Bold" ToolTip="Close" Cursor="Hand"/>
                     </Grid>
 
                     <!-- File Selector & Stats -->
@@ -385,8 +391,8 @@
             </Border>
         </Grid>
 
-        <!-- 4. FULL-SCREEN MODAL OVERLAY: STUDENT DOSSIER & PROFILE -->
-        <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        <!-- 5. FULL-SCREEN MODAL OVERLAY: STUDENT DOSSIER & PROFILE -->
+        <Grid Margin="0" Panel.ZIndex="1000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
               Visibility="{Binding IsProfileModalOpen, Converter={StaticResource BoolToVis}}"
               Background="{DynamicResource ModalOverlayBrush}">
             <Border Width="800" VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -404,7 +410,8 @@
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="📋 Student 360° Dossier &amp; Behavioral Profile" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
                         </StackPanel>
-                        <Button Content="✕" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseProfileModalCommand}" HorizontalAlignment="Right" Width="30" Height="30"/>
+                        <Button Content="✕" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseProfileModalCommand}"
+                                HorizontalAlignment="Right" Width="30" Height="30" Padding="0" FontSize="13" FontWeight="Bold" ToolTip="Close Dossier" Cursor="Hand"/>
                     </Grid>
 
                     <!-- Student Snapshot Card -->

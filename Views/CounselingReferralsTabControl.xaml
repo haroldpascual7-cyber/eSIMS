@@ -1,0 +1,205 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.CounselingReferralsTabControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+    <Grid Margin="0,10,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 1. KPI Summary Bar -->
+        <UniformGrid Grid.Row="0" Columns="3" Margin="0,0,0,12">
+            <!-- Total Referrals -->
+            <Border Style="{DynamicResource CardBorderStyle}" Margin="0,0,8,0" Padding="12,10">
+                <StackPanel>
+                    <TextBlock Text="TOTAL REFERRALS" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <TextBlock Text="{Binding TotalCounselingReferralsCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,3,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Pending Counseling Cases -->
+            <Border Style="{DynamicResource CardBorderStyle}" Margin="0,0,8,0" Padding="12,10">
+                <StackPanel>
+                    <TextBlock Text="PENDING COUNSELING (ACTION NEEDED)" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
+                    <TextBlock Text="{Binding PendingCounselingCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,3,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Completed Interventions -->
+            <Border Style="{DynamicResource CardBorderStyle}" Padding="12,10">
+                <StackPanel>
+                    <TextBlock Text="COMPLETED INTERVENTIONS" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
+                    <TextBlock Text="{Binding CompletedCounselingCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" Margin="0,3,0,0"/>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <!-- 2. Filter Toolbar -->
+        <Border Grid.Row="1" Background="{DynamicResource TableHoverBrush}" CornerRadius="8" Padding="12,8" Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="🔍 Filter:" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox Text="{Binding CounselingSearchText, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Width="260" Height="30" Tag="Search by student, incident #, or action..."/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
+                    <TextBlock Text="Status:" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox ItemsSource="{Binding CounselingFilterStatusOptions}" SelectedItem="{Binding SelectedCounselingFilterStatus}" Style="{DynamicResource ModernComboBoxStyle}" Width="160" Height="30"/>
+                </StackPanel>
+
+                <Button Grid.Column="2" Content="🔄 Refresh Cases" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCounselingReferralsCommand}" Height="30" Padding="12,0" FontSize="11"/>
+            </Grid>
+        </Border>
+
+        <!-- 3. Referrals List -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="450">
+            <StackPanel>
+                <!-- Empty State -->
+                <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="1" CornerRadius="8" Padding="20" Margin="0,10,0,0">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasCounselingReferrals}" Value="False">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="🕊️ No Counseling Referrals Found" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Incidents referred for guidance counseling will automatically appear here for intake and completion." FontSize="11.5" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Cards Grid -->
+                <ItemsControl ItemsSource="{Binding FilteredCounselingReferrals}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="3"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{DynamicResource RecordCardStyle}" Margin="4" Padding="14">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Row 0: Case Badge & Status Badge -->
+                                    <DockPanel Grid.Row="0" Margin="0,0,0,6">
+                                        <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource PrimaryBrush}" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding Incident.IncidentNumber, FallbackValue='INC-CASE'}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                        </Border>
+                                        <Border HorizontalAlignment="Right" CornerRadius="4" Padding="6,2">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="{DynamicResource TableHoverBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Completed">
+                                                            <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Pending">
+                                                            <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="Bold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Completed">
+                                                                <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Pending">
+                                                                <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+                                    </DockPanel>
+
+                                    <!-- Row 1: Student Name & Title -->
+                                    <StackPanel Grid.Row="1" Margin="0,0,0,4">
+                                        <TextBlock Text="{Binding Student.FullName, TargetNullValue='Involved Student'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding ActionType}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+
+                                    <!-- Row 2: Date & Details -->
+                                    <StackPanel Grid.Row="2" Margin="0,0,0,6">
+                                        <TextBlock Text="{Binding ScheduledDate, StringFormat='Scheduled: {0:yyyy-MM-dd}'}" FontSize="10.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding ActionDetails}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" MaxHeight="45" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- Row 3: Follow up / counselor notes -->
+                                    <Border Grid.Row="3" Background="{DynamicResource TableHoverBrush}" CornerRadius="4" Padding="6,4" Margin="0,0,0,8">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding FollowUpNotes}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding FollowUpNotes}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding FollowUpNotes, StringFormat='Notes: {0}'}" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" MaxHeight="30" TextTrimming="CharacterEllipsis"/>
+                                    </Border>
+
+                                    <!-- Row 4: Guidance Counselor Controls (Confirm Complete & Mark Resolved) -->
+                                    <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <!-- Confirm Complete -->
+                                        <Button Content="✓ Confirm Complete"
+                                                Command="{Binding DataContext.ConfirmCounselingCompleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" Height="26" Padding="8,0" FontSize="10" Margin="0,0,4,0">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Completed">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+
+                                        <!-- Mark as Resolved -->
+                                        <Button Content="🎯 Mark Resolved" Style="{DynamicResource PrimaryButtonStyle}"
+                                                Command="{Binding DataContext.MarkIncidentResolvedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" Height="26" Padding="8,0" FontSize="10"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace SmartSchoolIncidentManagementSystem.Models
@@ -14,6 +14,11 @@ namespace SmartSchoolIncidentManagementSystem.Models
         public string ScoreImpactText => ScoreImpact > 0 ? $"+{ScoreImpact} Pts" : ScoreImpact < 0 ? $"{ScoreImpact} Pts" : "0 Pts";
         public string HandledBy { get; set; } = string.Empty;
         public string ComplianceStatus { get; set; } = "Completed";
+
+        public string PointsString => ScoreImpactText;
+        public string Type => !string.IsNullOrEmpty(SourceModule) ? SourceModule : "Record";
+        public string Category => !string.IsNullOrEmpty(ReferenceCode) ? ReferenceCode : SourceModule;
+        public string Description => !string.IsNullOrEmpty(Title) ? Title : $"{SourceModule} record";
 
         public string EntryIcon => SourceModule switch
         {

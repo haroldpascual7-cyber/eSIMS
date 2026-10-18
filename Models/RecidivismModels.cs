@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SmartSchoolIncidentManagementSystem.Models
 {
@@ -27,5 +27,34 @@ namespace SmartSchoolIncidentManagementSystem.Models
         public string InterventionType { get; set; } = string.Empty;
         public double SuccessRatePercent { get; set; }
         public int TotalCaseCount { get; set; }
+    }
+
+    public class RepeatIncidentAlertItem
+    {
+        public string StudentId { get; set; } = string.Empty;
+        public string StudentName { get; set; } = string.Empty;
+        public string GradeSection { get; set; } = string.Empty;
+        public int TotalIncidents { get; set; }
+        public string AlertLevel { get; set; } = "Review Needed"; // "High Alert (3+)", "Review Needed (2)"
+        public string TriggeredPattern { get; set; } = string.Empty;
+        public string PrimaryCategory { get; set; } = string.Empty;
+        public string LastIncidentDate { get; set; } = string.Empty;
+        public int LatestIncidentId { get; set; }
+        public int? EnrolledStudentId { get; set; }
+    }
+
+    public class RelatedIncidentHistoryItem
+    {
+        public int IncidentId { get; set; }
+        public string IncidentNumber { get; set; } = string.Empty;
+        public DateTime IncidentDate { get; set; }
+        public string Category { get; set; } = string.Empty;
+        public string Severity { get; set; } = string.Empty;
+        public string Risk { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string ActionTaken { get; set; } = string.Empty;
+        public string Notes { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public bool IsSelectedForFollowUp { get; set; }
     }
 }

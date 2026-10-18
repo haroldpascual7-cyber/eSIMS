@@ -328,7 +328,8 @@
                 <StackPanel Orientation="Vertical">
                     <Grid Margin="0,0,0,14">
                         <TextBlock Text="Configure Campus Location Risk Rule" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                        <Button Content="✕" Width="28" Height="28" HorizontalAlignment="Right" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseModalCommand}"/>
+                        <Button Content="✕" Width="28" Height="28" Padding="0" FontSize="13" FontWeight="Bold" ToolTip="Close" Cursor="Hand"
+                                HorizontalAlignment="Right" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseModalCommand}"/>
                     </Grid>
 
                     <Border Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,12">

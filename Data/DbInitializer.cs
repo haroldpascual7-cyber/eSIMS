@@ -59,21 +59,25 @@ namespace SmartSchoolIncidentManagementSystem.Data
             {
                 context.Users.AddRange(new User[]
                 {
-                    new User { Username = "admin", PasswordHash = "admin123", Email = "admin@smartschool.edu", Role = "Administrator" },
-                    new User { Username = "guidance", PasswordHash = "guidance123", Email = "guidance@smartschool.edu", Role = "Guidance Counselor" },
-                    new User { Username = "discipline", PasswordHash = "discipline123", Email = "discipline@smartschool.edu", Role = "Discipline Officer" },
-                    new User { Username = "teacher", PasswordHash = "teacher123", Email = "teacher@smartschool.edu", Role = "Teacher" },
-                    new User { Username = "staff", PasswordHash = "staff123", Email = "staff@smartschool.edu", Role = "Staff" }
+                    new User { Username = "Admin", PasswordHash = "Admin123", Email = "Admin", Role = "Administrator" },
+                    new User { Username = "staff", PasswordHash = "staff123", Email = "staff", Role = "Staff" },
+                    new User { Username = "discipline_lead", PasswordHash = "discipline123", Email = "discipline_lead", Role = "Discipline Officer" },
+                    new User { Username = "guidance_counselor", PasswordHash = "guidance123", Email = "guidance_counselor", Role = "Guidance Counselor" },
+                    new User { Username = "admin", PasswordHash = "Admin123", Email = "admin@smartschool.edu", Role = "Administrator" },
+                    new User { Username = "teacher", PasswordHash = "teacher123", Email = "teacher@smartschool.edu", Role = "Teacher" }
                 });
                 context.SaveChanges();
             }
             else
             {
-                EnsureDemoUser(context, "admin", "admin123", "admin@smartschool.edu", "Administrator");
+                EnsureDemoUser(context, "Admin", "Admin123", "Admin", "Administrator");
+                EnsureDemoUser(context, "staff", "staff123", "staff", "Staff");
+                EnsureDemoUser(context, "discipline_lead", "discipline123", "discipline_lead", "Discipline Officer");
+                EnsureDemoUser(context, "guidance_counselor", "guidance123", "guidance_counselor", "Guidance Counselor");
+                EnsureDemoUser(context, "admin", "Admin123", "admin@smartschool.edu", "Administrator");
                 EnsureDemoUser(context, "guidance", "guidance123", "guidance@smartschool.edu", "Guidance Counselor");
                 EnsureDemoUser(context, "discipline", "discipline123", "discipline@smartschool.edu", "Discipline Officer");
                 EnsureDemoUser(context, "teacher", "teacher123", "teacher@smartschool.edu", "Teacher");
-                EnsureDemoUser(context, "staff", "staff123", "staff@smartschool.edu", "Staff");
                 context.SaveChanges();
             }
 
@@ -299,8 +303,62 @@ namespace SmartSchoolIncidentManagementSystem.Data
                 try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""MedicalNotes"" TEXT NOT NULL DEFAULT '';"); } catch { }
                 try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""ProfilePicturePath"" TEXT NOT NULL DEFAULT '';"); } catch { }
                 try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Incidents"" ADD COLUMN ""CreatedBy"" TEXT NOT NULL DEFAULT '';"); } catch { }
+                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Incidents"" ADD COLUMN ""InvolvedPersons"" TEXT NOT NULL DEFAULT '';"); } catch { }
+                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Incidents"" ADD COLUMN ""Witnesses"" TEXT NOT NULL DEFAULT '';"); } catch { }
+                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Incidents"" ADD COLUMN ""EvidenceData"" TEXT NOT NULL DEFAULT '';"); } catch { }
+                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Investigations"" ADD COLUMN ""InvestigationTimeline"" TEXT NOT NULL DEFAULT '';"); } catch { }
+                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Investigations"" ADD COLUMN ""IsFollowUpFlagged"" INTEGER NOT NULL DEFAULT 0;"); } catch { }
+                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Investigations"" ADD COLUMN ""FollowUpIssueType"" TEXT NOT NULL DEFAULT '';"); } catch { }
+                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Investigations"" ADD COLUMN ""FollowUpNotes"" TEXT NOT NULL DEFAULT '';"); } catch { }
+                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Investigations"" ADD COLUMN ""IsFollowUpResolved"" INTEGER NOT NULL DEFAULT 0;"); } catch { }
+                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""SuspensionOrders"" ADD COLUMN ""IncidentId"" INTEGER NULL;"); } catch { }
+                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""SuspensionOrders"" ADD COLUMN ""StudentId"" INTEGER NULL;"); } catch { }
+                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""SuspensionOrders"" ADD COLUMN ""Reason"" TEXT NOT NULL DEFAULT '';"); } catch { }
 
                 context.Database.ExecuteSqlRaw(@"
+                    CREATE TABLE IF NOT EXISTS ""ProbationRecords"" (
+                        ""Id"" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        ""RecordNumber"" TEXT NOT NULL DEFAULT '',
+                        ""IncidentId"" INTEGER NOT NULL,
+                        ""StudentId"" INTEGER NOT NULL,
+                        ""StartDate"" TEXT NOT NULL,
+                        ""EndDate"" TEXT NOT NULL,
+                        ""Reason"" TEXT NOT NULL DEFAULT '',
+                        ""ExpectedBehaviorConditions"" TEXT NOT NULL DEFAULT '',
+                        ""AssignedStaffId"" INTEGER NULL,
+                        ""ApprovedBy"" TEXT NOT NULL DEFAULT '',
+                        ""Status"" TEXT NOT NULL DEFAULT 'Active',
+                        ""ExtensionReason"" TEXT NOT NULL DEFAULT '',
+                        ""ClosedAt"" TEXT NULL,
+                        ""OutcomeSummary"" TEXT NOT NULL DEFAULT '',
+                        ""SyncId"" TEXT NOT NULL,
+                        ""IsSynced"" INTEGER NOT NULL DEFAULT 0,
+                        ""CreatedAt"" TEXT NOT NULL,
+                        ""UpdatedAt"" TEXT NOT NULL,
+                        FOREIGN KEY (""IncidentId"") REFERENCES ""Incidents"" (""Id"") ON DELETE RESTRICT,
+                        FOREIGN KEY (""StudentId"") REFERENCES ""Students"" (""Id"") ON DELETE RESTRICT,
+                        FOREIGN KEY (""AssignedStaffId"") REFERENCES ""StaffMembers"" (""Id"") ON DELETE SET NULL
+                    );
+                    CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ProbationRecords_SyncId"" ON ""ProbationRecords"" (""SyncId"");
+                    CREATE INDEX IF NOT EXISTS ""IX_ProbationRecords_IncidentId"" ON ""ProbationRecords"" (""IncidentId"");
+                    CREATE INDEX IF NOT EXISTS ""IX_ProbationRecords_StudentId"" ON ""ProbationRecords"" (""StudentId"");
+
+                    CREATE TABLE IF NOT EXISTS ""ProbationProgressNotes"" (
+                        ""Id"" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        ""ProbationRecordId"" INTEGER NOT NULL,
+                        ""NoteDate"" TEXT NOT NULL,
+                        ""ProgressStatus"" TEXT NOT NULL DEFAULT 'On Track',
+                        ""Notes"" TEXT NOT NULL DEFAULT '',
+                        ""RecordedBy"" TEXT NOT NULL DEFAULT '',
+                        ""SyncId"" TEXT NOT NULL,
+                        ""IsSynced"" INTEGER NOT NULL DEFAULT 0,
+                        ""CreatedAt"" TEXT NOT NULL,
+                        ""UpdatedAt"" TEXT NOT NULL,
+                        FOREIGN KEY (""ProbationRecordId"") REFERENCES ""ProbationRecords"" (""Id"") ON DELETE CASCADE
+                    );
+                    CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ProbationProgressNotes_SyncId"" ON ""ProbationProgressNotes"" (""SyncId"");
+                    CREATE INDEX IF NOT EXISTS ""IX_ProbationProgressNotes_ProbationRecordId"" ON ""ProbationProgressNotes"" (""ProbationRecordId"");
+
                     CREATE TABLE IF NOT EXISTS ""StudentMeritLogs"" (
                         ""Id"" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                         ""MeritId"" TEXT NOT NULL DEFAULT '',
@@ -379,7 +437,7 @@ namespace SmartSchoolIncidentManagementSystem.Data
 
         private static void EnsureDemoUser(AppDbContext context, string username, string password, string email, string role)
         {
-            var user = context.Users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
+            var user = context.Users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower() || u.Email.ToLower() == email.ToLower());
             if (user == null)
             {
                 context.Users.Add(new User
@@ -393,7 +451,9 @@ namespace SmartSchoolIncidentManagementSystem.Data
             }
             else
             {
+                user.Username = username;
                 user.PasswordHash = password;
+                user.Email = email;
                 user.Role = role;
                 user.IsActive = true;
             }

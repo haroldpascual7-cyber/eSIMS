@@ -56,7 +56,10 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
         public async Task AddSuspensionOrderAsync(SuspensionOrder order)
         {
+            DisciplinaryAuthorization.DemandManagePermission();
             if (order == null) throw new ArgumentNullException(nameof(order));
+            if (order.IncidentId == null || order.StudentId == null)
+                throw new InvalidOperationException("A verified incident and student are required.");
             if (string.IsNullOrWhiteSpace(order.OrderId))
             {
                 order.OrderId = await GenerateOrderIdAsync();
@@ -65,6 +68,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
             order.CreatedAt = DateTime.UtcNow;
             order.UpdatedAt = DateTime.UtcNow;
             order.IsSynced = false;
+            order.IssuedBy = SessionManager.CurrentUsername;
 
             await _context.SuspensionOrders.AddAsync(order);
             await _context.SaveChangesAsync();
@@ -72,6 +76,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
         public async Task UpdateClearanceStatusAsync(int orderId, bool parentCheck, bool packetCheck, bool counselorCheck, string notes, bool isCleared)
         {
+            DisciplinaryAuthorization.DemandManagePermission();
             var order = await _context.SuspensionOrders.FindAsync(orderId);
             if (order != null)
             {

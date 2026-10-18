@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:views="clr-namespace:SmartSchoolIncidentManagementSystem.Views"
              mc:Ignorable="d" 
              d:DesignHeight="850" d:DesignWidth="1200">
     <Grid Background="{DynamicResource AppBackgroundBrush}">
@@ -20,7 +21,7 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Content="↻ Refresh Analytics" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}"/>
+                    <Button Content="{Binding RefreshButtonText, FallbackValue='↻ Refresh Analytics'}" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}" Height="36" Padding="14,0"/>
                 </StackPanel>
             </Grid>
 
@@ -36,59 +37,121 @@
 
                         <!-- Filter Bar -->
                         <Border Grid.Row="0" Style="{DynamicResource CardBorderStyle}" Padding="14,10" Margin="0,0,0,12">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="180"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="220"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+                            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="Timeframe:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,8,0"/>
+                                <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding TimeframeModes}" SelectedItem="{Binding SelectedTimeframeMode}" Width="170" Margin="0,0,12,0"/>
 
-                                <TextBlock Grid.Column="0" Text="Timeframe:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,8,0"/>
-                                <ComboBox Grid.Column="1" Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding DateRanges}" SelectedItem="{Binding SelectedDateRange}" Margin="0,0,16,0"/>
+                                <!-- DatePicker for Specific Date (Day) -->
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding IsDatePickVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,0,12,0">
+                                    <TextBlock Text="Date:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,8,0"/>
+                                    <DatePicker SelectedDate="{Binding SelectedHeatmapDate}" Width="135" Height="36" VerticalContentAlignment="Center"/>
+                                </StackPanel>
 
-                                <TextBlock Grid.Column="2" Text="Category:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,8,0"/>
-                                <ComboBox Grid.Column="3" Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedHeatmapCategory}" Margin="0,0,16,0"/>
+                                <!-- Month Picker for Specific Month & Year -->
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding IsMonthPickVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,0,12,0">
+                                    <TextBlock Text="Month:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,8,0"/>
+                                    <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding AvailableMonths}" SelectedItem="{Binding SelectedMonthName}" Width="120"/>
+                                </StackPanel>
 
-                                <Button Grid.Column="5" Content="📑 Export Heatmap (PDF)" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding ExportLocationReportCommand}"/>
-                            </Grid>
+                                <!-- Year Picker for Specific Year or Specific Month & Year -->
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding IsYearPickVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,0,12,0">
+                                    <TextBlock Text="Year:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,8,0"/>
+                                    <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding AvailableYears}" SelectedItem="{Binding SelectedYear}" Width="90"/>
+                                </StackPanel>
+
+                                <TextBlock Text="Category:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,8,0"/>
+                                <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedHeatmapCategory}" Width="170" Margin="0,0,16,0"/>
+
+                                <Button Content="📑 Export Heatmap (PDF)" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding ExportLocationReportCommand}"/>
+                            </WrapPanel>
                         </Border>
 
-                        <!-- Main Split: Top Zones List vs Campus Canvas -->
+                        <!-- Main Split: Top Zones List / Incident Inspector vs Campus Canvas -->
                         <Grid Grid.Row="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="380"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Left: High Risk Locations List -->
+                            <!-- Left: High Risk Locations List & Zone Incidents Inspector -->
                             <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Padding="16" Margin="0,0,12,0">
                                 <DockPanel>
-                                    <TextBlock DockPanel.Dock="Top" Text="Top High-Incident Locations" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,12"/>
+                                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                                        <TextBlock Text="{Binding SelectedLocationTitle}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis" MaxWidth="280" VerticalAlignment="Center"/>
+                                        <Button Content="✕ All" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ClearSelectedLocationCommand}" Visibility="{Binding HasSelectedLocation, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Right" Padding="8,2" FontSize="11"/>
+                                    </DockPanel>
+                                    <TextBlock DockPanel.Dock="Top" Text="Click any zone on map or list to inspect incidents." FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,10"/>
                                     <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                        <ItemsControl ItemsSource="{Binding TopLocations}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border Style="{DynamicResource CardBorderStyle}" Padding="12" Margin="0,0,0,8" Background="{DynamicResource SurfaceBackgroundBrush}">
-                                                        <Grid>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*"/>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                            </Grid.ColumnDefinitions>
-                                                            <StackPanel Grid.Column="0">
-                                                                <TextBlock Text="{Binding LocationName}" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                                                <TextBlock Text="{Binding PrimaryInfraction, StringFormat='Frequent: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
-                                                            </StackPanel>
-                                                            <Border Grid.Column="1" Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1" CornerRadius="12" Padding="10,4" VerticalAlignment="Center">
-                                                                <TextBlock Text="{Binding IncidentCount, StringFormat='{}{0} Incidents'}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource DangerBrush}"/>
+                                        <StackPanel>
+                                            <!-- Top Locations (Visible when no specific location is selected) -->
+                                            <ItemsControl ItemsSource="{Binding TopLocations}">
+                                                <ItemsControl.Style>
+                                                    <Style TargetType="ItemsControl">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasSelectedLocation}" Value="True">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ItemsControl.Style>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Style="{DynamicResource CardBorderStyle}" Padding="12" Margin="0,0,0,8" Background="{DynamicResource SurfaceBackgroundBrush}" Cursor="Hand">
+                                                            <Border.InputBindings>
+                                                                <MouseBinding Gesture="LeftClick" Command="{Binding DataContext.SelectLocationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                                            </Border.InputBindings>
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <StackPanel Grid.Column="0">
+                                                                    <TextBlock Text="{Binding LocationName}" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                                    <TextBlock Text="{Binding PrimaryInfraction, StringFormat='Frequent: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                                                                </StackPanel>
+                                                                <Border Grid.Column="1" Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1" CornerRadius="12" Padding="10,4" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{Binding IncidentCount, StringFormat='{}{0} Incidents'}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource DangerBrush}"/>
+                                                                </Border>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+
+                                            <!-- Zone Incident Inspector (Visible when a location is selected) -->
+                                            <StackPanel>
+                                                <StackPanel.Style>
+                                                    <Style TargetType="StackPanel">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasSelectedLocation}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </StackPanel.Style>
+                                                <ItemsControl ItemsSource="{Binding SelectedLocationIncidents}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Style="{DynamicResource CardBorderStyle}" Padding="10" Margin="0,0,0,8" Background="{DynamicResource SurfaceBackgroundBrush}">
+                                                                <StackPanel>
+                                                                    <DockPanel Margin="0,0,0,4">
+                                                                        <TextBlock Text="{Binding IncidentNumber}" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource PrimaryBrush}"/>
+                                                                        <Border HorizontalAlignment="Right" Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1" CornerRadius="4" Padding="6,1">
+                                                                            <TextBlock Text="{Binding Category}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource DangerBrush}"/>
+                                                                        </Border>
+                                                                    </DockPanel>
+                                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                                                    <TextBlock Text="{Binding IncidentDate, StringFormat='🗓️ {0:MMM dd, yyyy • hh:mm tt}'}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                                                                    <TextBlock Text="{Binding StudentDisplayName, StringFormat='👤 Student: {0}'}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                                                </StackPanel>
                                                             </Border>
-                                                        </Grid>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </StackPanel>
                                     </ScrollViewer>
                                 </DockPanel>
                             </Border>
@@ -99,122 +162,214 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0" Text="Campus Incident Concentration Map" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,16"/>
 
-                                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                                        <ItemsControl ItemsSource="{Binding HeatmapNodes}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <Canvas Width="700" Height="450" Background="{DynamicResource SurfaceBackgroundBrush}"/>
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemContainerStyle>
-                                                <Style TargetType="ContentPresenter">
-                                                    <Setter Property="Canvas.Left" Value="{Binding X}"/>
-                                                    <Setter Property="Canvas.Top" Value="{Binding Y}"/>
-                                                </Style>
-                                            </ItemsControl.ItemContainerStyle>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="2" CornerRadius="8" Padding="10,6" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                        <StackPanel HorizontalAlignment="Center">
-                                                            <TextBlock Text="{Binding LocationName}" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center"/>
-                                                            <TextBlock Text="{Binding IncidentCount, StringFormat='⚠️ {0} incidents'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource DangerBrush}" HorizontalAlignment="Center"/>
+                                    <!-- Map Header & Indicators -->
+                                    <DockPanel Grid.Row="0" Margin="0,0,0,14">
+                                        <StackPanel Orientation="Vertical">
+                                            <TextBlock Text="Campus Incident Concentration Map" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                            <TextBlock Text="{Binding TimeframeSummaryText}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" Margin="0,2,0,0"/>
+                                        </StackPanel>
+
+                                        <Border HorizontalAlignment="Right" Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10,4">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="🧭" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="NORTH" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DockPanel>
+
+                                    <!-- Master Campus Architectural Blueprint Container -->
+                                    <Border Grid.Row="1" Background="{DynamicResource InputBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" CornerRadius="10" ClipToBounds="True">
+                                        <Viewbox Stretch="Uniform">
+                                            <Grid Width="780" Height="410">
+                                                <!-- BASE ARCHITECTURAL SCHEMATIC CANVAS -->
+                                                <Canvas Width="780" Height="410" Background="Transparent">
+                                                    <!-- Perimeter Campus Fence / Boundary -->
+                                                    <Rectangle Canvas.Left="10" Canvas.Top="10" Width="760" Height="390" Stroke="{DynamicResource BorderBrush}" StrokeThickness="1.5" StrokeDashArray="4 2" RadiusX="10" RadiusY="10" Fill="Transparent"/>
+
+                                                    <!-- Interconnecting Paved Walkways -->
+                                                    <Rectangle Canvas.Left="20" Canvas.Top="175" Width="740" Height="40" Fill="{DynamicResource TableHoverBrush}" RadiusX="4" RadiusY="4"/>
+                                                    <Rectangle Canvas.Left="230" Canvas.Top="20" Width="30" Height="370" Fill="{DynamicResource TableHoverBrush}" RadiusX="4" RadiusY="4"/>
+                                                    <Rectangle Canvas.Left="410" Canvas.Top="20" Width="30" Height="370" Fill="{DynamicResource TableHoverBrush}" RadiusX="4" RadiusY="4"/>
+
+                                                    <!-- Central Assembly Quadrangle / Landscaped Courtyard -->
+                                                    <Border Canvas.Left="440" Canvas.Top="310" Width="140" Height="70" Background="{DynamicResource SuccessBgBrush}" BorderBrush="{DynamicResource SuccessBrush}" BorderThickness="1" CornerRadius="6">
+                                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                            <TextBlock Text="🌳 🚩 🌳" FontSize="12" HorizontalAlignment="Center"/>
+                                                            <TextBlock Text="CENTRAL QUADRANGLE" FontSize="8.5" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                                            <TextBlock Text="Flagpole &amp; Assembly Lawn" FontSize="7.5" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center"/>
                                                         </StackPanel>
                                                     </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </ScrollViewer>
+
+                                                    <!-- Building 1: Gymnasium & Sports Pavilion -->
+                                                    <Border Canvas.Left="30" Canvas.Top="30" Width="200" Height="130" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" CornerRadius="8">
+                                                        <Grid Margin="8,6">
+                                                            <DockPanel VerticalAlignment="Top"><TextBlock Text="🏀" FontSize="13" Margin="0,0,4,0"/><TextBlock Text="GYMNASIUM" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/></DockPanel>
+                                                            <TextBlock Text="Indoor Arena &amp; Bleachers" FontSize="8.5" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Top" Margin="20,18,0,0"/>
+                                                            <Rectangle Stroke="{DynamicResource BorderBrush}" StrokeThickness="1" StrokeDashArray="3 2" Margin="4,32,4,4" RadiusX="4" RadiusY="4"/>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- Building 2: Restrooms & Lockers (Bldg A) -->
+                                                    <Border Canvas.Left="260" Canvas.Top="30" Width="150" Height="80" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" CornerRadius="8">
+                                                        <Grid Margin="8,6">
+                                                            <DockPanel VerticalAlignment="Top"><TextBlock Text="🚪" FontSize="13" Margin="0,0,4,0"/><TextBlock Text="RESTROOMS (BLDG A)" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/></DockPanel>
+                                                            <TextBlock Text="Student Lockers &amp; Facility" FontSize="8" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Top" Margin="18,16,0,0"/>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- Building 3: Science & IT Lab Wing -->
+                                                    <Border Canvas.Left="440" Canvas.Top="30" Width="210" Height="130" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" CornerRadius="8">
+                                                        <Grid Margin="8,6">
+                                                            <DockPanel VerticalAlignment="Top"><TextBlock Text="🔬" FontSize="13" Margin="0,0,4,0"/><TextBlock Text="SCIENCE &amp; IT LABS" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/></DockPanel>
+                                                            <TextBlock Text="Chemistry, Bio &amp; Computer Wing" FontSize="8.5" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Top" Margin="20,18,0,0"/>
+                                                            <Rectangle Stroke="{DynamicResource BorderBrush}" StrokeThickness="1" StrokeDashArray="3 2" Margin="4,32,4,4" RadiusX="4" RadiusY="4"/>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- Building 4: Cafeteria & Student Canteen -->
+                                                    <Border Canvas.Left="260" Canvas.Top="125" Width="150" Height="85" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" CornerRadius="8">
+                                                        <Grid Margin="8,6">
+                                                            <DockPanel VerticalAlignment="Top"><TextBlock Text="🍽️" FontSize="13" Margin="0,0,4,0"/><TextBlock Text="CAFETERIA &amp; CANTEEN" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/></DockPanel>
+                                                            <TextBlock Text="Dining Commons &amp; Kitchen" FontSize="8" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Top" Margin="18,16,0,0"/>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- Building 5: Covered Basketball Court -->
+                                                    <Border Canvas.Left="30" Canvas.Top="240" Width="200" Height="140" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" CornerRadius="8">
+                                                        <Grid Margin="8,6">
+                                                            <DockPanel VerticalAlignment="Top"><TextBlock Text="🏃" FontSize="13" Margin="0,0,4,0"/><TextBlock Text="COVERED COURT" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/></DockPanel>
+                                                            <TextBlock Text="Multi-Purpose Athletics Facility" FontSize="8.5" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Top" Margin="20,18,0,0"/>
+                                                            <Rectangle Stroke="{DynamicResource BorderBrush}" StrokeThickness="1" StrokeDashArray="3 2" Margin="4,32,4,4" RadiusX="4" RadiusY="4"/>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- Building 6: Main Hallway & Admin Hub -->
+                                                    <Border Canvas.Left="260" Canvas.Top="240" Width="150" Height="140" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" CornerRadius="8">
+                                                        <Grid Margin="8,6">
+                                                            <DockPanel VerticalAlignment="Top"><TextBlock Text="🏛️" FontSize="13" Margin="0,0,4,0"/><TextBlock Text="MAIN HALLWAY &amp; ADMIN" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/></DockPanel>
+                                                            <TextBlock Text="Central Corridor &amp; Offices" FontSize="8" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Top" Margin="18,16,0,0"/>
+                                                            <Rectangle Stroke="{DynamicResource BorderBrush}" StrokeThickness="1" StrokeDashArray="3 2" Margin="4,32,4,4" RadiusX="4" RadiusY="4"/>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- Building 7: Library & Study Hall -->
+                                                    <Border Canvas.Left="440" Canvas.Top="175" Width="140" Height="120" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" CornerRadius="8">
+                                                        <Grid Margin="8,6">
+                                                            <DockPanel VerticalAlignment="Top"><TextBlock Text="📚" FontSize="13" Margin="0,0,4,0"/><TextBlock Text="LIBRARY &amp; STUDY" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/></DockPanel>
+                                                            <TextBlock Text="Media &amp; Quiet Study Rooms" FontSize="8" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Top" Margin="18,16,0,0"/>
+                                                            <Rectangle Stroke="{DynamicResource BorderBrush}" StrokeThickness="1" StrokeDashArray="3 2" Margin="4,30,4,4" RadiusX="4" RadiusY="4"/>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- Building 8: East Parking Lot & Gate 2 -->
+                                                    <Border Canvas.Left="600" Canvas.Top="240" Width="150" Height="140" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" CornerRadius="8">
+                                                        <Grid Margin="8,6">
+                                                            <DockPanel VerticalAlignment="Top"><TextBlock Text="🚗" FontSize="13" Margin="0,0,4,0"/><TextBlock Text="EAST PARKING &amp; GATE 2" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/></DockPanel>
+                                                            <TextBlock Text="Vehicle Bays &amp; Perimeter Exit" FontSize="8" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Top" Margin="18,16,0,0"/>
+                                                            <StackPanel VerticalAlignment="Bottom" Margin="4,0,4,4"><Rectangle Height="1" Fill="{DynamicResource BorderBrush}" Margin="0,2"/><Rectangle Height="1" Fill="{DynamicResource BorderBrush}" Margin="0,2"/></StackPanel>
+                                                        </Grid>
+                                                    </Border>
+                                                </Canvas>
+
+                                                <!-- DYNAMIC INCIDENT CONCENTRATION BADGES OVERLAY -->
+                                                <ItemsControl ItemsSource="{Binding HeatmapNodes}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <Canvas Width="780" Height="410"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemContainerStyle>
+                                                        <Style TargetType="ContentPresenter">
+                                                            <Setter Property="Canvas.Left" Value="{Binding BadgeLeft}"/>
+                                                            <Setter Property="Canvas.Top" Value="{Binding BadgeTop}"/>
+                                                        </Style>
+                                                    </ItemsControl.ItemContainerStyle>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Background="{DynamicResource CardBackgroundBrush}"
+                                                                    BorderBrush="{Binding NodeBorderBrush}"
+                                                                    BorderThickness="1.5"
+                                                                    CornerRadius="8"
+                                                                    Padding="8,4"
+                                                                    Width="124"
+                                                                    Cursor="Hand">
+                                                                <Border.InputBindings>
+                                                                    <MouseBinding Gesture="LeftClick" Command="{Binding DataContext.SelectLocationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                                                </Border.InputBindings>
+                                                                <Border.Effect>
+                                                                    <DropShadowEffect Color="#000000" Opacity="0.12" BlurRadius="6" ShadowDepth="1"/>
+                                                                </Border.Effect>
+                                                                <StackPanel HorizontalAlignment="Center">
+                                                                    <TextBlock Text="{Binding LocationName}"
+                                                                               FontWeight="Bold"
+                                                                               FontSize="11"
+                                                                               Foreground="{DynamicResource PrimaryTextBrush}"
+                                                                               TextTrimming="CharacterEllipsis"
+                                                                               HorizontalAlignment="Center"/>
+                                                                    <TextBlock Text="{Binding CountDisplayText}"
+                                                                               FontSize="10.5"
+                                                                               FontWeight="Bold"
+                                                                               Foreground="{Binding NodeTextBrush}"
+                                                                               HorizontalAlignment="Center"
+                                                                               Margin="0,1,0,0"/>
+                                                                </StackPanel>
+                                                                <Border.ToolTip>
+                                                                    <ToolTip Style="{DynamicResource ModernToolTipStyle}">
+                                                                        <StackPanel>
+                                                                            <TextBlock Text="{Binding LocationName}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                                            <TextBlock Text="{Binding IncidentCount, StringFormat='Total Incidents: {0}'}" FontSize="11" Foreground="{Binding NodeTextBrush}" Margin="0,2,0,0"/>
+                                                                            <TextBlock Text="{Binding PrimaryInfraction, StringFormat='Top Category: {0}'}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                                                                            <TextBlock Text="{Binding RiskLevelText, StringFormat='Status: {0}'}" FontSize="11" FontWeight="Bold" Foreground="{Binding NodeTextBrush}" Margin="0,2,0,0"/>
+                                                                        </StackPanel>
+                                                                    </ToolTip>
+                                                                </Border.ToolTip>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </Grid>
+                                        </Viewbox>
+                                    </Border>
+
+                                    <!-- Map Architectural Legend Strip -->
+                                    <Border Grid.Row="2" Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="10,6" Margin="0,10,0,0">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <WrapPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="LEGEND:" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,10,0" VerticalAlignment="Center">
+                                                    <Ellipse Width="8" Height="8" Fill="{DynamicResource DangerBrush}" Margin="0,0,4,0"/>
+                                                    <TextBlock Text="High (8+)" FontSize="10" FontWeight="Medium" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,10,0" VerticalAlignment="Center">
+                                                    <Ellipse Width="8" Height="8" Fill="{DynamicResource WarningBrush}" Margin="0,0,4,0"/>
+                                                    <TextBlock Text="Moderate (4-7)" FontSize="10" FontWeight="Medium" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                    <Ellipse Width="8" Height="8" Fill="{DynamicResource SuccessBrush}" Margin="0,0,4,0"/>
+                                                    <TextBlock Text="Low / Stable (1-3)" FontSize="10" FontWeight="Medium" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                </StackPanel>
+                                            </WrapPanel>
+                                            <Border Grid.Column="1" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <TextBlock Text="🏫 Master Plan" FontSize="9.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
                                 </Grid>
                             </Border>
                         </Grid>
                     </Grid>
                 </TabItem>
 
-                <!-- Tab 2: Recidivism & Repeat Offenders -->
-                <TabItem Header="🔄 Recidivism &amp; Chronic Watchlist" FontSize="13" FontWeight="SemiBold">
-                    <Grid Margin="0,12,0,0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- Action Bar -->
-                        <Grid Grid.Row="0" Margin="0,0,0,12">
-                            <TextBlock Text="Repeat Offender Analytics &amp; Intervention Success Tracking" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                            <Button HorizontalAlignment="Right" Content="📑 Export Recidivism Report (PDF)" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding ExportRecidivismReportCommand}"/>
-                        </Grid>
-
-                        <!-- Metrics Row -->
-                        <Grid Grid.Row="1" Margin="0,0,0,16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Margin="0,0,8,0" Padding="16,12">
-                                <StackPanel>
-                                    <TextBlock Text="RECIDIVISM RATE" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                    <TextBlock Text="{Binding RecidivismSummary.RecidivismRate, StringFormat='{}{0:F1}%'}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,4,0,0"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Margin="4,0,4,0" Padding="16,12">
-                                <StackPanel>
-                                    <TextBlock Text="SINGLE OFFENDERS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                    <TextBlock Text="{Binding RecidivismSummary.SingleOffenderCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" Margin="0,4,0,0"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Margin="4,0,4,0" Padding="16,12">
-                                <StackPanel>
-                                    <TextBlock Text="REPEAT OFFENDERS (2x)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                    <TextBlock Text="{Binding RecidivismSummary.RepeatOffenderCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,4,0,0"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Grid.Column="3" Style="{DynamicResource CardBorderStyle}" Margin="8,0,0,0" Padding="16,12">
-                                <StackPanel>
-                                    <TextBlock Text="CHRONIC CASES (3+)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                    <TextBlock Text="{Binding RecidivismSummary.ChronicOffenderCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,4,0,0"/>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-
-                        <!-- Chronic Offender Watchlist Table -->
-                        <Border Grid.Row="2" Style="{DynamicResource CardBorderStyle}" Padding="0">
-                            <DataGrid ItemsSource="{Binding ChronicWatchlist}"
-                                      SelectedItem="{Binding SelectedWatchItem}"
-                                      AutoGenerateColumns="False"
-                                      IsReadOnly="True"
-                                      CanUserAddRows="False"
-                                      SelectionMode="Single"
-                                      GridLinesVisibility="Horizontal"
-                                      HorizontalGridLinesBrush="{DynamicResource BorderBrush}"
-                                      Background="Transparent"
-                                      RowBackground="Transparent"
-                                      AlternatingRowBackground="{DynamicResource TableRowAltBrush}"
-                                      Foreground="{DynamicResource PrimaryTextBrush}"
-                                      BorderThickness="0"
-                                      HeadersVisibility="Column"
-                                      RowHeight="44">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Student ID" Binding="{Binding StudentId}" Width="120"/>
-                                    <DataGridTextColumn Header="Student Name" Binding="{Binding StudentName}" Width="180"/>
-                                    <DataGridTextColumn Header="Grade &amp; Section" Binding="{Binding GradeSection}" Width="160"/>
-                                    <DataGridTextColumn Header="Total Violations" Binding="{Binding TotalIncidents}" Width="130"/>
-                                    <DataGridTextColumn Header="Frequent Offense" Binding="{Binding MostCommonOffense}" Width="*"/>
-                                    <DataGridTextColumn Header="IAP Status" Binding="{Binding ActiveIapStatus}" Width="140"/>
-                                    <DataGridTextColumn Header="Last Incident" Binding="{Binding LastIncidentDate}" Width="120"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Border>
-                    </Grid>
+                <!-- Tab 2: Review Repeat-Incident Alerts -->
+                <TabItem Header="⚠️ Review Repeat-Incident Alerts" FontSize="13" FontWeight="SemiBold">
+                    <views:RepeatIncidentAlertsControl/>
                 </TabItem>
 
                 <!-- Tab 3: Executive Summary Report -->

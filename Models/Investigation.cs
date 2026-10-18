@@ -24,5 +24,32 @@ namespace SmartSchoolIncidentManagementSystem.Models
         // Findings: Pending, Substantiated, Unsubstantiated, Inconclusive, Dismissed
         public string Findings { get; set; } = "Pending";
         public string FinalSummary { get; set; } = string.Empty;
+
+        // Structured timeline entries stored as JSON
+        public string InvestigationTimeline { get; set; } = string.Empty;
+
+        // Flagging missing or conflicting information for follow-up
+        public bool IsFollowUpFlagged { get; set; }
+        public string FollowUpIssueType { get; set; } = string.Empty;
+        public string FollowUpNotes { get; set; } = string.Empty;
+        public bool IsFollowUpResolved { get; set; }
+    }
+
+    public class InvestigationTimelineEntry
+    {
+        public string Id { get; set; } = Guid.NewGuid().ToString("N");
+        public DateTime Timestamp { get; set; } = DateTime.Now;
+        public string ActionTitle { get; set; } = string.Empty;
+        public string PerformedBy { get; set; } = string.Empty;
+        public string Notes { get; set; } = string.Empty;
+        public string EntryType { get; set; } = "Note"; // Note, Interview, Witness, Evidence, StatusChange
+    }
+
+    public class InvestigationEvidenceItem
+    {
+        public string FileName { get; set; } = string.Empty;
+        public string FilePath { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string AddedAt { get; set; } = string.Empty;
     }
 }

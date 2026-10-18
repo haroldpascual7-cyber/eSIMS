@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:views="clr-namespace:SmartSchoolIncidentManagementSystem.Views"
              mc:Ignorable="d" 
              d:DesignHeight="850" d:DesignWidth="1200"
              Background="{DynamicResource AppBackgroundBrush}"
@@ -325,27 +326,26 @@
                         </ScrollViewer>
                     </Grid>
                 </TabItem>
+
+                <!-- TAB 5: COUNSELING & INCIDENT REFERRALS -->
+                <TabItem Header="Counseling &amp; Referrals">
+                    <views:CounselingReferralsTabControl/>
+                </TabItem>
             </TabControl>
         </Border>
         </Grid>
 
         <!-- 4. MODAL: ADD MERIT / COMMENDATION -->
         <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Visibility="{Binding IsAddMeritModalOpen, Converter={StaticResource BoolToVis}}" Background="{DynamicResource ModalOverlayBrush}">
-            <Border Width="520" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="20">
+            <Border Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
                 <StackPanel>
                     <TextBlock Text="Award Student Commendation / Merit" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
-
                     <TextBlock Text="Commendation Category" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <ComboBox ItemsSource="{Binding MeritTypeOptions}" SelectedItem="{Binding MeritType}" Style="{DynamicResource ModernComboBoxStyle}" Height="34" Margin="0,0,0,10"/>
-
                     <TextBlock Text="Points Awarded (+)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding MeritPoints}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" Margin="0,0,0,10"/>
-
                     <TextBlock Text="Citation / Commendation Narrative *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding MeritCitation}" Style="{DynamicResource ModernTextBoxStyle}" Height="70" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,16"/>
-
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Cancel" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseAddMeritCommand}" Margin="0,0,8,0" Height="34"/>
                         <Button Content="Save Merit" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveMeritCommand}" Height="34"/>
@@ -356,24 +356,17 @@
 
         <!-- 5. MODAL: ADD ANECDOTAL NOTE -->
         <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Visibility="{Binding IsAddAnecdotalModalOpen, Converter={StaticResource BoolToVis}}" Background="{DynamicResource ModalOverlayBrush}">
-            <Border Width="560" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="20">
+            <Border Width="560" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
                 <StackPanel>
                     <TextBlock Text="Log Classroom Anecdotal Observation" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
-
                     <TextBlock Text="Subject / Setting" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding AnecdotalSubject}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" Margin="0,0,0,10"/>
-
                     <TextBlock Text="Observation Type" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <ComboBox ItemsSource="{Binding AnecdotalTypeOptions}" SelectedItem="{Binding AnecdotalType}" Style="{DynamicResource ModernComboBoxStyle}" Height="34" Margin="0,0,0,10"/>
-
                     <TextBlock Text="Narrative Observation *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding AnecdotalNarrative}" Style="{DynamicResource ModernTextBoxStyle}" Height="60" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,10"/>
-
                     <TextBlock Text="Immediate Action Taken by Teacher" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding AnecdotalActionTaken}" Style="{DynamicResource ModernTextBoxStyle}" Height="40" Margin="0,0,0,16"/>
-
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Cancel" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseAddAnecdotalCommand}" Margin="0,0,8,0" Height="34"/>
                         <Button Content="Save Observation" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveAnecdotalCommand}" Height="34"/>
@@ -384,21 +377,15 @@
 
         <!-- 6. MODAL: ADD RESTORATIVE PLAN -->
         <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Visibility="{Binding IsAddRestorativeModalOpen, Converter={StaticResource BoolToVis}}" Background="{DynamicResource ModalOverlayBrush}">
-            <Border Width="520" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="20">
+            <Border Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
                 <StackPanel>
                     <TextBlock Text="Assign Restorative Intervention Plan" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
-
                     <TextBlock Text="Intervention Type" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <ComboBox ItemsSource="{Binding RestorativeTypeOptions}" SelectedItem="{Binding RestorativeType}" Style="{DynamicResource ModernComboBoxStyle}" Height="34" Margin="0,0,0,10"/>
-
                     <TextBlock Text="Target Metric (Required Hours or Sessions)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding RestorativeTargetMetric}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" Margin="0,0,0,10"/>
-
                     <TextBlock Text="Intervention Objectives &amp; Conditions *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding RestorativeObjectives}" Style="{DynamicResource ModernTextBoxStyle}" Height="70" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,16"/>
-
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Cancel" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseAddRestorativeCommand}" Margin="0,0,8,0" Height="34"/>
                         <Button Content="Assign Plan" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveRestorativeCommand}" Height="34"/>
@@ -477,7 +464,6 @@
                 </StackPanel>
             </Border>
         </Grid>
-
         <!-- 10. MODAL: VIEW ACTION PLAN -->
         <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Visibility="{Binding IsViewActionPlanModalOpen, Converter={StaticResource BoolToVis}}" Background="{DynamicResource ModalOverlayBrush}">
             <Border Width="500" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="20">
@@ -486,10 +472,10 @@
                         <TextBlock Text="🎯 Individual Action Plan (IAP)" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
                         <Button Content="✕" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseActionPlanCardCommand}" HorizontalAlignment="Right" Width="28" Height="28" Padding="0"/>
                     </DockPanel>
-                    <TextBlock Text="{Binding ViewingActionPlan.FocusArea, StringFormat='Focus: {0}'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
-                    <TextBlock Text="{Binding ViewingActionPlan.AssignedCounselor, StringFormat='Counselor: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                    <TextBlock Text="{Binding ViewingActionPlan.ReviewDate, StringFormat='Review Date: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8"/>
-                    <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,4,0,14">
+                    <TextBlock Text="{Binding ViewingActionPlan.FocusArea, StringFormat='Focus: {0}'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/>
+                    <TextBlock Text="{Binding ViewingActionPlan.AssignedCounselor, StringFormat='Counselor: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                    <TextBlock Text="{Binding ViewingActionPlan.ReviewDate, StringFormat='Review Date: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,6"/>
+                    <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,2,0,12">
                         <TextBlock Text="{Binding ViewingActionPlan.CoreRoadmapObjectives}" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap"/>
                     </Border>
                     <Button Content="Close" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseActionPlanCardCommand}" HorizontalAlignment="Right" Height="32" Width="80"/>

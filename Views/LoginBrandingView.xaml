@@ -5,61 +5,84 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d">
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-        <!-- MATTI NATIONAL HIGH SCHOOL PRIMARY BRANDING -->
+        <!-- DYNAMIC INSTITUTIONAL BRANDING (CONFIGURED VIA BRANDING & MAINTENANCE) -->
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MaxWidth="460">
             
-            <!-- 1. Large Matti National High School Official Seal (Top) -->
+            <!-- 1. Large Official School Seal / Login Logo (Top) -->
             <Border Width="165" Height="165" 
                     HorizontalAlignment="Center" 
                     Margin="0,0,0,22"
                     CornerRadius="82.5">
-                <Border.Effect>
-                    <DropShadowEffect Color="#38BDF8" Opacity="0.35" BlurRadius="32" ShadowDepth="0"/>
-                </Border.Effect>
-                <Image Source="pack://application:,,,/Assets/Matti_National_High_School_logo.png"
+                <Image Source="{Binding LoginLogoSource}"
                        Width="155" Height="155"
                        Stretch="Uniform"
                        RenderOptions.BitmapScalingMode="HighQuality"
                        HorizontalAlignment="Center"
-                       VerticalAlignment="Center"/>
+                       VerticalAlignment="Center">
+                    <Image.Effect>
+                        <DropShadowEffect Color="#000000" Opacity="0.30" BlurRadius="12" ShadowDepth="3"/>
+                    </Image.Effect>
+                </Image>
             </Border>
 
-            <!-- 2. Institution Name & Description at the Bottom of Logo -->
+            <!-- 2. Institution Name & Details (Dynamic from Settings) -->
             <StackPanel HorizontalAlignment="Center">
-                <TextBlock Text="MATTI NATIONAL HIGH SCHOOL"
+                <TextBlock Text="{Binding SchoolName}"
                            FontSize="24"
                            FontWeight="ExtraBold"
-                           Foreground="#FFFFFF"
-                           HorizontalAlignment="Center"
-                           TextAlignment="Center"/>
-                
-                <TextBlock Text="Digos City, Davao Del Sur"
-                           FontSize="15"
-                           FontWeight="SemiBold"
-                           Foreground="#94A3B8"
+                           Foreground="{DynamicResource LoginBrandingTextBrush}"
                            HorizontalAlignment="Center"
                            TextAlignment="Center"
-                           Margin="0,6,0,0"/>
+                           TextWrapping="Wrap">
+                    <TextBlock.Effect>
+                        <DropShadowEffect Color="#000000" Opacity="0.55" BlurRadius="6" ShadowDepth="1.5" Direction="270"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+                
+                <TextBlock Text="{Binding SchoolAddress}"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource LoginBrandingSubtextBrush}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           Margin="0,6,0,0">
+                    <TextBlock.Effect>
+                        <DropShadowEffect Color="#000000" Opacity="0.45" BlurRadius="4" ShadowDepth="1" Direction="270"/>
+                    </TextBlock.Effect>
+                </TextBlock>
 
                 <!-- Subtle Decorative Divider with Glowing Accent -->
                 <Grid Width="220" HorizontalAlignment="Center" Margin="0,18,0,18">
-                    <Border Height="1" Background="#1E3A8A" Opacity="0.8"/>
-                    <Border Width="6" Height="6" CornerRadius="3" Background="#38BDF8" HorizontalAlignment="Center"/>
+                    <Border Height="1" Background="{DynamicResource LoginBrandingDividerBrush}" Opacity="0.8"/>
+                    <Border Width="6" Height="6" CornerRadius="3" Background="{DynamicResource AccentBrush}" HorizontalAlignment="Center"/>
                 </Grid>
 
-                <!-- System Title & Description -->
+                <!-- System Title & Acronym -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
-                    <TextBlock Text="e" FontSize="19" FontWeight="ExtraBold" Foreground="#38BDF8"/>
-                    <TextBlock Text="SIMS" FontSize="19" FontWeight="ExtraBold" Foreground="#FFFFFF"/>
-                    <TextBlock Text=" • School Incident Management System" FontSize="14" FontWeight="SemiBold" Foreground="#CBD5E1" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                    <TextBlock Text="{Binding SystemAcronym}" FontSize="19" FontWeight="ExtraBold" Foreground="{DynamicResource AccentBrush}">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="#000000" Opacity="0.45" BlurRadius="4" ShadowDepth="1" Direction="270"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+                    <TextBlock Text="{Binding SystemTitle, StringFormat=' • {0}'}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource LoginBrandingTextBrush}" VerticalAlignment="Center" Margin="6,0,0,0">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="#000000" Opacity="0.45" BlurRadius="4" ShadowDepth="1" Direction="270"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
                 </StackPanel>
 
-                <TextBlock Text="Campus Safety • Behavioral Intelligence • Student Welfare"
+                <!-- Motto / Tagline -->
+                <TextBlock Text="{Binding Tagline}"
                            FontSize="12"
                            FontWeight="Medium"
-                           Foreground="#64748B"
+                           Foreground="{DynamicResource LoginBrandingMutedBrush}"
                            HorizontalAlignment="Center"
-                           TextAlignment="Center"/>
+                           TextAlignment="Center"
+                           TextWrapping="Wrap">
+                    <TextBlock.Effect>
+                        <DropShadowEffect Color="#000000" Opacity="0.45" BlurRadius="4" ShadowDepth="1" Direction="270"/>
+                    </TextBlock.Effect>
+                </TextBlock>
             </StackPanel>
         </StackPanel>
     </Grid>

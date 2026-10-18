@@ -32,6 +32,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public ActivityLogViewModel ActivityLogVM { get; }
         public IntegrityAuditViewModel IntegrityVM { get; }
         public SecurityAccessLogViewModel SecurityLogVM { get; }
+        public AcademicStructureViewModel AcademicVM { get; }
 
         // --- Email & SMTP Configuration State ---
         private string _smtpHost = "smtp.gmail.com";
@@ -46,9 +47,14 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
         // --- Branding & System Maintenance State ---
         private string _schoolName = "Matti National High School";
+        private string _schoolAddress = "Digos City, Davao Del Sur";
         private string _systemTitle = "Smart School Incident Management System";
+        private string _systemAcronym = "eSIMS";
         private string _motto = "Safe Campus • Real-time Reporting • Smart Resolution";
         private string _tagline = "Manage. Monitor. Protect.";
+        private string _loginLogoPath = string.Empty;
+        private string _dashboardLogoPath = string.Empty;
+        private bool _useSameLogoForDashboard = true;
         private string _brandingStatusMessage = string.Empty;
         private string _backupStatusMessage = string.Empty;
         private string _lastBackupDate = "No backups created in this session";
@@ -81,17 +87,27 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             ActivityLogVM = new ActivityLogViewModel(_auditService, _pdfService, () => { });
             IntegrityVM = new IntegrityAuditViewModel(_integrityService, _pdfService, () => { });
             SecurityLogVM = new SecurityAccessLogViewModel(_securityLogService, _pdfService, () => { });
+            AcademicVM = new AcademicStructureViewModel(_settingsService, _auditService);
 
             // Commands
             SaveEmailSettingsCommand = new RelayCommand(async _ => await SaveEmailSettingsAsync(), _ => CanManageSettings);
             SendTestEmailCommand = new RelayCommand(async _ => await SendTestEmailAsync(), _ => CanManageSettings);
             SaveBrandingCommand = new RelayCommand(async _ => await SaveBrandingAsync(), _ => CanManageSettings);
+            BrowseLoginLogoCommand = new RelayCommand(_ => BrowseLoginLogo(), _ => CanManageSettings);
+            ResetLoginLogoCommand = new RelayCommand(_ => ResetLoginLogo(), _ => CanManageSettings);
+            BrowseDashboardLogoCommand = new RelayCommand(_ => BrowseDashboardLogo(), _ => CanManageSettings && CanEditDashboardLogoCustom);
+            ResetDashboardLogoCommand = new RelayCommand(_ => ResetDashboardLogo(), _ => CanManageSettings && CanEditDashboardLogoCustom);
             CreateBackupCommand = new RelayCommand(async _ => await CreateDatabaseBackupAsync(), _ => CanManageSettings);
             ToggleThemeCommand = new RelayCommand(_ =>
             {
                 _themeService.ToggleTheme();
                 OnPropertyChanged(nameof(IsDarkMode));
                 OnPropertyChanged(nameof(ThemeModeText));
+                _ = _auditService.LogActivityAsync(
+                    SessionManager.CurrentUsername ?? "ADMIN-01",
+                    "CONFIG",
+                    "Interface Theme",
+                    $"Switched interface theme mode to {ThemeModeText}.");
             });
 
             _ = InitializeSettingsAsync();
@@ -116,9 +132,60 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
         // --- Branding Properties ---
         public string SchoolName { get => _schoolName; set => SetProperty(ref _schoolName, value); }
+        public string SchoolAddress { get => _schoolAddress; set => SetProperty(ref _schoolAddress, value); }
         public string SystemTitle { get => _systemTitle; set => SetProperty(ref _systemTitle, value); }
+        public string SystemAcronym { get => _systemAcronym; set => SetProperty(ref _systemAcronym, value); }
         public string Motto { get => _motto; set => SetProperty(ref _motto, value); }
         public string Tagline { get => _tagline; set => SetProperty(ref _tagline, value); }
+        public string LoginLogoPath
+        {
+            get => _loginLogoPath;
+            set
+            {
+                if (SetProperty(ref _loginLogoPath, value))
+                {
+                    OnPropertyChanged(nameof(LoginLogoPreview));
+                    OnPropertyChanged(nameof(HasCustomLoginLogo));
+                    if (UseSameLogoForDashboard)
+                    {
+                        OnPropertyChanged(nameof(DashboardLogoPreview));
+                    }
+                }
+            }
+        }
+        public string DashboardLogoPath
+        {
+            get => _dashboardLogoPath;
+            set
+            {
+                if (SetProperty(ref _dashboardLogoPath, value))
+                {
+                    OnPropertyChanged(nameof(DashboardLogoPreview));
+                    OnPropertyChanged(nameof(HasCustomDashboardLogo));
+                }
+            }
+        }
+        public bool UseSameLogoForDashboard
+        {
+            get => _useSameLogoForDashboard;
+            set
+            {
+                if (SetProperty(ref _useSameLogoForDashboard, value))
+                {
+                    OnPropertyChanged(nameof(DashboardLogoPreview));
+                    OnPropertyChanged(nameof(CanEditDashboardLogoCustom));
+                }
+            }
+        }
+        public bool CanEditDashboardLogoCustom => !UseSameLogoForDashboard;
+        public bool HasCustomLoginLogo => !string.IsNullOrWhiteSpace(LoginLogoPath) && File.Exists(LoginLogoPath);
+        public bool HasCustomDashboardLogo => !string.IsNullOrWhiteSpace(DashboardLogoPath) && File.Exists(DashboardLogoPath);
+
+        public object? LoginLogoPreview => LoadImagePreview(LoginLogoPath, SettingsService.DefaultSchoolSealUri);
+        public object? DashboardLogoPreview => UseSameLogoForDashboard
+            ? LoginLogoPreview
+            : LoadImagePreview(DashboardLogoPath, SettingsService.DefaultSchoolSealUri);
+
         public string BrandingStatusMessage { get => _brandingStatusMessage; set => SetProperty(ref _brandingStatusMessage, value); }
         public string BackupStatusMessage { get => _backupStatusMessage; set => SetProperty(ref _backupStatusMessage, value); }
         public string LastBackupDate { get => _lastBackupDate; set => SetProperty(ref _lastBackupDate, value); }
@@ -130,6 +197,10 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public ICommand SaveEmailSettingsCommand { get; }
         public ICommand SendTestEmailCommand { get; }
         public ICommand SaveBrandingCommand { get; }
+        public ICommand BrowseLoginLogoCommand { get; }
+        public ICommand ResetLoginLogoCommand { get; }
+        public ICommand BrowseDashboardLogoCommand { get; }
+        public ICommand ResetDashboardLogoCommand { get; }
         public ICommand CreateBackupCommand { get; }
         public ICommand ToggleThemeCommand { get; }
 
@@ -140,9 +211,14 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             {
                 await _settingsService.LoadSettingsAsync();
                 SchoolName = _settingsService.SchoolName;
+                SchoolAddress = _settingsService.SchoolAddress;
                 SystemTitle = _settingsService.SystemTitle;
+                SystemAcronym = _settingsService.SystemAcronym;
                 Motto = _settingsService.Motto;
                 Tagline = _settingsService.Tagline;
+                LoginLogoPath = _settingsService.LoginLogoPath;
+                DashboardLogoPath = _settingsService.DashboardLogoPath;
+                UseSameLogoForDashboard = string.IsNullOrWhiteSpace(DashboardLogoPath);
 
                 SmtpHost = await _settingsService.GetSettingAsync("SmtpHost", "smtp.gmail.com");
                 SmtpPort = await _settingsService.GetSettingAsync("SmtpPort", "587");
@@ -151,6 +227,8 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 SmtpEnableSsl = bool.Parse(await _settingsService.GetSettingAsync("SmtpEnableSsl", "True"));
                 NotificationsEnabled = bool.Parse(await _settingsService.GetSettingAsync("NotificationsEnabled", "True"));
                 TestRecipientEmail = SmtpSenderEmail;
+
+                await AcademicVM.LoadDataAsync();
             }
             catch { }
             finally
@@ -169,6 +247,12 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 await _settingsService.SetSettingAsync("SmtpSenderName", SmtpSenderName, "Sender Name");
                 await _settingsService.SetSettingAsync("SmtpEnableSsl", SmtpEnableSsl.ToString(), "Use SSL/TLS");
                 await _settingsService.SetSettingAsync("NotificationsEnabled", NotificationsEnabled.ToString(), "Enable Automated Notifications");
+
+                await _auditService.LogActivityAsync(
+                    SessionManager.CurrentUsername ?? "ADMIN-01",
+                    "UPDATE",
+                    "SMTP Configuration",
+                    $"Updated SMTP settings: Host='{SmtpHost}', Port='{SmtpPort}', Sender='{SmtpSenderEmail}', SSL={SmtpEnableSsl}.");
 
                 EmailStatusMessage = "Email settings saved successfully.";
                 MessageBox.Show("SMTP Configuration successfully updated.", "Settings Saved", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -211,17 +295,116 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             }
         }
 
+        private void BrowseLoginLogo()
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Select School Seal / Login Logo",
+                Filter = "Image Files (*.png;*.jpg;*.jpeg;*.webp;*.ico)|*.png;*.jpg;*.jpeg;*.webp;*.ico|All Files (*.*)|*.*"
+            };
+            if (dlg.ShowDialog() == true)
+            {
+                LoginLogoPath = dlg.FileName;
+            }
+        }
+
+        private void ResetLoginLogo()
+        {
+            LoginLogoPath = string.Empty;
+        }
+
+        private void BrowseDashboardLogo()
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Select Dashboard / Sidebar Logo",
+                Filter = "Image Files (*.png;*.jpg;*.jpeg;*.webp;*.ico)|*.png;*.jpg;*.jpeg;*.webp;*.ico|All Files (*.*)|*.*"
+            };
+            if (dlg.ShowDialog() == true)
+            {
+                DashboardLogoPath = dlg.FileName;
+            }
+        }
+
+        private void ResetDashboardLogo()
+        {
+            DashboardLogoPath = string.Empty;
+        }
+
+        private static object? LoadImagePreview(string? path, string defaultUri)
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+                {
+                    var bmp = new System.Windows.Media.Imaging.BitmapImage();
+                    bmp.BeginInit();
+                    bmp.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    bmp.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.IgnoreImageCache;
+                    bmp.UriSource = new Uri(path, UriKind.Absolute);
+                    bmp.EndInit();
+                    bmp.Freeze();
+                    return bmp;
+                }
+                else if (!string.IsNullOrWhiteSpace(defaultUri) && defaultUri.StartsWith("pack://", StringComparison.OrdinalIgnoreCase))
+                {
+                    var bmp = new System.Windows.Media.Imaging.BitmapImage();
+                    bmp.BeginInit();
+                    bmp.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    bmp.UriSource = new Uri(defaultUri, UriKind.Absolute);
+                    bmp.EndInit();
+                    bmp.Freeze();
+                    return bmp;
+                }
+            }
+            catch { }
+            return null;
+        }
+
         private async Task SaveBrandingAsync()
         {
             try
             {
-                await _settingsService.SetSettingAsync("SchoolName", SchoolName, "School Name");
-                await _settingsService.SetSettingAsync("SystemTitle", SystemTitle, "System Application Title");
-                await _settingsService.SetSettingAsync("Motto", Motto, "School Motto");
-                await _settingsService.SetSettingAsync("Tagline", Tagline, "System Tagline");
+                string brandingDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SmartSchool", "Branding");
+                Directory.CreateDirectory(brandingDir);
 
-                BrandingStatusMessage = "School branding updated successfully.";
-                MessageBox.Show("Branding changes saved successfully.", "Branding Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+                string finalLoginPath = LoginLogoPath ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(LoginLogoPath) && File.Exists(LoginLogoPath) && !LoginLogoPath.StartsWith(brandingDir, StringComparison.OrdinalIgnoreCase))
+                {
+                    string ext = Path.GetExtension(LoginLogoPath);
+                    string destFile = Path.Combine(brandingDir, $"login_seal_{Guid.NewGuid().ToString("N")[..6]}{ext}");
+                    File.Copy(LoginLogoPath, destFile, true);
+                    finalLoginPath = destFile;
+                    LoginLogoPath = destFile;
+                }
+
+                string finalDashPath = UseSameLogoForDashboard ? string.Empty : (DashboardLogoPath ?? string.Empty);
+                if (!UseSameLogoForDashboard && !string.IsNullOrWhiteSpace(DashboardLogoPath) && File.Exists(DashboardLogoPath) && !DashboardLogoPath.StartsWith(brandingDir, StringComparison.OrdinalIgnoreCase))
+                {
+                    string ext = Path.GetExtension(DashboardLogoPath);
+                    string destFile = Path.Combine(brandingDir, $"dash_logo_{Guid.NewGuid().ToString("N")[..6]}{ext}");
+                    File.Copy(DashboardLogoPath, destFile, true);
+                    finalDashPath = destFile;
+                    DashboardLogoPath = destFile;
+                }
+
+                await _settingsService.SetSettingAsync("SchoolName", SchoolName ?? string.Empty, "School Name");
+                await _settingsService.SetSettingAsync("SchoolAddress", SchoolAddress ?? string.Empty, "School Address / District");
+                await _settingsService.SetSettingAsync("SystemTitle", SystemTitle ?? string.Empty, "System Application Title");
+                await _settingsService.SetSettingAsync("SystemAcronym", SystemAcronym ?? string.Empty, "System Acronym / Short Name");
+                await _settingsService.SetSettingAsync("Motto", Motto ?? string.Empty, "School Motto");
+                await _settingsService.SetSettingAsync("Tagline", Tagline ?? string.Empty, "System Tagline");
+                await _settingsService.SetSettingAsync("LoginLogoPath", finalLoginPath, "Custom Login School Seal Path");
+                await _settingsService.SetSettingAsync("DashboardLogoPath", finalDashPath, "Custom Dashboard Logo Path");
+
+                await _auditService.LogActivityAsync(
+                    SessionManager.CurrentUsername ?? "ADMIN-01",
+                    "UPDATE",
+                    "School Branding",
+                    $"Updated school branding: SchoolName='{SchoolName}', SystemTitle='{SystemTitle}', Motto='{Motto}'.");
+
+                BrandingStatusMessage = "School branding and logos updated successfully across the system.";
+                MessageBox.Show("Branding changes and logos saved successfully across the system.", "Branding Saved", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
@@ -249,6 +432,12 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                         File.Copy(dbFile, backupFile, overwrite: true);
                     }
                 });
+
+                await _auditService.LogActivityAsync(
+                    SessionManager.CurrentUsername ?? "ADMIN-01",
+                    "BACKUP",
+                    "Database Maintenance",
+                    $"Created database backup snapshot: {Path.GetFileName(backupFile)}");
 
                 LastBackupDate = DateTime.Now.ToString("MMM dd, yyyy HH:mm:ss");
                 BackupStatusMessage = $"Backup successfully created:\n{backupFile}";

@@ -19,25 +19,33 @@
 
             <!-- TOP FILTER BAR -->
             <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,20">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="24"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="220"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Timeframe:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox ItemsSource="{Binding TimeframeModes}" SelectedItem="{Binding SelectedTimeframeMode}" Width="170" Height="36" VerticalContentAlignment="Center" Margin="0,0,12,0"/>
 
-                    <TextBlock Grid.Column="0" Text="Date Range:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <ComboBox Grid.Column="1" ItemsSource="{Binding DateRanges}" SelectedItem="{Binding SelectedDateRange}" Height="36" VerticalContentAlignment="Center"/>
+                    <!-- DatePicker for Day -->
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding IsDatePickVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,0,12,0">
+                        <TextBlock Text="Date:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <DatePicker SelectedDate="{Binding SelectedHeatmapDate}" Width="135" Height="36" VerticalContentAlignment="Center"/>
+                    </StackPanel>
 
-                    <TextBlock Grid.Column="3" Text="Incident Category:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <ComboBox Grid.Column="4" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" Height="36" VerticalContentAlignment="Center"/>
+                    <!-- Month Picker -->
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding IsMonthPickVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,0,12,0">
+                        <TextBlock Text="Month:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <ComboBox ItemsSource="{Binding AvailableMonths}" SelectedItem="{Binding SelectedMonthName}" Width="120" Height="36" VerticalContentAlignment="Center"/>
+                    </StackPanel>
 
-                    <Button Grid.Column="6" Content="🔄 Refresh Data" Command="{Binding RefreshCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="36" Padding="14,0"/>
-                </Grid>
+                    <!-- Year Picker -->
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding IsYearPickVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,0,12,0">
+                        <TextBlock Text="Year:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <ComboBox ItemsSource="{Binding AvailableYears}" SelectedItem="{Binding SelectedYear}" Width="90" Height="36" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+
+                    <TextBlock Text="Category:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" Width="170" Height="36" VerticalContentAlignment="Center" Margin="0,0,16,0"/>
+
+                    <Button Content="{Binding RefreshButtonText, FallbackValue='🔄 Refresh Data'}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}" Style="{DynamicResource SecondaryButtonStyle}" Height="36" Padding="14,0"/>
+                </WrapPanel>
             </Border>
 
             <!-- SPLIT PANE GRID (70/30) -->
@@ -59,7 +67,7 @@
 
                         <StackPanel Grid.Row="0" Margin="0,0,0,14">
                             <TextBlock Text="Interactive Campus Danger Map" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                            <TextBlock Text="Hover over risk nodes to inspect incident metrics and infractions." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                            <TextBlock Text="{Binding TimeframeSummaryText}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" Margin="0,2,0,0"/>
                         </StackPanel>
 
                         <!-- MAP SCHEMATIC & CANVAS CONTAINER -->
@@ -119,14 +127,17 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Ellipse Width="{Binding Radius}" Height="{Binding Radius}" Fill="{Binding RiskColor}" Cursor="Hand">
+                                                <Ellipse.InputBindings>
+                                                    <MouseBinding Gesture="LeftClick" Command="{Binding DataContext.SelectLocationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                                </Ellipse.InputBindings>
                                                 <Ellipse.Effect><BlurEffect Radius="8"/></Ellipse.Effect>
                                                 <Ellipse.ToolTip>
-                                                    <ToolTip Background="#1E293B" Foreground="White" BorderThickness="0" Padding="10">
+                                                    <ToolTip Style="{DynamicResource ModernToolTipStyle}">
                                                         <StackPanel>
-                                                            <TextBlock Text="{Binding LocationName}" FontSize="12" FontWeight="Bold"/>
-                                                            <TextBlock Text="{Binding IncidentCount, StringFormat='Total Incidents: {0}'}" FontSize="11" Foreground="#38BDF8" Margin="0,2,0,0"/>
-                                                            <TextBlock Text="{Binding PrimaryInfraction, StringFormat='Top Category: {0}'}" FontSize="11" Foreground="#CBD5E1" Margin="0,2,0,0"/>
-                                                            <TextBlock Text="{Binding RiskLevelText, StringFormat='Status: {0}'}" FontSize="11" FontWeight="Bold" Foreground="#F87171" Margin="0,2,0,0"/>
+                                                            <TextBlock Text="{Binding LocationName}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                            <TextBlock Text="{Binding IncidentCount, StringFormat='Total Incidents: {0}'}" FontSize="11" Foreground="{Binding NodeTextBrush}" Margin="0,2,0,0"/>
+                                                            <TextBlock Text="{Binding PrimaryInfraction, StringFormat='Top Category: {0}'}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                                                            <TextBlock Text="{Binding RiskLevelText, StringFormat='Status: {0}'}" FontSize="11" FontWeight="Bold" Foreground="{Binding NodeTextBrush}" Margin="0,2,0,0"/>
                                                         </StackPanel>
                                                     </ToolTip>
                                                 </Ellipse.ToolTip>
@@ -139,7 +150,7 @@
                     </Grid>
                 </Border>
 
-                <!-- RIGHT COLUMN: Risk Ranking & Patrol Priorities (30%) -->
+                <!-- RIGHT COLUMN: Risk Ranking & Patrol Priorities (30%) / Selected Zone Incident Inspector -->
                 <Border Grid.Column="2" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="20">
                     <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.04" BlurRadius="10" ShadowDepth="2"/></Border.Effect>
                     <Grid>
@@ -149,38 +160,90 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Title -->
-                        <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                            <TextBlock Text="Security Patrol Priorities" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                            <TextBlock Text="Ranked locations needing increased guard deployment." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
-                        </StackPanel>
+                        <!-- Title & Clear Button -->
+                        <DockPanel Grid.Row="0" Margin="0,0,0,14">
+                            <StackPanel DockPanel.Dock="Left">
+                                <TextBlock Text="{Binding SelectedLocationTitle}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis" MaxWidth="220"/>
+                                <TextBlock Text="Click a zone to inspect incidents." FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <Button Content="✕ All" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ClearSelectedLocationCommand}" Visibility="{Binding HasSelectedLocation, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="8,2" FontSize="11"/>
+                        </DockPanel>
 
-                        <!-- Location Ranking ItemsControl -->
+                        <!-- Scrollable Content: Top Locations OR Selected Zone Incidents -->
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                            <ItemsControl ItemsSource="{Binding TopLocations}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,10">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <!-- Location Ranking ItemsControl (When HasSelectedLocation is False) -->
+                                <ItemsControl ItemsSource="{Binding TopLocations}">
+                                    <ItemsControl.Style>
+                                        <Style TargetType="ItemsControl">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasSelectedLocation}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ItemsControl.Style>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,10" Cursor="Hand">
+                                                <Border.InputBindings>
+                                                    <MouseBinding Gesture="LeftClick" Command="{Binding DataContext.SelectLocationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                                                </Border.InputBindings>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
 
-                                                <StackPanel Grid.Column="0">
-                                                    <TextBlock Text="{Binding LocationName}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                                    <TextBlock Text="{Binding PrimaryInfraction, StringFormat='Infraction: {0}'}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
-                                                    <TextBlock Text="{Binding IncidentCount, StringFormat='{}{0} Incidents Logged'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,2,0,0"/>
-                                                </StackPanel>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="{Binding LocationName}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                        <TextBlock Text="{Binding PrimaryInfraction, StringFormat='Infraction: {0}'}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                                                        <TextBlock Text="{Binding IncidentCount, StringFormat='{}{0} Incidents Logged'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,2,0,0"/>
+                                                    </StackPanel>
 
-                                                <Border Grid.Column="1" Background="{Binding RiskColor}" CornerRadius="4" Padding="6,2" VerticalAlignment="Top">
-                                                    <TextBlock Text="{Binding RiskLevelText}" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                                    <Border Grid.Column="1" Background="{Binding RiskColor}" CornerRadius="4" Padding="6,2" VerticalAlignment="Top">
+                                                        <TextBlock Text="{Binding RiskLevelText}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- Selected Zone Incidents (When HasSelectedLocation is True) -->
+                                <StackPanel>
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasSelectedLocation}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <ItemsControl ItemsSource="{Binding SelectedLocationIncidents}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Style="{DynamicResource CardBorderStyle}" Padding="10" Margin="0,0,0,8" Background="{DynamicResource SurfaceBackgroundBrush}">
+                                                    <StackPanel>
+                                                        <DockPanel Margin="0,0,0,4">
+                                                            <TextBlock Text="{Binding IncidentNumber}" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource PrimaryBrush}"/>
+                                                            <Border HorizontalAlignment="Right" Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1" CornerRadius="4" Padding="6,1">
+                                                                <TextBlock Text="{Binding Category}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource DangerBrush}"/>
+                                                            </Border>
+                                                        </DockPanel>
+                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding IncidentDate, StringFormat='🗓️ {0:MMM dd, yyyy • hh:mm tt}'}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                                                        <TextBlock Text="{Binding StudentDisplayName, StringFormat='👤 Student: {0}'}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                                    </StackPanel>
                                                 </Border>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </StackPanel>
                         </ScrollViewer>
 
                         <!-- Bottom Export Button -->

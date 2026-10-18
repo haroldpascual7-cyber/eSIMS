@@ -7,12 +7,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace SmartSchoolIncidentManagementSystem.ViewModels
 {
-    public class IncidentDetailViewModel : ObservableObject
+    public partial class IncidentDetailViewModel : ObservableObject
     {
         private readonly IIncidentService _incidentService;
         private readonly IRuleEngineService _ruleEngineService;
@@ -67,6 +69,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                     RepeatIncidentCount = incident.RepeatIncidentCount,
                     ActionTaken = incident.ActionTaken,
                     Notes = incident.Notes,
+                    EvidenceData = incident.EvidenceData,
                     CreatedAt = incident.CreatedAt,
                     UpdatedAt = incident.UpdatedAt,
                     IsSynced = incident.IsSynced
@@ -95,6 +98,10 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             CancelCommand = new RelayCommand(() => _onClose());
             ApplyRuleRecommendationsCommand = new RelayCommand(ApplyRecommendations);
             SelectStudentSuggestionCommand = new RelayCommand(param => SelectStudentSuggestion(param));
+
+            // Evidence commands
+            InitializeEvidenceSupport();
+            LoadEvidenceFromIncident();
 
             _ = LoadEnrolledStudentsAsync();
             TriggerLiveAnalysis();
@@ -406,7 +413,12 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 _incident.Location = (_incident.Location ?? string.Empty).Trim();
                 _incident.Description = (_incident.Description ?? string.Empty).Trim();
                 _incident.RecommendedAction = LiveRecommendedAction;
-                _incident.IsRepeatIncident = IsRepeatAlertVisible;
+                if (!string.IsNullOrWhiteSpace(NewEvidenceFilePathOrUrl))
+                {
+                    AddEvidence();
+                }
+
+                _incident.EvidenceData = JsonSerializer.Serialize(EvidenceList.ToList());
 
                 if (_isEditMode)
                 {

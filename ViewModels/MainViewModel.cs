@@ -21,6 +21,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         private readonly IConsequenceService _consequenceService;
         private readonly IRestorativeService _restorativeService;
         private readonly ISuspensionService _suspensionService;
+        private readonly IProbationService _probationService;
         private readonly IIncidentClassificationService _classificationService;
         private readonly IBehavioralTranscriptService _transcriptService;
         private readonly IAnalyticsService _analyticsService;
@@ -51,6 +52,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             IConsequenceService consequenceService,
             IRestorativeService restorativeService,
             ISuspensionService suspensionService,
+            IProbationService probationService,
             IIncidentClassificationService classificationService,
             IBehavioralTranscriptService transcriptService,
             IAnalyticsService? analyticsService = null,
@@ -76,6 +78,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             _consequenceService = consequenceService ?? throw new ArgumentNullException(nameof(consequenceService));
             _restorativeService = restorativeService ?? throw new ArgumentNullException(nameof(restorativeService));
             _suspensionService = suspensionService ?? throw new ArgumentNullException(nameof(suspensionService));
+            _probationService = probationService ?? throw new ArgumentNullException(nameof(probationService));
             _classificationService = classificationService ?? throw new ArgumentNullException(nameof(classificationService));
             _transcriptService = transcriptService ?? throw new ArgumentNullException(nameof(transcriptService));
             _analyticsService = analyticsService ?? new AnalyticsService(new AppDbContext());
@@ -115,6 +118,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             ToggleThemeCommand = new RelayCommand(ToggleTheme);
             LogoutCommand = new RelayCommand(Logout);
             InitializeNotificationSystem();
+            InitializeBrandingSupport();
             ViewNotificationsCommand = OpenNotificationModalCommand;
 
             _currentViewModel = new LoginViewModel(_authService, _themeService, _settingsService, OnLoginSuccess);
@@ -160,7 +164,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public bool IsDashboardOverviewActive => ActiveSection == "Dashboard Overview";
         public bool IsStudentsActive => ActiveSection == "Students";
         public bool IsIncidentsActive => ActiveSection == "Incidents";
-        public bool IsInvestigationsActive => ActiveSection == "Investigations";
+        public bool IsInvestigationsActive => ActiveSection == "Investigations" || ActiveSection == "DisciplinaryActions";
         public bool IsBehaviorActive => ActiveSection == "Behavior";
         public bool IsParentNoticesActive => ActiveSection == "ParentNotices";
         public bool IsReportsAnalyticsActive => ActiveSection == "ReportsAnalytics";
@@ -174,6 +178,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             "Students" => "Students Directory & Records",
             "Incidents" => "Incidents Records & Intelligence Log",
             "Investigations" => "Case Investigation Workspace",
+            "DisciplinaryActions" => "Suspension & Probation Tracking",
             "Behavior" => "Student Behavioral Management",
             "ParentNotices" => "Parent Notices & Official Disclosures",
             "ReportsAnalytics" => "Safety Reports & Safety Analytics",
@@ -286,7 +291,8 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 _incidentService,
                 incident => ShowIncidentDetail(incident),
                 () => ShowIncidents(),
-                () => ShowDashboard());
+                () => ShowDashboard(),
+                _settingsService);
         }
 
         // 2. STUDENTS
@@ -301,7 +307,13 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         }
 
         // 3. INCIDENTS
-        public void ShowIncidents(Incident? preselectedIncident = null, bool createNew = false, string? forStudentName = null)
+        public void ShowIncidents(
+            Incident? preselectedIncident = null,
+            bool createNew = false,
+            string? forStudentName = null,
+            string? statusFilter = null,
+            string? severityFilter = null,
+            string? searchKeyword = null)
         {
             if (!EnsureRolePermission("System Administrator,Discipline Officer,Guidance Counselor,Teacher,Staff", "Incidents Management")) return;
             ActiveSection = "Incidents";
@@ -313,6 +325,13 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 _ruleEngineService,
                 _commService,
                 _studentService);
+
+            if (!string.IsNullOrWhiteSpace(statusFilter))
+                vm.SelectedStatusFilter = statusFilter;
+            if (!string.IsNullOrWhiteSpace(severityFilter))
+                vm.SelectedSeverityFilter = severityFilter;
+            if (!string.IsNullOrWhiteSpace(searchKeyword))
+                vm.SearchText = searchKeyword;
 
             if (createNew)
             {
@@ -360,7 +379,8 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 _investigationService,
                 _incidentService,
                 incident,
-                () => ShowInvestigations());
+                () => ShowInvestigations(),
+                ShowDisciplinaryActions);
         }
 
         public void ShowStudentInvestigationInquiry(Incident incident)
@@ -447,7 +467,6 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
         public void ShowSystemSettings() => ShowSettingsWorkspace(4);
         public void ShowUserManagement() => ShowSettingsWorkspace(0);
-        public void ShowDisciplinaryActions() => ShowInvestigations();
         public void ShowRiskRules() => ShowSettingsWorkspace(3);
         public void ShowAuditTrail() => ShowSettingsWorkspace(5);
 

@@ -3,6 +3,7 @@ using SmartSchoolIncidentManagementSystem.ViewModels.Common;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace SmartSchoolIncidentManagementSystem.ViewModels
@@ -48,10 +49,12 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             FlipToSignUpCommand = new RelayCommand(() => FlipCard(true));
             FlipToLoginCommand = new RelayCommand(() => FlipCard(false));
             ToggleThemeCommand = new RelayCommand(() => _themeService.ToggleTheme());
+            ExitCommand = new RelayCommand(() => Application.Current?.Shutdown());
             TogglePasswordVisibilityCommand = new RelayCommand(TogglePasswordVisibility);
             ToggleSignUpPasswordVisibilityCommand = new RelayCommand(() => SignUpIsPasswordVisible = !SignUpIsPasswordVisible);
             ToggleSignUpConfirmPasswordVisibilityCommand = new RelayCommand(() => SignUpIsConfirmPasswordVisible = !SignUpIsConfirmPasswordVisible);
 
+            _settingsService.SettingsChanged += RefreshBranding;
             _ = InitializeSettingsAsync();
         }
 
@@ -255,10 +258,13 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         }
 
         public string SchoolName => _settingsService.SchoolName;
+        public string SchoolAddress => _settingsService.SchoolAddress;
         public string SystemTitle => _settingsService.SystemTitle;
+        public string SystemAcronym => _settingsService.SystemAcronym;
         public string Tagline => _settingsService.Tagline;
         public string Motto => _settingsService.Motto;
         public string LogoIcon => _settingsService.LogoIcon;
+        public object? LoginLogoSource => _settingsService.LoginLogoSource;
 
         public string Username
         {
@@ -313,6 +319,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public ICommand LoginCommand { get; }
         public ICommand ToggleThemeCommand { get; }
         public ICommand TogglePasswordVisibilityCommand { get; }
+        public ICommand ExitCommand { get; }
 
         private void TogglePasswordVisibility()
         {
@@ -322,11 +329,19 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         private async Task InitializeSettingsAsync()
         {
             await _settingsService.LoadSettingsAsync();
+            RefreshBranding();
+        }
+
+        private void RefreshBranding()
+        {
             OnPropertyChanged(nameof(SchoolName));
+            OnPropertyChanged(nameof(SchoolAddress));
             OnPropertyChanged(nameof(SystemTitle));
+            OnPropertyChanged(nameof(SystemAcronym));
             OnPropertyChanged(nameof(Tagline));
             OnPropertyChanged(nameof(Motto));
             OnPropertyChanged(nameof(LogoIcon));
+            OnPropertyChanged(nameof(LoginLogoSource));
         }
 
         public async Task ExecuteLoginAsync()

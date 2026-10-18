@@ -1,4 +1,4 @@
-﻿using SmartSchoolIncidentManagementSystem.Models;
+using SmartSchoolIncidentManagementSystem.Models;
 using SmartSchoolIncidentManagementSystem.Services;
 using SmartSchoolIncidentManagementSystem.ViewModels.Common;
 using System;
@@ -33,11 +33,14 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         private string _fileStudentName = "Michael Brown";
         private string _fileStudentId = "STD-1042";
         private string _fileIncidentNumber = "INC-2026-00004";
+        private Incident? _fileIncident;
+        private Student? _fileStudent;
         private string _fileSuspensionType = "Out-of-School Suspension (OSS)";
         private DateTime _fileStartDate = DateTime.Now;
         private DateTime _fileEndDate = DateTime.Now.AddDays(5);
         private DateTime _fileReentryDate = DateTime.Now.AddDays(6);
         private string _fileIssuedBy = "Dean of Student Affairs";
+        private string _fileReason = string.Empty;
         private string _fileTerms = string.Empty;
         private bool _fileParentConferenceRequired = true;
         private bool _fileAcademicPacketRequired = true;
@@ -63,8 +66,8 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             _onBackToOverview = onBackToOverview ?? throw new ArgumentNullException(nameof(onBackToOverview));
 
             SuspensionOrders = new ObservableCollection<SuspensionOrder>();
-            AvailableIncidents = new ObservableCollection<string>();
-            AvailableStudents = new ObservableCollection<string>();
+            AvailableIncidents = new ObservableCollection<Incident>();
+            AvailableStudents = new ObservableCollection<Student>();
 
             TypeFilterOptions = new ObservableCollection<string> { "All", "ISS", "OSS", "Preventative Exclusion" };
             StatusFilterOptions = new ObservableCollection<string> { "All", "Active Ban", "Pending Review", "Readmitted" };
@@ -93,8 +96,8 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         }
 
         public ObservableCollection<SuspensionOrder> SuspensionOrders { get; }
-        public ObservableCollection<string> AvailableIncidents { get; }
-        public ObservableCollection<string> AvailableStudents { get; }
+        public ObservableCollection<Incident> AvailableIncidents { get; }
+        public ObservableCollection<Student> AvailableStudents { get; }
 
         public ObservableCollection<string> TypeFilterOptions { get; }
         public ObservableCollection<string> StatusFilterOptions { get; }
@@ -141,11 +144,33 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public string FileStudentName { get => _fileStudentName; set => SetProperty(ref _fileStudentName, value); }
         public string FileStudentId { get => _fileStudentId; set => SetProperty(ref _fileStudentId, value); }
         public string FileIncidentNumber { get => _fileIncidentNumber; set => SetProperty(ref _fileIncidentNumber, value); }
+        public Incident? FileIncident
+        {
+            get => _fileIncident;
+            set
+            {
+                if (!SetProperty(ref _fileIncident, value) || value == null) return;
+                FileIncidentNumber = value.IncidentNumber;
+                if (value.Student != null)
+                    FileStudent = AvailableStudents.FirstOrDefault(s => s.Id == value.Student.Id) ?? value.Student;
+            }
+        }
+        public Student? FileStudent
+        {
+            get => _fileStudent;
+            set
+            {
+                if (!SetProperty(ref _fileStudent, value) || value == null) return;
+                FileStudentName = value.FullName;
+                FileStudentId = value.StudentNumber;
+            }
+        }
         public string FileSuspensionType { get => _fileSuspensionType; set => SetProperty(ref _fileSuspensionType, value); }
         public DateTime FileStartDate { get => _fileStartDate; set { if (SetProperty(ref _fileStartDate, value)) RecalculateDates(); } }
         public DateTime FileEndDate { get => _fileEndDate; set { if (SetProperty(ref _fileEndDate, value)) RecalculateDates(); } }
         public DateTime FileReentryDate { get => _fileReentryDate; set => SetProperty(ref _fileReentryDate, value); }
         public string FileIssuedBy { get => _fileIssuedBy; set => SetProperty(ref _fileIssuedBy, value); }
+        public string FileReason { get => _fileReason; set => SetProperty(ref _fileReason, value); }
         public string FileTerms { get => _fileTerms; set => SetProperty(ref _fileTerms, value); }
         public bool FileParentConferenceRequired { get => _fileParentConferenceRequired; set => SetProperty(ref _fileParentConferenceRequired, value); }
         public bool FileAcademicPacketRequired { get => _fileAcademicPacketRequired; set => SetProperty(ref _fileAcademicPacketRequired, value); }
@@ -175,18 +200,36 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public ICommand FilterThisWeekCommand { get; }
         public ICommand FilterThisMonthCommand { get; }
 
+        private bool _isLoading;
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set => SetProperty(ref _isLoading, value);
+        }
+
         private async Task InitializeDataAsync()
         {
-            var incidents = await _incidentService.GetAllIncidentsAsync();
-            AvailableIncidents.Clear();
-            foreach (var inc in incidents) AvailableIncidents.Add(inc.IncidentNumber);
-            if (AvailableIncidents.Any()) FileIncidentNumber = AvailableIncidents.First();
+            try
+            {
+                IsLoading = true;
+                var incidents = await _incidentService.GetAllIncidentsAsync();
+                AvailableIncidents.Clear();
+                foreach (var inc in incidents) AvailableIncidents.Add(inc);
 
-            var students = await _incidentService.GetAllStudentsAsync();
-            AvailableStudents.Clear();
-            foreach (var st in students) AvailableStudents.Add($"{st.FullName} ({st.StudentNumber})");
+                var students = await _incidentService.GetAllStudentsAsync();
+                AvailableStudents.Clear();
+                foreach (var st in students) AvailableStudents.Add(st);
 
-            await LoadOrdersAsync();
+                FileIncident = AvailableIncidents.FirstOrDefault();
+                FileStudent ??= AvailableStudents.FirstOrDefault();
+
+                await LoadOrdersAsync();
+            }
+            finally
+            {
+                await Task.Delay(100);
+                IsLoading = false;
+            }
         }
 
         private async Task LoadOrdersAsync()
@@ -221,13 +264,16 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         private void OpenFileModal()
         {
             FileErrorMessage = string.Empty;
-            FileStudentName = "Michael Brown";
-            FileStudentId = "STD-1042";
+            FileIncident = null;
+            FileStudent = null;
+            FileIncident = AvailableIncidents.FirstOrDefault();
+            FileStudent ??= AvailableStudents.FirstOrDefault();
             FileSuspensionType = "Out-of-School Suspension (OSS)";
             FileStartDate = DateTime.Now;
             FileEndDate = DateTime.Now.AddDays(5);
             FileReentryDate = DateTime.Now.AddDays(6);
-            FileIssuedBy = "Dean of Student Affairs";
+            FileIssuedBy = SessionManager.CurrentUsername;
+            FileReason = string.Empty;
             FileTerms = string.Empty;
             IsFileModalOpen = true;
         }
@@ -237,23 +283,28 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         private async Task SaveNewOrderAsync()
         {
             FileErrorMessage = string.Empty;
-            if (string.IsNullOrWhiteSpace(FileStudentName)) { FileErrorMessage = "Please enter student's name."; return; }
+            if (FileIncident == null) { FileErrorMessage = "Please select a verified incident."; return; }
+            if (FileStudent == null) { FileErrorMessage = "Please select a verified student."; return; }
             if (FileEndDate < FileStartDate) { FileErrorMessage = "End Date cannot be earlier than Start Date."; return; }
+            if (string.IsNullOrWhiteSpace(FileReason)) { FileErrorMessage = "Please enter the authorized suspension reason."; return; }
             if (string.IsNullOrWhiteSpace(FileTerms)) { FileErrorMessage = "Please specify suspension terms & parameters."; return; }
 
             int totalDays = (int)(FileEndDate - FileStartDate).TotalDays + 1;
             var order = new SuspensionOrder
             {
                 OrderId = await _suspensionService.GenerateOrderIdAsync(),
-                IncidentNumber = string.IsNullOrWhiteSpace(FileIncidentNumber) ? "INC-2026-00004" : FileIncidentNumber,
-                StudentName = FileStudentName.Trim(),
-                StudentIdNumber = string.IsNullOrWhiteSpace(FileStudentId) ? "STD-1042" : FileStudentId.Trim(),
+                IncidentId = FileIncident.Id,
+                IncidentNumber = FileIncident.IncidentNumber,
+                StudentId = FileStudent.Id,
+                StudentName = FileStudent.FullName,
+                StudentIdNumber = FileStudent.StudentNumber,
                 SuspensionType = FileSuspensionType,
                 StartDate = FileStartDate,
                 EndDate = FileEndDate,
                 TotalDays = Math.Max(1, totalDays),
                 ReentryDate = FileReentryDate,
-                IssuedBy = FileIssuedBy.Trim(),
+                IssuedBy = SessionManager.CurrentUsername,
+                Reason = FileReason.Trim(),
                 Terms = FileTerms.Trim(),
                 ParentConferenceRequired = FileParentConferenceRequired,
                 AcademicPacketRequired = FileAcademicPacketRequired,

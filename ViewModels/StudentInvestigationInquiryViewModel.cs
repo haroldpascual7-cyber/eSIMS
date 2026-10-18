@@ -116,7 +116,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             _preselectedIncidentNumber = preselectedIncident?.IncidentNumber;
 
             BackCommand = new RelayCommand(_ => _onBack());
-            RefreshCommand = new RelayCommand(async _ => await LoadCasesAsync());
+            RefreshCommand = new RelayCommand(async _ => await ExecuteRefreshAsync(), _ => !IsLoading && !IsRefreshing);
             FilterAllCommand = new RelayCommand(_ => { SelectedFilter = "All"; });
             FilterActiveCommand = new RelayCommand(_ => { SelectedFilter = "Active"; });
             FilterResolvedCommand = new RelayCommand(_ => { SelectedFilter = "Resolved"; });
@@ -207,7 +207,56 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public bool IsLoading
         {
             get => _isLoading;
-            set => SetProperty(ref _isLoading, value);
+            set
+            {
+                if (SetProperty(ref _isLoading, value))
+                {
+                    OnPropertyChanged(nameof(IsNotRefreshing));
+                    OnPropertyChanged(nameof(RefreshButtonText));
+                }
+            }
+        }
+
+        private bool _isRefreshing;
+        public bool IsRefreshing
+        {
+            get => _isRefreshing;
+            set
+            {
+                if (SetProperty(ref _isRefreshing, value))
+                {
+                    OnPropertyChanged(nameof(IsNotRefreshing));
+                    OnPropertyChanged(nameof(RefreshButtonText));
+                }
+            }
+        }
+
+        public bool IsNotRefreshing => !IsRefreshing && !IsLoading;
+        public string RefreshButtonText => (IsRefreshing || IsLoading) ? "⌛ Refreshing..." : "↻ Refresh Cases";
+
+        public async Task ExecuteRefreshAsync()
+        {
+            if (IsRefreshing || IsLoading) return;
+            try
+            {
+                IsRefreshing = true;
+                IsLoading = true;
+                OnPropertyChanged(nameof(IsNotRefreshing));
+                OnPropertyChanged(nameof(RefreshButtonText));
+                await LoadCasesAsync();
+                await Task.Delay(750);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error refreshing cases: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+                IsRefreshing = false;
+                OnPropertyChanged(nameof(IsNotRefreshing));
+                OnPropertyChanged(nameof(RefreshButtonText));
+            }
         }
 
         public int TotalCasesCount

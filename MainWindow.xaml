@@ -39,6 +39,21 @@
         <DataTemplate DataType="{x:Type vm:InvestigationDetailViewModel}">
             <views:InvestigationDetailView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DisciplinaryActionsHubViewModel}">
+            <views:DisciplinaryActionsHubView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ConsequenceTrackingViewModel}">
+            <views:ConsequenceTrackingView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:RestorativeInterventionsViewModel}">
+            <views:RestorativeInterventionsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SuspensionCalendarViewModel}">
+            <views:SuspensionCalendarView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProbationTrackingViewModel}">
+            <views:ProbationTrackingView/>
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:BehaviorWorkspaceViewModel}">
             <views:BehaviorWorkspaceView/>
         </DataTemplate>
@@ -51,37 +66,6 @@
         <DataTemplate DataType="{x:Type vm:SettingsWorkspaceViewModel}">
             <views:SettingsWorkspaceView/>
         </DataTemplate>
-
-        <!-- Sidebar Navigation Button Style -->
-        <Style x:Key="SidebarNavButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{DynamicResource SidebarTextBrush}"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="14,0"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Margin" Value="10,2"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="{DynamicResource SidebarHoverBrush}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
 
     <Grid>
@@ -117,243 +101,9 @@
                 <ColumnDefinition Width="*"/>    <!-- Main Workspace Content Area -->
             </Grid.ColumnDefinitions>
 
-            <!-- LEFT SIDEBAR NAVIGATION: Exists in all workspaces except the full-screen Dashboard -->
-            <Border Grid.Column="0" Width="230"
-                    Visibility="{Binding IsDashboardActive, Converter={StaticResource InverseBoolToVis}}"
-                    Background="{DynamicResource SidebarBackgroundBrush}"
-                    BorderBrush="{DynamicResource BorderBrush}"
-                    BorderThickness="0,0,1,0">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/> <!-- School Branding -->
-                        <RowDefinition Height="*"/>    <!-- Vertical Navigation Menu -->
-                        <RowDefinition Height="Auto"/> <!-- Bottom User Profile & Quick Actions -->
-                    </Grid.RowDefinitions>
-
-                    <!-- 1. School Branding -->
-                    <Border Grid.Row="0" Padding="16,14" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Ellipse Grid.Column="0" Width="38" Height="38" Margin="0,0,10,0" VerticalAlignment="Center">
-                                <Ellipse.Fill>
-                                    <ImageBrush ImageSource="pack://application:,,,/Assets/Matti_National_High_School_logo.png"
-                                                Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                </Ellipse.Fill>
-                            </Ellipse>
-
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="MATTI NATIONAL" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SidebarTextBrush}"/>
-                                <TextBlock Text="HIGH SCHOOL" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SidebarTextBrush}"/>
-                                <TextBlock Text="Incident System" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,1,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- 2. Vertical Navigation Menu -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,10">
-                        <StackPanel>
-                            <!-- 1. Dashboard (Returns to Full-Screen Tablet Dashboard) -->
-                            <Button Command="{Binding NavigateDashboardCommand}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsDashboardActive}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsDashboardOverviewActive}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="🏠" FontSize="15" Width="26" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Dashboard" FontSize="12.5" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- 2. Students Directory -->
-                            <Button Command="{Binding NavigateStudentsCommand}"
-                                    Visibility="{Binding CanAccessStudents, Converter={StaticResource BoolToVis}}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsStudentsActive}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="👥" FontSize="15" Width="26" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Students" FontSize="12.5" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- 3. Incidents Management -->
-                            <Button Command="{Binding NavigateIncidentsCommand}"
-                                    Visibility="{Binding CanAccessIncidents, Converter={StaticResource BoolToVis}}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsIncidentsActive}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="🚨" FontSize="15" Width="26" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Incidents" FontSize="12.5" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- 4. Investigations Workspace -->
-                            <Button Command="{Binding NavigateInvestigationsCommand}"
-                                    Visibility="{Binding CanAccessInvestigations, Converter={StaticResource BoolToVis}}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsInvestigationsActive}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="🔍" FontSize="15" Width="26" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Investigations" FontSize="12.5" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- 5. Student Behavioral Management -->
-                            <Button Command="{Binding NavigateBehaviorCommand}"
-                                    Visibility="{Binding CanAccessBehavior, Converter={StaticResource BoolToVis}}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsBehaviorActive}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="📈" FontSize="15" Width="26" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Behavior &amp; IAP" FontSize="12.5" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- 6. Parent Notices -->
-                            <Button Command="{Binding NavigateParentNoticesCommand}"
-                                    Visibility="{Binding CanAccessParentNotices, Converter={StaticResource BoolToVis}}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsParentNoticesActive}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="✉️" FontSize="15" Width="26" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Parent Notices" FontSize="12.5" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- 7. Safety Reports & Analytics -->
-                            <Button Command="{Binding NavigateReportsAnalyticsCommand}"
-                                    Visibility="{Binding CanAccessReports, Converter={StaticResource BoolToVis}}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsReportsAnalyticsActive}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="📊" FontSize="15" Width="26" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Reports &amp; Analytics" FontSize="12.5" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- 8. System Administration & Settings -->
-                            <Button Command="{Binding NavigateSettingsCommand}"
-                                    Visibility="{Binding CanAccessSettings, Converter={StaticResource BoolToVis}}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsSettingsActive}" Value="True">
-                                                <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="⚙️" FontSize="15" Width="26" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Settings &amp; Users" FontSize="12.5" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-                    </ScrollViewer>
-
-                    <!-- 3. Bottom User Profile & Quick Actions -->
-                    <Border Grid.Row="2" Padding="12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
-                        <StackPanel>
-                            <!-- Active User Card -->
-                            <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="{DynamicResource PrimaryBrush}" Margin="0,0,8,0" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding UserInitials}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding CurrentUserName}" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Text="{Binding CurrentUserRole}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}"/>
-                                        <TextBlock Text="● Online" FontSize="9" Foreground="{DynamicResource SuccessBrush}" Margin="0,1,0,0"/>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
-
-                            <!-- Action Bar: Theme & Logout -->
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="38"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Button Grid.Column="0" Command="{Binding ToggleThemeCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="32" Padding="0" ToolTip="Toggle Light / Dark Mode" Margin="0,0,8,0">
-                                    <TextBlock Text="🌓" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Button>
-
-                                <Button Grid.Column="1" Command="{Binding LogoutCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="32" Padding="0" ToolTip="Log Out of System">
-                                    <TextBlock Text="🚪 Exit" FontSize="11.5" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Button>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-            </Border>
+            <!-- REUSABLE COLLAPSIBLE LEFT SIDEBAR NAVIGATION: Icons only when collapsed, Icons + Text when expanded -->
+            <views:SidebarNavigationControl Grid.Column="0"
+                                            Visibility="{Binding IsDashboardActive, Converter={StaticResource InverseBoolToVis}}"/>
 
             <!-- MAIN WORKSPACE CONTENT AREA -->
             <Grid Grid.Column="1" ClipToBounds="False" Panel.ZIndex="10">
@@ -421,6 +171,56 @@
                 <!-- Workspace View Content Control -->
                 <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" ClipToBounds="False"/>
             </Grid>
+        </Grid>
+
+        <!-- ==================== 3. GLOBAL FULL-SCREEN REFRESH / LOADING OVERLAY ==================== -->
+        <Grid Visibility="{Binding CurrentViewModel.IsLoading, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}"
+              Panel.ZIndex="2500"
+              ClipToBounds="False"
+              Background="{DynamicResource ModalOverlayBrush}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <!-- Smooth Rotating Radial Activity Indicator -->
+                <Grid Width="56" Height="56" HorizontalAlignment="Center" Margin="0,0,0,16" RenderTransformOrigin="0.5,0.5">
+                    <Grid.RenderTransform>
+                        <RotateTransform Angle="0"/>
+                    </Grid.RenderTransform>
+                    <Grid.Triggers>
+                        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                            <BeginStoryboard>
+                                <Storyboard RepeatBehavior="Forever">
+                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                     From="0" To="360" Duration="0:0:0.9"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Grid.Triggers>
+                    <!-- 12 Radial Rounded Spokes with Graduated Opacities -->
+                    <Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="1.0" VerticalAlignment="Top" HorizontalAlignment="Center"/>
+                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="30"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.91" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
+                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="60"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.82" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
+                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="90"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.73" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
+                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="120"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.64" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
+                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="150"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.55" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
+                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="180"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.46" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
+                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="210"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.36" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
+                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="240"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.27" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
+                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="270"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.20" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
+                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="300"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.14" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
+                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="330"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.08" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
+                </Grid>
+
+                <!-- Status Title & Subtitle Matching Reference Mockup -->
+                <TextBlock Text="Refreshing..."
+                           FontSize="19"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource ButtonTextBrush}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,6"/>
+                <TextBlock Text="Please wait a moment."
+                           FontSize="13"
+                           Foreground="{DynamicResource SidebarTextBrush}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
         </Grid>
 
         <!-- ==================== 3. FULL-SCREEN NOTIFICATION CENTER MODAL DIALOG ==================== -->

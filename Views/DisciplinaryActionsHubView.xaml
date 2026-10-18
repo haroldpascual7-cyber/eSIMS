@@ -21,7 +21,7 @@
                         <TextBlock Text="⚖️" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
                         <TextBlock Text="Disciplinary Actions &amp; Case Interventions" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <TextBlock Text="Manage formal student disciplinary consequences, restorative community service hours, parent summons, and suspension calendar orders." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                    <TextBlock Text="Manage authorized sanctions, suspension orders, probation monitoring, restorative plans, and parent notices." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
                 </StackPanel>
 
                 <Border HorizontalAlignment="Right" VerticalAlignment="Center" Background="{DynamicResource InfoBgBrush}" BorderBrush="{DynamicResource InfoBrush}" BorderThickness="1" CornerRadius="20" Padding="12,6">
@@ -33,7 +33,7 @@
             </Grid>
 
             <!-- 2. KPI / Quick Stats Summary Bar -->
-            <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,22">
+            <UniformGrid Grid.Row="1" Columns="5" Margin="0,0,0,22">
                 <!-- Stat 1: Active Sanctions -->
                 <Border Style="{DynamicResource CardBorderStyle}" Margin="4" Padding="16,14">
                     <StackPanel>
@@ -45,24 +45,31 @@
                 <!-- Stat 2: Restorative Plans -->
                 <Border Style="{DynamicResource CardBorderStyle}" Margin="4" Padding="16,14">
                     <StackPanel>
-                        <TextBlock Text="RESTORATIVE SERVICE PLANS" FontSize="11" FontWeight="Bold" Foreground="#10B981"/>
-                        <TextBlock Text="{Binding RestorativePlansCount}" FontSize="24" FontWeight="Bold" Foreground="#10B981" Margin="0,4,0,0"/>
+                        <TextBlock Text="RESTORATIVE SERVICE PLANS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
+                        <TextBlock Text="{Binding RestorativePlansCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Stat 3: Active Suspensions -->
                 <Border Style="{DynamicResource CardBorderStyle}" Margin="4" Padding="16,14">
                     <StackPanel>
-                        <TextBlock Text="ACTIVE SUSPENSION ORDERS" FontSize="11" FontWeight="Bold" Foreground="#EF4444"/>
-                        <TextBlock Text="{Binding ActiveSuspensionsCount}" FontSize="24" FontWeight="Bold" Foreground="#EF4444" Margin="0,4,0,0"/>
+                        <TextBlock Text="ACTIVE SUSPENSION ORDERS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}"/>
+                        <TextBlock Text="{Binding ActiveSuspensionsCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Stat 4: Parent Summons -->
                 <Border Style="{DynamicResource CardBorderStyle}" Margin="4" Padding="16,14">
                     <StackPanel>
-                        <TextBlock Text="PARENT SUMMON &amp; NOTICES" FontSize="11" FontWeight="Bold" Foreground="#F59E0B"/>
-                        <TextBlock Text="{Binding ParentNoticesCount}" FontSize="24" FontWeight="Bold" Foreground="#F59E0B" Margin="0,4,0,0"/>
+                        <TextBlock Text="PARENT SUMMON &amp; NOTICES" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
+                        <TextBlock Text="{Binding ParentNoticesCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{DynamicResource CardBorderStyle}" Margin="4" Padding="16,14">
+                    <StackPanel>
+                        <TextBlock Text="ACTIVE PROBATION" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}"/>
+                        <TextBlock Text="{Binding ActiveProbationsCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
             </UniformGrid>
@@ -76,7 +83,7 @@
 
                 <TextBlock Grid.Row="0" Text="OPERATIONAL DISCIPLINE MODULES" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="4,0,0,12"/>
 
-                <UniformGrid Grid.Row="1" Columns="4">
+                <UniformGrid Grid.Row="1" Columns="3">
 
                     <!-- CARD 1: Consequence & Sanction Tracking -->
                     <Border Style="{DynamicResource CardBorderStyle}" Margin="4" Padding="20">
@@ -88,7 +95,7 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="#E0F2FE" Margin="0,0,0,14" HorizontalAlignment="Left">
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="{DynamicResource InfoBgBrush}" Margin="0,0,0,14" HorizontalAlignment="Left">
                                 <TextBlock Text="📋" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
 
@@ -114,7 +121,7 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="#ECFDF5" Margin="0,0,0,14" HorizontalAlignment="Left">
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="{DynamicResource SuccessBgBrush}" Margin="0,0,0,14" HorizontalAlignment="Left">
                                 <TextBlock Text="🤝" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
 
@@ -140,7 +147,7 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="#FEF3C7" Margin="0,0,0,14" HorizontalAlignment="Left">
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="{DynamicResource WarningBgBrush}" Margin="0,0,0,14" HorizontalAlignment="Left">
                                 <TextBlock Text="📜" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
 
@@ -166,7 +173,7 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="#FEE2E2" Margin="0,0,0,14" HorizontalAlignment="Left">
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="{DynamicResource DangerBgBrush}" Margin="0,0,0,14" HorizontalAlignment="Left">
                                 <TextBlock Text="📅" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
 
@@ -179,6 +186,27 @@
                                     Command="{Binding OpenSuspensionCalendarCommand}"
                                     HorizontalAlignment="Stretch"
                                     Height="38"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- CARD 5: Probation & Behavior Monitoring -->
+                    <Border Style="{DynamicResource CardBorderStyle}" Margin="4" Padding="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Border Grid.Row="0" Width="44" Height="44" CornerRadius="8" Background="{DynamicResource InfoBgBrush}" Margin="0,0,0,14" HorizontalAlignment="Left">
+                                <TextBlock Text="P" FontSize="19" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Grid.Row="1" Text="Probation &amp; Monitoring" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
+                            <TextBlock Grid.Row="2" Text="Assign responsible staff, document behavior conditions, record progress, and formally extend or complete monitoring." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,16"/>
+                            <Button Grid.Row="3" Content="Open Probation Tracking"
+                                    Style="{DynamicResource PrimaryButtonStyle}"
+                                    Command="{Binding OpenProbationTrackingCommand}"
+                                    HorizontalAlignment="Stretch" Height="38"/>
                         </Grid>
                     </Border>
 

@@ -1,0 +1,488 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.SidebarNavigationControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             ClipToBounds="True"
+             HorizontalAlignment="Left">
+
+    <UserControl.Resources>
+        <!-- Themed Tooltip Style for Collapsed Navigation Icons -->
+        <Style TargetType="ToolTip">
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="9,5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HasDropShadow" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolTip">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Toggle Button Style (Hamburger ☰) -->
+        <Style x:Key="SidebarToggleButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="btnBorder" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource SidebarHoverBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Sidebar Navigation Button Base Style -->
+        <Style x:Key="SidebarItemButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource SidebarTextBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="8,2"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource SidebarHoverBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSidebarCollapsed}" Value="True">
+                    <Setter Property="Margin" Value="6,2"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <!-- Animated Root Sidebar Border: 230px Expanded -> 60px Collapsed with smooth 250ms CubicEase -->
+    <Border x:Name="SidebarRoot"
+            Background="{DynamicResource SidebarBackgroundBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="0,0,1,0"
+            ClipToBounds="True">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Width" Value="230"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsSidebarCollapsed}" Value="True">
+                        <DataTrigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Width"
+                                                     To="60"
+                                                     Duration="0:0:0.25">
+                                        <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.EnterActions>
+                        <DataTrigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Width"
+                                                     To="230"
+                                                     Duration="0:0:0.25">
+                                        <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.ExitActions>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Top Header: Branding & Hamburger Toggle -->
+                <RowDefinition Height="*"/>    <!-- Middle: 8 Navigation Menu Buttons -->
+                <RowDefinition Height="Auto"/> <!-- Bottom: User Profile Badge & Quick Actions -->
+            </Grid.RowDefinitions>
+
+            <!-- ==================== 1. TOP HEADER & TOGGLE ==================== -->
+            <Border Grid.Row="0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                <Grid>
+                    <!-- Expanded Header: School Emblem, Name, and Right Toggle Button (☰) -->
+                    <Border Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}"
+                            Padding="12,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+
+                            <Ellipse Grid.Column="0" Width="36" Height="36" Margin="0,0,10,0" VerticalAlignment="Center">
+                                <Ellipse.Fill>
+                                    <ImageBrush ImageSource="{Binding DashboardLogoSource}"
+                                                Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding SchoolNameFirstLine}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SidebarTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="{Binding SchoolNameSecondLine}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SidebarTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="{Binding SystemTitle}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,1,0,0" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+
+                            <Button Grid.Column="2" Command="{Binding ToggleSidebarCommand}"
+                                    Style="{StaticResource SidebarToggleButtonStyle}"
+                                    ToolTip="Collapse Navigation"
+                                    Width="30" Height="30" VerticalAlignment="Center">
+                                <TextBlock Text="☰" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource SidebarTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Collapsed Header: Centered Toggle Button (☰) & School Emblem -->
+                    <Border Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BoolToVis}}"
+                            Padding="8,10">
+                        <StackPanel HorizontalAlignment="Center">
+                            <Button Command="{Binding ToggleSidebarCommand}"
+                                    Style="{StaticResource SidebarToggleButtonStyle}"
+                                    ToolTip="Expand Navigation"
+                                    ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12"
+                                    Width="38" Height="32" HorizontalAlignment="Center">
+                                <TextBlock Text="☰" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource SidebarTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Button>
+
+                            <Ellipse Width="34" Height="34" Margin="0,6,0,0" HorizontalAlignment="Center"
+                                     ToolTip="{Binding SchoolName}"
+                                     ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">
+                                <Ellipse.Fill>
+                                    <ImageBrush ImageSource="{Binding DashboardLogoSource}"
+                                                Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- ==================== 2. VERTICAL NAVIGATION MENU ==================== -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,10">
+                <StackPanel>
+                    <!-- 1. Dashboard -->
+                    <Button Command="{Binding NavigateDashboardCommand}"
+                            ToolTip="Dashboard"
+                            ToolTipService.IsEnabled="{Binding IsSidebarCollapsed}"
+                            ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarItemButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsDashboardActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsDashboardOverviewActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                        Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}">
+                                <TextBlock Text="🏠" FontSize="15" Width="26" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="Dashboard" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </StackPanel>
+                            <TextBlock Text="🏠" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BoolToVis}}"/>
+                        </Grid>
+                    </Button>
+
+                    <!-- 2. Students Directory -->
+                    <Button Command="{Binding NavigateStudentsCommand}"
+                            Visibility="{Binding CanAccessStudents, Converter={StaticResource BoolToVis}}"
+                            ToolTip="Students Directory"
+                            ToolTipService.IsEnabled="{Binding IsSidebarCollapsed}"
+                            ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarItemButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsStudentsActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                        Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}">
+                                <TextBlock Text="👥" FontSize="15" Width="26" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="Students" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </StackPanel>
+                            <TextBlock Text="👥" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BoolToVis}}"/>
+                        </Grid>
+                    </Button>
+
+                    <!-- 3. Incidents Management -->
+                    <Button Command="{Binding NavigateIncidentsCommand}"
+                            Visibility="{Binding CanAccessIncidents, Converter={StaticResource BoolToVis}}"
+                            ToolTip="Incidents Management"
+                            ToolTipService.IsEnabled="{Binding IsSidebarCollapsed}"
+                            ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarItemButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsIncidentsActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                        Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}">
+                                <TextBlock Text="🚨" FontSize="15" Width="26" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="Incidents" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </StackPanel>
+                            <TextBlock Text="🚨" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BoolToVis}}"/>
+                        </Grid>
+                    </Button>
+
+                    <!-- 4. Investigations Workspace -->
+                    <Button Command="{Binding NavigateInvestigationsCommand}"
+                            Visibility="{Binding CanAccessInvestigations, Converter={StaticResource BoolToVis}}"
+                            ToolTip="Investigations Workspace"
+                            ToolTipService.IsEnabled="{Binding IsSidebarCollapsed}"
+                            ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarItemButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsInvestigationsActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                        Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}">
+                                <TextBlock Text="🔍" FontSize="15" Width="26" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="Investigations" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </StackPanel>
+                            <TextBlock Text="🔍" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BoolToVis}}"/>
+                        </Grid>
+                    </Button>
+
+                    <!-- 5. Student Behavioral Management -->
+                    <Button Command="{Binding NavigateBehaviorCommand}"
+                            Visibility="{Binding CanAccessBehavior, Converter={StaticResource BoolToVis}}"
+                            ToolTip="Behavior &amp; IAP"
+                            ToolTipService.IsEnabled="{Binding IsSidebarCollapsed}"
+                            ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarItemButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsBehaviorActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                        Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}">
+                                <TextBlock Text="📈" FontSize="15" Width="26" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="Behavior &amp; IAP" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </StackPanel>
+                            <TextBlock Text="📈" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BoolToVis}}"/>
+                        </Grid>
+                    </Button>
+
+                    <!-- 6. Parent Notices -->
+                    <Button Command="{Binding NavigateParentNoticesCommand}"
+                            Visibility="{Binding CanAccessParentNotices, Converter={StaticResource BoolToVis}}"
+                            ToolTip="Parent Notices"
+                            ToolTipService.IsEnabled="{Binding IsSidebarCollapsed}"
+                            ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarItemButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsParentNoticesActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                        Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}">
+                                <TextBlock Text="✉️" FontSize="15" Width="26" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="Parent Notices" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </StackPanel>
+                            <TextBlock Text="✉️" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BoolToVis}}"/>
+                        </Grid>
+                    </Button>
+
+                    <!-- 7. Safety Reports & Analytics -->
+                    <Button Command="{Binding NavigateReportsAnalyticsCommand}"
+                            Visibility="{Binding CanAccessReports, Converter={StaticResource BoolToVis}}"
+                            ToolTip="Reports &amp; Analytics"
+                            ToolTipService.IsEnabled="{Binding IsSidebarCollapsed}"
+                            ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarItemButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsReportsAnalyticsActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                        Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}">
+                                <TextBlock Text="📊" FontSize="15" Width="26" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="Reports &amp; Analytics" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </StackPanel>
+                            <TextBlock Text="📊" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BoolToVis}}"/>
+                        </Grid>
+                    </Button>
+
+                    <!-- 8. System Administration & Settings -->
+                    <Button Command="{Binding NavigateSettingsCommand}"
+                            Visibility="{Binding CanAccessSettings, Converter={StaticResource BoolToVis}}"
+                            ToolTip="Settings &amp; Users"
+                            ToolTipService.IsEnabled="{Binding IsSidebarCollapsed}"
+                            ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarItemButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsSettingsActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                        Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}">
+                                <TextBlock Text="⚙️" FontSize="15" Width="26" TextAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="Settings &amp; Users" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </StackPanel>
+                            <TextBlock Text="⚙️" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BoolToVis}}"/>
+                        </Grid>
+                    </Button>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ==================== 3. BOTTOM USER PROFILE & ACTIONS ==================== -->
+            <Border Grid.Row="2" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
+                <Grid>
+                    <!-- Expanded Bottom Bar: Full User Card + Theme & Exit Buttons -->
+                    <Border Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}"
+                            Padding="12">
+                        <StackPanel>
+                            <!-- Active User Card -->
+                            <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="{DynamicResource PrimaryBrush}" Margin="0,0,8,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding UserInitials}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding CurrentUserName}" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding CurrentUserRole}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                        <TextBlock Text="● Online" FontSize="9" Foreground="{DynamicResource SuccessBrush}" Margin="0,1,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Action Bar: Theme & Logout -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="38"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button Grid.Column="0" Command="{Binding ToggleThemeCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="32" Padding="0" ToolTip="Toggle Light / Dark Mode" Margin="0,0,8,0">
+                                    <TextBlock Text="🌓" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Button>
+
+                                <Button Grid.Column="1" Command="{Binding LogoutCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="32" Padding="0" ToolTip="Log Out of System">
+                                    <TextBlock Text="🚪 Exit" FontSize="11.5" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Collapsed Bottom Bar: Centered Avatar & Icon Action Buttons -->
+                    <Border Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BoolToVis}}"
+                            Padding="6,10">
+                        <StackPanel HorizontalAlignment="Center">
+                            <!-- User Avatar Circle -->
+                            <Border Width="34" Height="34" CornerRadius="17" Background="{DynamicResource PrimaryBrush}"
+                                    Margin="0,0,0,8" HorizontalAlignment="Center"
+                                    ToolTip="{Binding UserTooltip}"
+                                    ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">
+                                <TextBlock Text="{Binding UserInitials}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- Theme Toggle Icon Button -->
+                            <Button Command="{Binding ToggleThemeCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                                    Width="38" Height="32" Padding="0" Margin="0,0,0,6" HorizontalAlignment="Center"
+                                    ToolTip="Toggle Light / Dark Mode"
+                                    ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">
+                                <TextBlock Text="🌓" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Button>
+
+                            <!-- Logout Icon Button -->
+                            <Button Command="{Binding LogoutCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                                    Width="38" Height="32" Padding="0" HorizontalAlignment="Center"
+                                    ToolTip="Log Out of System"
+                                    ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">
+                                <TextBlock Text="🚪" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

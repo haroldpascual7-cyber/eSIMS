@@ -21,6 +21,8 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         private string _modalTitle = "Incident Record";
         private string _modalErrorMessage = string.Empty;
         private int _modalIncidentPk;
+        private string _modalCreatedBy = string.Empty;
+        private IncidentStatus _originalModalStatus = IncidentStatus.Reported;
 
         private string _modalIncidentNumber = string.Empty;
         private string _modalTitleField = string.Empty;
@@ -71,12 +73,15 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             { 
                 if (SetProperty(ref _isModalEditing, value))
                 {
-                    OnPropertyChanged(nameof(IsModalReadOnly));
-                    OnPropertyChanged(nameof(CanCancelEdit));
+                    NotifyModalPermissionState();
                 }
             } 
         }
         public bool IsModalReadOnly => !IsModalEditing;
+        public bool IsIncidentIntakeReadOnly => !CanEditIncidentIntake;
+        public bool IsReporterFieldReadOnly => !CanEditReporterField;
+        public bool IsOfficialFlowReadOnly => !CanEditOfficialIncidentFlow;
+        public bool IsActionTakenReadOnly => !CanEditActionTakenSummary;
         public bool IsModalNewRecord 
         { 
             get => _isModalNewRecord; 
@@ -84,19 +89,36 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             { 
                 if (SetProperty(ref _isModalNewRecord, value))
                 {
-                    OnPropertyChanged(nameof(CanDeleteModalIncident));
-                    OnPropertyChanged(nameof(CanInvestigateModalIncident));
-                    OnPropertyChanged(nameof(CanCancelEdit));
-                    OnPropertyChanged(nameof(SaveModalButtonText));
+                    NotifyModalPermissionState();
                 }
             } 
         }
         public bool CanDeleteModalIncident => !IsModalNewRecord && CanDeleteIncident;
         public bool CanInvestigateModalIncident => !IsModalNewRecord && CanOpenInvestigation;
+        public bool CanEditModalIncident => !IsModalNewRecord && CanEditCurrentIncidentIntake();
+        public bool CanShowEditModalButton => IsModalReadOnly && CanEditModalIncident;
+        public bool CanEditIncidentIntake => IsModalEditing && CanEditCurrentIncidentIntake();
+        public bool CanManageOfficialIncidentFlow => SessionManager.HasPermission("System Administrator,Discipline Officer,Guidance Counselor");
+        public bool CanEditOfficialIncidentFlow => IsModalEditing && CanManageOfficialIncidentFlow;
+        public bool CanEditActionTakenSummary => IsModalEditing && (CanManageOfficialIncidentFlow || CanEditCurrentIncidentIntake());
+        public bool CanApplyRuleRecommendations => CanEditOfficialIncidentFlow;
+        public bool CanSendParentNotification => IsModalEditing && CanManageOfficialIncidentFlow;
+        public bool CanEditReporterField => CanEditIncidentIntake && CanManageOfficialIncidentFlow;
         public bool CanCancelEdit => IsModalEditing && !IsModalNewRecord;
         public string SaveModalButtonText => IsModalNewRecord ? "Save Incident" : "Update & Save";
         public string ModalTitle { get => _modalTitle; set => SetProperty(ref _modalTitle, value); }
-        public string ModalErrorMessage { get => _modalErrorMessage; set => SetProperty(ref _modalErrorMessage, value); }
+        public string ModalErrorMessage 
+        { 
+            get => _modalErrorMessage; 
+            set 
+            { 
+                if (SetProperty(ref _modalErrorMessage, value))
+                {
+                    OnPropertyChanged(nameof(HasModalError));
+                }
+            } 
+        }
+        public bool HasModalError => !string.IsNullOrWhiteSpace(ModalErrorMessage);
 
         public string ModalIncidentNumber { get => _modalIncidentNumber; set => SetProperty(ref _modalIncidentNumber, value); }
         public string ModalTitleField { get => _modalTitleField; set { if (SetProperty(ref _modalTitleField, value)) TriggerLiveAnalysis(); } }
@@ -123,8 +145,28 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public string ModalGradeSection { get => _modalGradeSection; set => SetProperty(ref _modalGradeSection, value); }
         public string ModalParentName { get => _modalParentName; set => SetProperty(ref _modalParentName, value); }
         public string ModalParentEmail { get => _modalParentEmail; set => SetProperty(ref _modalParentEmail, value); }
-        public string ModalReporter { get => _modalReporter; set => SetProperty(ref _modalReporter, value); }
-        public IncidentStatus ModalStatus { get => _modalStatus; set => SetProperty(ref _modalStatus, value); }
+        public string ModalReporter
+        {
+            get => _modalReporter;
+            set
+            {
+                if (SetProperty(ref _modalReporter, value))
+                {
+                    NotifyModalPermissionState();
+                }
+            }
+        }
+        public IncidentStatus ModalStatus
+        {
+            get => _modalStatus;
+            set
+            {
+                if (SetProperty(ref _modalStatus, value))
+                {
+                    NotifyModalPermissionState();
+                }
+            }
+        }
         public IncidentSeverity ModalSeverity { get => _modalSeverity; set => SetProperty(ref _modalSeverity, value); }
         public RiskLevel ModalRisk { get => _modalRisk; set => SetProperty(ref _modalRisk, value); }
         public string ModalActionTaken { get => _modalActionTaken; set => SetProperty(ref _modalActionTaken, value); }
@@ -153,14 +195,16 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
         private void InitializeModalCommands()
         {
-            SaveModalCommand = new RelayCommand(async () => await SaveModalAsync());
+            SaveModalCommand = new RelayCommand(async () => await SaveModalAsync(), () => IsModalEditing && (IsModalNewRecord || CanEditModalIncident));
             CancelModalCommand = new RelayCommand(() => IsIncidentModalOpen = false);
-            ToggleEditModeCommand = new RelayCommand(() => IsModalEditing = !IsModalEditing);
+            ToggleEditModeCommand = new RelayCommand(ToggleEditMode, () => IsModalEditing || CanEditModalIncident);
             CancelEditModeCommand = new RelayCommand(() => IsModalEditing = false);
             DeleteCurrentModalIncidentCommand = new RelayCommand(async () => await DeleteCurrentModalIncidentAsync(), () => CanDeleteModalIncident);
             InvestigateCurrentModalIncidentCommand = new RelayCommand(async () => await InvestigateCurrentModalIncidentAsync());
-            ApplyRuleRecommendationsCommand = new RelayCommand(ApplyRecommendations);
+            ApplyRuleRecommendationsCommand = new RelayCommand(ApplyRecommendations, () => CanApplyRuleRecommendations);
             SelectStudentSuggestionCommand = new RelayCommand(param => SelectStudentSuggestion(param as Student));
+            InitializeInvolvedWitnessEvidence();
+            InitializeCounselingModalSupport();
         }
 
         public void OpenCreateModalForStudent(string studentName)
@@ -186,6 +230,8 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             IsModalNewRecord = true;
             IsModalEditing = true;
             _modalIncidentPk = 0;
+            _modalCreatedBy = SessionManager.Username;
+            _originalModalStatus = IncidentStatus.Reported;
 
             ModalIncidentNumber = await _ruleEngineService.GenerateIncidentNumberAsync();
             ModalTitle = $"Report New Incident ({ModalIncidentNumber})";
@@ -206,35 +252,54 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             ModalRisk = RiskLevel.Low;
             ModalActionTaken = string.Empty;
             ModalNotes = string.Empty;
-            SendParentNotification = true;
+            SendParentNotification = CanManageOfficialIncidentFlow;
             NotificationStatusText = "Pending Save";
 
+            ResetInvolvedWitnessEvidenceForms();
+            _disciplinaryActionsForModal.Clear();
+            OnPropertyChanged(nameof(HasModalDisciplinaryActions));
+            NotifyLifecycleProgression();
             IsIncidentModalOpen = true;
+            NotifyModalPermissionState();
             TriggerLiveAnalysis();
         }
 
         public void OpenViewModal(Incident inc)
         {
-            PopulateModalFromIncident(inc);
             IsModalNewRecord = false;
             IsModalEditing = false;
+            PopulateModalFromIncident(inc);
             ModalTitle = $"Incident Details: {inc.IncidentNumber}";
             IsIncidentModalOpen = true;
+            NotifyModalPermissionState();
         }
 
         public void OpenEditModal(Incident inc)
         {
-            PopulateModalFromIncident(inc);
             IsModalNewRecord = false;
-            IsModalEditing = true;
-            ModalTitle = $"Edit Incident: {inc.IncidentNumber}";
+            PopulateModalFromIncident(inc);
+            if (CanEditModalIncident)
+            {
+                IsModalEditing = true;
+                ModalTitle = $"Edit Incident: {inc.IncidentNumber}";
+                TriggerLiveAnalysis();
+            }
+            else
+            {
+                IsModalEditing = false;
+                ModalTitle = $"Incident Details: {inc.IncidentNumber}";
+                ModalErrorMessage = "This incident is locked for Staff/Teacher editing. Only the original reporter may edit while it remains Reported.";
+            }
             IsIncidentModalOpen = true;
+            NotifyModalPermissionState();
         }
 
         private void PopulateModalFromIncident(Incident inc)
         {
             ModalErrorMessage = string.Empty;
             _modalIncidentPk = inc.Id;
+            _modalCreatedBy = inc.CreatedBy;
+            _originalModalStatus = inc.Status;
             ModalIncidentNumber = inc.IncidentNumber;
             ModalTitleField = inc.Title;
             ModalCategory = inc.Category;
@@ -250,7 +315,6 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             ModalActionTaken = inc.ActionTaken;
             ModalNotes = inc.Notes;
 
-            // Retrieve enrolled student details if matching
             var student = _allEnrolledStudents.FirstOrDefault(s => s.FullName.Equals(inc.PrimaryInvolvedStudent, StringComparison.OrdinalIgnoreCase) || s.DisplayName.Equals(inc.PrimaryInvolvedStudent, StringComparison.OrdinalIgnoreCase) || s.Id == inc.StudentId);
             if (student != null)
             {
@@ -267,8 +331,11 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 ModalParentEmail = string.Empty;
             }
 
+            PopulateInvolvedWitnessEvidence(inc);
             SendParentNotification = false;
             NotificationStatusText = "Stored";
+            _ = LoadDisciplinaryActionsForModalAsync(inc.Id);
+            NotifyLifecycleProgression();
             TriggerLiveAnalysis();
         }
 
@@ -314,6 +381,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             ModalGradeSection = $"{student.GradeLevel} - {student.Section}";
             ModalParentName = student.GuardianName;
             ModalParentEmail = student.GuardianEmail;
+            IsPrimaryStudentConfirmed = true;
 
             StudentSuggestions.Clear();
             IsStudentSuggestionsOpen = false;
@@ -332,6 +400,13 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             IsRepeatOffenderAlert = result.IsRepeatOffender;
             RepeatAlertMessage = result.RepeatAlertMessage;
 
+            if (IsLimitedIncidentReporterRole() && (IsModalNewRecord || CanEditIncidentIntake))
+            {
+                ModalStatus = IncidentStatus.Reported;
+                ModalSeverity = LiveSuggestedSeverity;
+                ModalRisk = LiveSuggestedRisk;
+            }
+
             TriggeredRules.Clear();
             foreach (var r in result.TriggeredRules)
             {
@@ -341,6 +416,12 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
         private void ApplyRecommendations()
         {
+            if (!CanApplyRuleRecommendations)
+            {
+                ModalErrorMessage = "Rule recommendations can only be applied by Administrator, Discipline Officer, or Guidance Counselor accounts.";
+                return;
+            }
+
             ModalCategory = LiveSuggestedCategory;
             ModalSeverity = LiveSuggestedSeverity;
             ModalRisk = LiveSuggestedRisk;
@@ -349,153 +430,6 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 ModalActionTaken = string.IsNullOrEmpty(ModalActionTaken)
                     ? LiveRecommendedAction
                     : $"{ModalActionTaken}\n[Rule Recommendation]: {LiveRecommendedAction}";
-            }
-        }
-
-        private async Task SaveModalAsync()
-        {
-            ModalErrorMessage = string.Empty;
-
-            if (string.IsNullOrWhiteSpace(ModalTitleField))
-            {
-                ModalErrorMessage = "Incident Title is required.";
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(ModalStudentName))
-            {
-                ModalErrorMessage = "Primary involved student is required.";
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(ModalDescription))
-            {
-                ModalErrorMessage = "Incident narrative description is required.";
-                return;
-            }
-
-            try
-            {
-                // Match student record
-                var matchedStudent = _allEnrolledStudents.FirstOrDefault(s => s.FullName.Equals(ModalStudentName.Trim(), StringComparison.OrdinalIgnoreCase) || s.StudentNumber.Equals(ModalStudentNumber.Trim(), StringComparison.OrdinalIgnoreCase));
-
-                DateTime incidentDateTime = ModalDate.Date;
-                if (TimeSpan.TryParse(ModalTime, out var timeOfDay))
-                {
-                    incidentDateTime = incidentDateTime.Add(timeOfDay);
-                }
-
-                if (IsModalNewRecord)
-                {
-                    var newInc = new Incident
-                    {
-                        IncidentNumber = ModalIncidentNumber,
-                        Title = ModalTitleField.Trim(),
-                        Category = ModalCategory,
-                        Description = ModalDescription.Trim(),
-                        Location = ModalLocation.Trim(),
-                        IncidentDate = incidentDateTime,
-                        PrimaryInvolvedStudent = ModalStudentName.Trim(),
-                        StudentId = matchedStudent?.Id,
-                        ReportingStaffTeacher = ModalReporter.Trim(),
-                        CreatedBy = SessionManager.Username,
-                        Status = ModalStatus,
-                        Severity = ModalSeverity,
-                        Risk = ModalRisk,
-                        ActionTaken = ModalActionTaken?.Trim() ?? string.Empty,
-                        Notes = ModalNotes?.Trim() ?? string.Empty,
-                        RecommendedAction = LiveRecommendedAction,
-                        IsRepeatIncident = IsRepeatOffenderAlert
-                    };
-
-                    await _incidentService.AddIncidentAsync(newInc);
-
-                    // Send Email Notification if checked and email is provided
-                    if (SendParentNotification && !string.IsNullOrWhiteSpace(ModalParentEmail))
-                    {
-                        string emailSubject = $"Official Incident Notification: [{newInc.IncidentNumber}] {newInc.Title}";
-                        string emailBody = $"Dear {ModalParentName},\n\nPlease be informed that an incident concerning {ModalStudentName} was recorded today ({incidentDateTime:yyyy-MM-dd HH:mm}).\nCategory: {ModalCategory}\nSeverity: {ModalSeverity}\nDescription: {ModalDescription}\n\nPlease contact the School Discipline Office for further inquiry.\n\nSincerely,\n{ModalReporter}\nMatti National High School";
-
-                        await _commService.SendEmailAsync(matchedStudent?.StudentNumber ?? "N/A", ModalParentName, ModalParentEmail, emailSubject, emailBody);
-                    }
-                }
-                else
-                {
-                    var existing = await _incidentService.GetIncidentByIdAsync(_modalIncidentPk);
-                    if (existing != null)
-                    {
-                        existing.Title = ModalTitleField.Trim();
-                        existing.Category = ModalCategory;
-                        existing.Description = ModalDescription.Trim();
-                        existing.Location = ModalLocation.Trim();
-                        existing.IncidentDate = incidentDateTime;
-                        existing.PrimaryInvolvedStudent = ModalStudentName.Trim();
-                        if (matchedStudent != null) existing.StudentId = matchedStudent.Id;
-                        existing.ReportingStaffTeacher = ModalReporter.Trim();
-                        existing.Status = ModalStatus;
-                        existing.Severity = ModalSeverity;
-                        existing.Risk = ModalRisk;
-                        existing.ActionTaken = ModalActionTaken?.Trim() ?? string.Empty;
-                        existing.Notes = ModalNotes?.Trim() ?? string.Empty;
-
-                        await _incidentService.UpdateIncidentAsync(existing);
-                    }
-                }
-
-                IsIncidentModalOpen = false;
-                await LoadIncidentsAsync();
-            }
-            catch (Exception ex)
-            {
-                ModalErrorMessage = ex.Message;
-            }
-        }
-
-        private async Task DeleteCurrentModalIncidentAsync()
-        {
-            if (_modalIncidentPk <= 0) return;
-
-            var result = MessageBox.Show(
-                $"Are you sure you want to delete incident '{ModalIncidentNumber}' ({ModalTitleField})?\nThis action cannot be undone.",
-                "Confirm Delete Incident",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                try
-                {
-                    var inc = await _incidentService.GetIncidentByIdAsync(_modalIncidentPk);
-                    if (inc != null)
-                    {
-                        await _incidentService.DeleteIncidentAsync(inc);
-                    }
-                    IsIncidentModalOpen = false;
-                    SelectedIncident = null;
-                    await LoadIncidentsAsync();
-                }
-                catch (Exception ex)
-                {
-                    ModalErrorMessage = $"Error deleting incident: {ex.Message}";
-                }
-            }
-        }
-
-        private async Task InvestigateCurrentModalIncidentAsync()
-        {
-            if (_modalIncidentPk <= 0) return;
-            try
-            {
-                var target = await _incidentService.GetIncidentByIdAsync(_modalIncidentPk);
-                if (target != null)
-                {
-                    IsIncidentModalOpen = false;
-                    _openInvestigationAction?.Invoke(target);
-                }
-            }
-            catch (Exception ex)
-            {
-                ModalErrorMessage = $"Error opening investigation: {ex.Message}";
             }
         }
     }

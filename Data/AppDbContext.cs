@@ -18,6 +18,8 @@ namespace SmartSchoolIncidentManagementSystem.Data
         public DbSet<RestorativePlan> RestorativePlans { get; set; } = null!;
         public DbSet<InterventionProgressLog> InterventionProgressLogs { get; set; } = null!;
         public DbSet<SuspensionOrder> SuspensionOrders { get; set; } = null!;
+        public DbSet<ProbationRecord> ProbationRecords { get; set; } = null!;
+        public DbSet<ProbationProgressNote> ProbationProgressNotes { get; set; } = null!;
         public DbSet<KeywordSensitivityRule> KeywordSensitivityRules { get; set; } = null!;
         public DbSet<LocationWeightRule> LocationWeightRules { get; set; } = null!;
         public DbSet<RepeatOffenderRule> RepeatOffenderRules { get; set; } = null!;
@@ -50,6 +52,13 @@ namespace SmartSchoolIncidentManagementSystem.Data
             modelBuilder.Entity<RestorativePlan>().HasIndex(rp => rp.SyncId).IsUnique();
             modelBuilder.Entity<InterventionProgressLog>().HasIndex(ipl => ipl.SyncId).IsUnique();
             modelBuilder.Entity<SuspensionOrder>().HasIndex(so => so.SyncId).IsUnique();
+            modelBuilder.Entity<ProbationRecord>().HasIndex(p => p.SyncId).IsUnique();
+            modelBuilder.Entity<ProbationProgressNote>().HasIndex(p => p.SyncId).IsUnique();
+            modelBuilder.Entity<ProbationRecord>()
+                .HasMany(p => p.ProgressNotes)
+                .WithOne(n => n.ProbationRecord)
+                .HasForeignKey(n => n.ProbationRecordId)
+                .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<KeywordSensitivityRule>().HasIndex(ksr => ksr.SyncId).IsUnique();
             modelBuilder.Entity<LocationWeightRule>().HasIndex(lwr => lwr.SyncId).IsUnique();
             modelBuilder.Entity<RepeatOffenderRule>().HasIndex(ror => ror.SyncId).IsUnique();

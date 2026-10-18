@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SmartSchoolIncidentManagementSystem.Data;
 using SmartSchoolIncidentManagementSystem.Helpers;
 using SmartSchoolIncidentManagementSystem.Models;
@@ -102,7 +102,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
                 await conn.OpenAsync();
 
                 using var countCmd = conn.CreateCommand();
-                countCmd.CommandText = "SELECT COUNT(*) FROM IncidentLogs;";
+                countCmd.CommandText = "SELECT COUNT(*) FROM Incidents;";
                 totalRows = Convert.ToInt32(await countCmd.ExecuteScalarAsync() ?? 0);
 
                 if (totalRows == 0)
@@ -110,14 +110,14 @@ namespace SmartSchoolIncidentManagementSystem.Services
                     return new DiagnosticResultModel
                     {
                         TestName = "SHA-256 Cryptographic Immutability Verification",
-                        TargetComponent = "IncidentLogs Row Hashes",
+                        TargetComponent = "Incidents Row Hashes",
                         Status = "PASSED",
                         Details = "No incident records logged yet. SHA-256 hash engine ready."
                     };
                 }
 
                 using var cmd = conn.CreateCommand();
-                cmd.CommandText = "SELECT Id, IncidentDate, Category, Title FROM IncidentLogs;";
+                cmd.CommandText = "SELECT Id, IncidentDate, Category, Title FROM Incidents;";
                 using var reader = await cmd.ExecuteReaderAsync();
 
                 int current = 0;
@@ -127,7 +127,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
                     progressCallback?.Invoke(current, totalRows);
                     await Task.Delay(10); // Smooth progress bar simulation
 
-                    string id = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
+                    string id = reader.IsDBNull(0) ? string.Empty : reader.GetValue(0).ToString() ?? string.Empty;
                     string date = reader.IsDBNull(1) ? string.Empty : reader.GetDateTime(1).ToString("yyyy-MM-dd");
                     string cat = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
                     string title = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
@@ -151,7 +151,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
             return new DiagnosticResultModel
             {
                 TestName = "SHA-256 Cryptographic Immutability Verification",
-                TargetComponent = "IncidentLogs Row Checksums",
+                TargetComponent = "Incidents Row Checksums",
                 Status = allVerified ? "PASSED" : "FAILED",
                 Details = allVerified 
                     ? $"Verified 100% of rows ({verifiedRows}/{totalRows}). SHA-256 row signatures match expected cryptographic checksums."

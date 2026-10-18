@@ -1,0 +1,448 @@
+<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.RepeatIncidentAlertsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="820" d:DesignWidth="1200">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="0,10,0,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- 1. Guiding Principle / Pattern Review Banner -->
+            <Border Grid.Row="0" Background="{DynamicResource InfoBgBrush}" BorderBrush="{DynamicResource InfoBrush}"
+                    BorderThickness="1.5" CornerRadius="8" Padding="16,12" Margin="0,0,0,14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Background="{DynamicResource InfoBrush}" CornerRadius="20"
+                            Width="38" Height="38" VerticalAlignment="Center" Margin="0,0,14,0">
+                        <TextBlock Text="&#x26A0;&#xFE0F;" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="Pattern Review Principle (Repeat-Incident Alerts)" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        <TextBlock Text="&quot;A repeat-incident alert is a prompt for review, not automatic proof that incidents are identical or that the same consequence should be applied.&quot;"
+                                   FontSize="12" FontStyle="Italic" FontWeight="Medium" Foreground="{DynamicResource InfoBrush}" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                        <TextBlock Text="Review the context, category, severity, and prior intervention outcomes before deciding on counseling or escalation."
+                                   FontSize="11.5" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,3,0,0"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="2" Content="&#x1F4C4; Export Recidivism Report (PDF)" Style="{DynamicResource SecondaryButtonStyle}"
+                            Command="{Binding ExportRecidivismReportCommand}" VerticalAlignment="Center"
+                            Height="36" Padding="14,0" FontSize="12.5" FontWeight="SemiBold"/>
+                </Grid>
+            </Border>
+
+            <!-- 2. Summary KPI Ribbon -->
+            <Grid Grid.Row="1" Margin="0,0,0,14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Margin="0,0,8,0" Padding="16,12">
+                    <StackPanel>
+                        <TextBlock Text="ACTIVE REPEAT ALERTS" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding RepeatAlerts.Count}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,4,0,0"/>
+                        <TextBlock Text="Students with 2+ violations" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Margin="4,0,4,0" Padding="16,12">
+                    <StackPanel>
+                        <TextBlock Text="RECIDIVISM RATE" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding RecidivismSummary.RecidivismRate, StringFormat='{}{0:F1}%'}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,4,0,0"/>
+                        <TextBlock Text="Campus overall repeat %" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Margin="4,0,4,0" Padding="16,12">
+                    <StackPanel>
+                        <TextBlock Text="REPEAT CASES (2×)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding RecidivismSummary.RepeatOffenderCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,4,0,0"/>
+                        <TextBlock Text="Prompt for early intervention" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="3" Style="{DynamicResource CardBorderStyle}" Margin="8,0,0,0" Padding="16,12">
+                    <StackPanel>
+                        <TextBlock Text="CHRONIC CASES (3+)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding RecidivismSummary.ChronicOffenderCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,4,0,0"/>
+                        <TextBlock Text="Escalated review required" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- 3. Main Workflow Split: Left Alerts List vs Right Review & Follow-up -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="430"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: Repeat Alerts List (Steps 1 & 2) -->
+                <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Padding="18,16" MinHeight="620">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Title -->
+                        <StackPanel Grid.Row="0" Margin="0,0,0,2">
+                            <TextBlock Text="1 &amp; 2. Repeat-Incident Alerts" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            <TextBlock Text="Select a student or alert to inspect their historical cases and patterns."
+                                       FontSize="11.5" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+
+                        <!-- Divider -->
+                        <Border Grid.Row="1" Height="1" Background="{DynamicResource DividerBrush}" Margin="0,10,0,10"/>
+
+                        <!-- Inspect Student Selector -->
+                        <Grid Grid.Row="2" Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Inspect Student:" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding AllStudents}"
+                                      SelectedItem="{Binding SelectedEnrolledStudent}"
+                                      DisplayMemberPath="DisplayName"
+                                      Style="{DynamicResource ModernComboBoxStyle}"
+                                      Height="34"/>
+                        </Grid>
+
+                        <!-- Alerts DataGrid -->
+                        <DataGrid Grid.Row="3"
+                                  ItemsSource="{Binding RepeatAlerts}"
+                                  SelectedItem="{Binding SelectedAlert}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  SelectionMode="Single"
+                                  GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="{DynamicResource BorderBrush}"
+                                  Background="Transparent"
+                                  RowBackground="Transparent"
+                                  AlternatingRowBackground="{DynamicResource TableRowAltBrush}"
+                                  Foreground="{DynamicResource PrimaryTextBrush}"
+                                  BorderThickness="0"
+                                  HeadersVisibility="Column"
+                                  MinHeight="450"
+                                  RowHeight="52">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Student" Binding="{Binding StudentName}" Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="FontSize" Value="12.5"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Grade &amp; Section" Binding="{Binding GradeSection}" Width="120">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontSize" Value="12"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Total" Binding="{Binding TotalIncidents}" Width="52">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="FontSize" Value="14"/>
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Pattern" Binding="{Binding TriggeredPattern}" Width="130">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontSize" Value="11"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!-- Right: Related Cases & Determination Workspace (Steps 3, 4, 5) -->
+            <Grid Grid.Column="2">
+
+                <!-- If No Alert Selected — Empty State -->
+                <Border Padding="24" MinHeight="620">
+                    <Border.Style>
+                        <Style TargetType="Border" BasedOn="{StaticResource CardBorderStyle}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedAlert}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="&#x1F4CB;" FontSize="46" HorizontalAlignment="Center" Margin="0,0,0,14"/>
+                        <TextBlock Text="No Student Alert Selected" FontSize="16" FontWeight="Bold"
+                                   Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Select a student record or repeat alert from the left panel to inspect related cases, verify dates, categories, severity, and document the required follow-up action."
+                                   FontSize="12.5" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap"
+                                   MaxWidth="460" TextAlignment="Center" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- If Alert Selected -->
+                <Grid>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedAlert}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="14"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Step 3: Related Cases History (Card 1) -->
+                    <Border Grid.Row="0" Style="{DynamicResource CardBorderStyle}" Padding="18,16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Header Row -->
+                            <Grid Grid.Row="0" Margin="0,0,0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <WrapPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="3. Related Incidents &amp; Case History: " FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                    <TextBlock Text="{Binding SelectedAlert.StudentName}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                    <TextBlock Text="{Binding SelectedAlert.GradeSection, StringFormat=' ({0})'}" FontSize="12"
+                                               Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                                </WrapPanel>
+
+                                <Border Grid.Column="1" Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}"
+                                        BorderThickness="1" CornerRadius="4" Padding="10,4" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding SelectedAlert.AlertLevel}" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}"/>
+                                </Border>
+                            </Grid>
+
+                            <!-- Divider -->
+                            <Border Grid.Row="1" Height="1" Background="{DynamicResource DividerBrush}" Margin="0,8,0,8"/>
+
+                            <!-- Subtitle -->
+                            <TextBlock Grid.Row="2" Text="Select an incident below to link your follow-up action. Check category, severity, and prior outcomes."
+                                       FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,10"/>
+
+                            <!-- History DataGrid -->
+                            <DataGrid Grid.Row="3"
+                                      ItemsSource="{Binding SelectedStudentHistory}"
+                                      SelectedItem="{Binding SelectedTargetIncident}"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      CanUserAddRows="False"
+                                      SelectionMode="Single"
+                                      GridLinesVisibility="Horizontal"
+                                      HorizontalGridLinesBrush="{DynamicResource BorderBrush}"
+                                      Background="Transparent"
+                                      RowBackground="Transparent"
+                                      AlternatingRowBackground="{DynamicResource TableRowAltBrush}"
+                                      Foreground="{DynamicResource PrimaryTextBrush}"
+                                      BorderThickness="0"
+                                      HeadersVisibility="Column"
+                                      Height="170"
+                                      RowHeight="46">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Case #" Binding="{Binding IncidentNumber}" Width="110">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                <Setter Property="FontSize" Value="12"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Date" Binding="{Binding IncidentDate, StringFormat='{}{0:yyyy-MM-dd}'}" Width="100">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FontSize" Value="12"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="150">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FontSize" Value="12"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="90">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                <Setter Property="FontSize" Value="12"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Outcome / Action Taken" Binding="{Binding ActionTaken}" Width="*">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FontSize" Value="12"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Step 4 & 5: Determine Follow-Up Action & Link to Incident (Card 2) -->
+                    <Border Grid.Row="2" Style="{DynamicResource CardBorderStyle}" Padding="20,18">
+                        <StackPanel>
+                            <!-- Header Row -->
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="4 &amp; 5. Determine Intervention &amp; Link Follow-Up Action"
+                                           FontSize="14.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                                
+                                <!-- Target Case indicator -->
+                                <Border Grid.Column="1" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource PrimaryBrush}"
+                                        BorderThickness="1" CornerRadius="4" Padding="10,4" VerticalAlignment="Center"
+                                        Visibility="{Binding SelectedTargetIncident, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Linking to Target Case: " FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding SelectedTargetIncident.IncidentNumber, StringFormat='#{0}'}"
+                                                   FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <!-- Divider -->
+                            <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,8,0,12"/>
+
+                            <!-- Status / Alert Notification Banner (only when message present) -->
+                            <Border Background="{DynamicResource InfoBgBrush}" BorderBrush="{DynamicResource InfoBrush}"
+                                    BorderThickness="1" CornerRadius="5" Padding="12,8" Margin="0,0,0,14">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding FollowUpStatusMessage}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding FollowUpStatusMessage}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding FollowUpStatusMessage}" FontSize="12" Foreground="{DynamicResource InfoBrush}" FontWeight="SemiBold"/>
+                            </Border>
+
+                            <!-- Form Grid: 2 Columns (Step 4 Left, Step 5 Right) -->
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="310"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Column Left: Step 4 Determination -->
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Step 4: Determination *" FontSize="12.5" FontWeight="Bold"
+                                               Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/>
+                                    <TextBlock Text="Select counseling or disciplinary path."
+                                               FontSize="11.5" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8"/>
+                                    <ComboBox Style="{DynamicResource ModernComboBoxStyle}"
+                                              ItemsSource="{Binding DeterminationOptions}"
+                                              SelectedItem="{Binding SelectedDetermination}"
+                                              Height="36" Margin="0,0,0,12"/>
+
+                                    <Border Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderThickness="1" CornerRadius="6" Padding="12,10">
+                                        <StackPanel>
+                                            <TextBlock Text="&#x1F4A1; Guidance Hint" FontSize="11.5" FontWeight="Bold"
+                                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                            <TextBlock Text="Prioritize counseling and restorative interventions first unless repetitive severe infractions mandate disciplinary escalation."
+                                                       FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" LineHeight="16"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- Column Right: Step 5 Documentation -->
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Step 5: Document Follow-Up Action &amp; Link Details *"
+                                               FontSize="12.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/>
+                                    <TextBlock Text="Describe the follow-up taken and its link to the selected incident case."
+                                               FontSize="11.5" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8"/>
+                                    <TextBox Style="{DynamicResource ModernTextBoxStyle}"
+                                             Text="{Binding FollowUpDocumentation, UpdateSourceTrigger=PropertyChanged}"
+                                             TextWrapping="Wrap"
+                                             AcceptsReturn="True"
+                                             Height="112"
+                                             VerticalScrollBarVisibility="Auto"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Bottom Action Row -->
+                            <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,0,0,14"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="&#x1F4BE; Document Follow-Up &amp; Link to Incident"
+                                        Style="{DynamicResource PrimaryButtonStyle}"
+                                        Command="{Binding DocumentFollowUpActionCommand}"
+                                        Height="38" Padding="20,0" FontSize="13" FontWeight="Bold"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+    </ScrollViewer>
+</UserControl>

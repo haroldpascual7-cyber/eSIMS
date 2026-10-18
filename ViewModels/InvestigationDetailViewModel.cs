@@ -9,11 +9,12 @@ using System.Windows.Input;
 
 namespace SmartSchoolIncidentManagementSystem.ViewModels
 {
-    public class InvestigationDetailViewModel : ObservableObject
+    public partial class InvestigationDetailViewModel : ObservableObject
     {
         private readonly IInvestigationService _investigationService;
         private readonly IIncidentService _incidentService;
         private readonly Action _onClose;
+        private readonly Action _onOpenDisciplineTracking;
 
         private Incident _incident;
         private Investigation _investigation = new();
@@ -36,12 +37,14 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             IInvestigationService investigationService,
             IIncidentService incidentService,
             Incident incident,
-            Action onClose)
+            Action onClose,
+            Action onOpenDisciplineTracking)
         {
             _investigationService = investigationService ?? throw new ArgumentNullException(nameof(investigationService));
             _incidentService = incidentService ?? throw new ArgumentNullException(nameof(incidentService));
             _incident = incident ?? throw new ArgumentNullException(nameof(incident));
             _onClose = onClose ?? throw new ArgumentNullException(nameof(onClose));
+            _onOpenDisciplineTracking = onOpenDisciplineTracking ?? throw new ArgumentNullException(nameof(onOpenDisciplineTracking));
 
             DisciplinaryActions = new ObservableCollection<DisciplinaryAction>();
 
@@ -61,10 +64,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 "Behavioral Contract",
                 "Written Reprimand",
                 "Verbal Warning",
-                "Restorative School Service",
-                "In-School Suspension",
-                "Out-of-School Suspension",
-                "Behavioral Probation"
+                "Restorative School Service"
             };
 
             ActionStatusOptions = new ObservableCollection<string>
@@ -110,7 +110,17 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             });
 
             CloseCommand = new RelayCommand(() => _onClose());
+            OpenDisciplineTrackingCommand = new RelayCommand(() =>
+            {
+                IsLoading = false;
+                IsRefreshing = false;
+                _onOpenDisciplineTracking();
+            });
+            RefreshCommand = new RelayCommand(async () => await ExecuteRefreshAsync(), () => !IsLoading && !IsRefreshing);
 
+            InitializeTimelineAndEvidence();
+            InitializeObservationsAndFlags();
+            InitializeDisciplinaryGuidanceCommands();
             _ = InitializeWorkspaceAsync();
         }
 
@@ -268,6 +278,8 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public ICommand DeleteActionCommand { get; }
         public ICommand SetStatusCommand { get; }
         public ICommand CloseCommand { get; }
+        public ICommand OpenDisciplineTrackingCommand { get; }
+        public ICommand RefreshCommand { get; }
 
         private async Task InitializeWorkspaceAsync()
         {
@@ -280,7 +292,15 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             OnPropertyChanged(nameof(WitnessStatements));
             OnPropertyChanged(nameof(Findings));
             OnPropertyChanged(nameof(FinalSummary));
+            OnPropertyChanged(nameof(IsFollowUpFlagged));
+            OnPropertyChanged(nameof(FollowUpIssueType));
+            OnPropertyChanged(nameof(FollowUpNotes));
+            OnPropertyChanged(nameof(IsFollowUpResolved));
+            OnPropertyChanged(nameof(HasActiveFollowUpFlag));
+            OnPropertyChanged(nameof(FollowUpBadgeText));
+            OnPropertyChanged(nameof(FollowUpSummaryDisplay));
 
+            LoadTimelineEntries();
             await RefreshDisciplinaryActionsAsync();
         }
 
@@ -332,16 +352,6 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             StartAddAction();
         }
 
-        private async Task RefreshDisciplinaryActionsAsync()
-        {
-            DisciplinaryActions.Clear();
-            var actions = await _investigationService.GetDisciplinaryActionsByIncidentIdAsync(_incident.Id);
-            foreach (var act in actions) DisciplinaryActions.Add(act);
-            OnPropertyChanged(nameof(CompletedActionsCount));
-            OnPropertyChanged(nameof(PendingActionsCount));
-            OnPropertyChanged(nameof(HasDisciplinaryActions));
-        }
-
         private async Task SaveInvestigationAsync()
         {
             // Validation: Lead Investigator must not be empty
@@ -351,114 +361,23 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 return;
             }
 
+            if (IsLoading) return;
             try
             {
+                IsLoading = true;
                 _investigation.LeadInvestigatorName = LeadInvestigatorName.Trim();
                 await _investigationService.SaveInvestigationAsync(_investigation);
                 StatusMessage = "✔ Investigation details saved successfully.";
+                await Task.Delay(500);
             }
             catch (Exception ex)
             {
                 StatusMessage = $"Error saving investigation: {ex.Message}";
             }
-        }
-
-        private async Task SaveActionAsync()
-        {
-            if (string.IsNullOrWhiteSpace(ActionFormDetails))
+            finally
             {
-                ModalMessage = "⚠ Please provide action details or requirements.";
-                StatusMessage = "⚠ Please provide action details.";
-                return;
+                IsLoading = false;
             }
-
-            try
-            {
-                if (IsEditingAction && _editingAction != null)
-                {
-                    _editingAction.ActionType = ActionFormType;
-                    _editingAction.ActionDetails = ActionFormDetails.Trim();
-                    _editingAction.ScheduledDate = ActionFormDate;
-                    _editingAction.Status = ActionFormStatus;
-                    _editingAction.FollowUpNotes = ActionFormNotes?.Trim() ?? string.Empty;
-
-                    if (ActionFormStatus == "Completed" && _editingAction.CompletedDate == null)
-                        _editingAction.CompletedDate = DateTime.Now;
-                    else if (ActionFormStatus != "Completed")
-                        _editingAction.CompletedDate = null;
-
-                    await _investigationService.UpdateDisciplinaryActionAsync(_editingAction);
-                    await RefreshDisciplinaryActionsAsync();
-                    ModalMessage = "✔ Disciplinary action updated successfully.";
-                    StatusMessage = "Disciplinary action updated.";
-                    StartAddAction();
-                }
-                else
-                {
-                    var action = new DisciplinaryAction
-                    {
-                        IncidentId = _incident.Id,
-                        StudentId = _incident.StudentId,
-                        ActionType = ActionFormType,
-                        ActionDetails = ActionFormDetails.Trim(),
-                        ScheduledDate = ActionFormDate,
-                        Status = ActionFormStatus,
-                        FollowUpNotes = ActionFormNotes?.Trim() ?? string.Empty,
-                        CompletedDate = ActionFormStatus == "Completed" ? DateTime.Now : null
-                    };
-
-                    await _investigationService.AddDisciplinaryActionAsync(action);
-                    await RefreshDisciplinaryActionsAsync();
-
-                    _incident.Status = IncidentStatus.ActionTaken;
-                    OnPropertyChanged(nameof(CurrentStatus));
-                    ModalMessage = "✔ Disciplinary action recorded successfully.";
-                    StatusMessage = "Disciplinary action recorded.";
-                    StartAddAction();
-                }
-            }
-            catch (Exception ex)
-            {
-                ModalMessage = $"⚠ Error saving action: {ex.Message}";
-                StatusMessage = $"Error: {ex.Message}";
-            }
-        }
-
-        private async Task MarkActionCompletedAsync(DisciplinaryAction action)
-        {
-            action.Status = "Completed";
-            action.CompletedDate = DateTime.Now;
-            await _investigationService.UpdateDisciplinaryActionAsync(action);
-            await RefreshDisciplinaryActionsAsync();
-
-            if (_editingAction != null && _editingAction.Id == action.Id)
-            {
-                ActionFormStatus = "Completed";
-            }
-
-            ModalMessage = "✔ Disciplinary action marked as completed.";
-            StatusMessage = "Disciplinary action marked as completed.";
-        }
-
-        private async Task DeleteActionAsync(DisciplinaryAction action)
-        {
-            if (_editingAction != null && _editingAction.Id == action.Id)
-            {
-                StartAddAction();
-            }
-
-            await _investigationService.DeleteDisciplinaryActionAsync(action);
-            await RefreshDisciplinaryActionsAsync();
-            ModalMessage = "✔ Action removed.";
-            StatusMessage = "Action removed.";
-        }
-
-        private async Task ChangeIncidentStatusAsync(IncidentStatus newStatus)
-        {
-            _incident.Status = newStatus;
-            await _investigationService.UpdateIncidentStatusAsync(_incident.Id, newStatus);
-            OnPropertyChanged(nameof(CurrentStatus));
-            StatusMessage = $"Case status updated to {newStatus}.";
         }
     }
 }

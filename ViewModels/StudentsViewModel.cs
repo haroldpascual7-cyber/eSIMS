@@ -137,6 +137,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
             // Import & Profile Commands
             InitializeImportAndProfileCommands();
+            InitializeDetailCommands();
 
             // Filter Commands
             ApplyFiltersCommand = new RelayCommand(async () => await LoadStudentsAsync());
@@ -147,7 +148,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 SelectedSectionFilter = "All Sections";
                 await LoadStudentsAsync();
             });
-            RefreshCommand = ApplyFiltersCommand;
+            RefreshCommand = new RelayCommand(async () => await ExecuteRefreshAsync(), () => !IsLoading && !IsRefreshing);
 
             _ = LoadStudentsAsync();
         }
@@ -162,7 +163,14 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public bool IsLoading
         {
             get => _isLoading;
-            set => SetProperty(ref _isLoading, value);
+            set
+            {
+                if (SetProperty(ref _isLoading, value))
+                {
+                    OnPropertyChanged(nameof(IsNotRefreshing));
+                    OnPropertyChanged(nameof(RefreshButtonIcon));
+                }
+            }
         }
 
         public string SearchText
@@ -337,7 +345,9 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             ModalGuardianEmail = s.GuardianEmail;
             ModalMedicalNotes = s.MedicalNotes;
 
-            IsStudentModalOpen = true;
+            LoadStudentDetailStatistics(s);
+            IsStudentDetailOpen = true;
+            IsStudentModalOpen = false;
         }
 
         private void OpenEditStudentModal(Student s)
@@ -390,6 +400,13 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                     };
 
                     await _studentService.AddStudentAsync(student);
+                    await LoadStudentsAsync();
+                    var newStudent = Students.FirstOrDefault(x => x.StudentNumber == student.StudentNumber) ?? student;
+                    SelectedStudent = null;
+                    OpenViewStudentModal(newStudent);
+                    OnPropertyChanged(nameof(SelectedStudent));
+                    OnPropertyChanged(nameof(DetailLevelCategory));
+                    MessageBox.Show($"Student record for '{newStudent.FullName}' created successfully!", "Student Created", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
@@ -416,15 +433,22 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                         student.MedicalNotes = ModalMedicalNotes?.Trim() ?? string.Empty;
 
                         await _studentService.UpdateStudentAsync(student);
+                        await LoadStudentsAsync();
+
+                        var updatedStudent = Students.FirstOrDefault(x => x.Id == student.Id) ?? student;
+                        SelectedStudent = null;
+                        OpenViewStudentModal(updatedStudent);
+                        OnPropertyChanged(nameof(SelectedStudent));
+                        OnPropertyChanged(nameof(DetailLevelCategory));
+
+                        MessageBox.Show($"Student information for '{updatedStudent.FullName}' updated successfully!", "Update Successful", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
-
-                IsStudentModalOpen = false;
-                await LoadStudentsAsync();
             }
             catch (Exception ex)
             {
                 ModalErrorMessage = ex.Message;
+                MessageBox.Show($"Error saving student record: {ex.Message}", "Save Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

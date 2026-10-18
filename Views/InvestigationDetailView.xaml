@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:models="clr-namespace:SmartSchoolIncidentManagementSystem.Models"
+             xmlns:views="clr-namespace:SmartSchoolIncidentManagementSystem.Views"
              mc:Ignorable="d" 
              d:DesignHeight="950" d:DesignWidth="1100"
              ClipToBounds="False">
@@ -19,30 +20,45 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- 1. Header & Quick Case Info -->
                 <Grid Grid.Row="0" Margin="0,0,0,20">
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal">
-                            <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="4" Padding="8,4" Margin="0,0,10,0" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <DockPanel Grid.Row="0" LastChildFill="True">
+                            <Border DockPanel.Dock="Left" Background="{DynamicResource PrimaryBrush}" CornerRadius="4" Padding="8,4" Margin="0,0,10,0" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding IncidentNumber}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
                             </Border>
-                            <TextBlock Text="{Binding Title, StringFormat='Investigation: {0}'}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <TextBlock Text="{Binding Category, StringFormat='Category: {0}'}" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
-                    </StackPanel>
+                            <TextBlock Text="{Binding Title, StringFormat='Investigation: {0}'}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        </DockPanel>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,4,0,0">
+                            <TextBlock Text="{Binding Category, StringFormat='Category: {0}'}" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,10,0" TextTrimming="CharacterEllipsis"/>
+                            <Border Visibility="{Binding IsFollowUpFlagged, Converter={StaticResource BoolToVis}}" Background="{DynamicResource WarningBgBrush}" BorderBrush="{DynamicResource WarningBrush}" BorderThickness="1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding FollowUpBadgeText}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                         <Button Content="← Back to Cases" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseCommand}" Margin="0,0,8,0"/>
-                        <Button Content="{Binding DisciplinaryActions.Count, StringFormat='⚖️ Disciplinary &amp; Counseling ({0})'}"
-                                Style="{DynamicResource SecondaryButtonStyle}"
-                                Command="{Binding OpenDisciplinaryModalCommand}"
-                                Visibility="{Binding CanManageInvestigation, Converter={StaticResource BoolToVis}}"
-                                Margin="0,0,8,0"/>
-                        <Button Content="💾 Save Investigation" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveInvestigationCommand}"
-                                Visibility="{Binding CanManageInvestigation, Converter={StaticResource BoolToVis}}"/>
+                        <Button Content="{Binding RefreshButtonText, FallbackValue='↻ Refresh'}" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}" Margin="0,0,8,0"/>
+                        <Button Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding OpenDisciplinaryModalCommand}" Visibility="{Binding CanManageInvestigation, Converter={StaticResource BoolToVis}}" Margin="0,0,8,0">
+                            <TextBlock Text="{Binding DisciplinaryActions.Count, StringFormat='⚖️ Disciplinary &amp; Counseling ({0})'}"/>
+                        </Button>
+                        <Button Content="{Binding SaveButtonText, FallbackValue='💾 Save Investigation'}" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveInvestigationCommand}" IsEnabled="{Binding IsNotRefreshing}" Visibility="{Binding CanManageInvestigation, Converter={StaticResource BoolToVis}}"/>
                     </StackPanel>
                 </Grid>
 
@@ -61,63 +77,9 @@
                 <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource InfoBrush}" FontWeight="Medium"/>
             </Border>
 
-            <!-- 2. Interactive Lifecycle Stepper -->
-            <Border Grid.Row="2" Style="{DynamicResource CardBorderStyle}" Margin="0,0,0,20" Padding="16,14"
-                    Visibility="{Binding CanManageInvestigation, Converter={StaticResource BoolToVis}}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="0" Text="INCIDENT LIFECYCLE PROGRESSION" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,12"/>
-
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Step 1: Reported -->
-                        <Button Grid.Column="0" Content="1. Reported" Style="{DynamicResource SecondaryButtonStyle}" Margin="0,0,6,0" Command="{Binding SetStatusCommand}">
-                            <Button.CommandParameter>
-                                <models:IncidentStatus>Reported</models:IncidentStatus>
-                            </Button.CommandParameter>
-                        </Button>
-
-                        <!-- Step 2: Under Investigation -->
-                        <Button Grid.Column="1" Content="2. Investigating" Style="{DynamicResource SecondaryButtonStyle}" Margin="0,0,6,0" Command="{Binding SetStatusCommand}">
-                            <Button.CommandParameter>
-                                <models:IncidentStatus>UnderInvestigation</models:IncidentStatus>
-                            </Button.CommandParameter>
-                        </Button>
-
-                        <!-- Step 3: Action Taken -->
-                        <Button Grid.Column="2" Content="3. Action Taken" Style="{DynamicResource SecondaryButtonStyle}" Margin="0,0,6,0" Command="{Binding SetStatusCommand}">
-                            <Button.CommandParameter>
-                                <models:IncidentStatus>ActionTaken</models:IncidentStatus>
-                            </Button.CommandParameter>
-                        </Button>
-
-                        <!-- Step 4: Resolved -->
-                        <Button Grid.Column="3" Content="4. Resolved" Style="{DynamicResource SecondaryButtonStyle}" Margin="0,0,6,0" Command="{Binding SetStatusCommand}">
-                            <Button.CommandParameter>
-                                <models:IncidentStatus>Resolved</models:IncidentStatus>
-                            </Button.CommandParameter>
-                        </Button>
-
-                        <!-- Step 5: Closed -->
-                        <Button Grid.Column="4" Content="5. Closed" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding SetStatusCommand}">
-                            <Button.CommandParameter>
-                                <models:IncidentStatus>Closed</models:IncidentStatus>
-                            </Button.CommandParameter>
-                        </Button>
-                    </Grid>
-                </Grid>
-            </Border>
+            <!-- 2. Interactive Lifecycle Stepper (Matching Picture 2) -->
+            <views:IncidentLifecycleProgressionControl Grid.Row="2"
+                    Visibility="{Binding CanManageInvestigation, Converter={StaticResource BoolToVis}}"/>
 
             <!-- 3. Investigation Dossier & Disciplinary Management -->
             <Grid Grid.Row="3">
@@ -141,49 +103,44 @@
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Investigation Dossier &amp; Witness Statements" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,16"/>
 
-                        <!-- Investigator & Findings Row -->
-                        <Grid Margin="0,0,0,16">
+                        <!-- Start an Investigation (Steps 1-6) -->
+                        <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="8" Padding="14,12" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="Start an Investigation" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="150"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                        <TextBlock Text="Assign Lead Investigator *" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                        <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding LeadInvestigatorName, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsTeacher}" Height="34"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="Target Deadline *" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                        <DatePicker SelectedDate="{Binding TargetCompletionDate}" Height="34"/>
+                                    </StackPanel>
+                                </Grid>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="▶️ Start Investigation (Set Status)" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding StartInvestigationCommand}" Padding="12,6" Margin="0,0,8,0"/>
+                                    <Button Content="💾 Save Record" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding SaveInvestigationCommand}" Padding="12,6"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Findings & Formal Conclusion -->
+                        <Grid Margin="0,0,0,14">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-
-                            <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                                <TextBlock Text="Lead Investigator" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
-                                <Grid>
-                                    <TextBox Style="{DynamicResource ModernTextBoxStyle}"
-                                             Text="{Binding LeadInvestigatorName, UpdateSourceTrigger=PropertyChanged}"
-                                             IsReadOnly="{Binding IsTeacher}"
-                                             x:Name="InvestigatorTextBox"/>
-                                    <!-- Placeholder text -->
-                                    <TextBlock Text="Enter lead investigator name"
-                                               Foreground="{DynamicResource MutedTextBrush}"
-                                               FontSize="14"
-                                               IsHitTestVisible="False"
-                                               Margin="12,0,0,0"
-                                               VerticalAlignment="Center">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <MultiDataTrigger>
-                                                        <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding LeadInvestigatorName}" Value=""/>
-                                                            <Condition Binding="{Binding IsTeacher}" Value="False"/>
-                                                        </MultiDataTrigger.Conditions>
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </MultiDataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Grid>
+                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                <TextBlock Text="Formal Finding / Conclusion" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                                <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding FindingsOptions}" SelectedItem="{Binding Findings}" IsEnabled="{Binding CanManageInvestigation}" Height="34"/>
                             </StackPanel>
-
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Formal Finding / Conclusion" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
-                                <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding FindingsOptions}" SelectedItem="{Binding Findings}"
-                                          IsEnabled="{Binding CanManageInvestigation}"/>
+                                <TextBlock Text="Final Summary Notes" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding FinalSummary, UpdateSourceTrigger=PropertyChanged}" Height="34"/>
                             </StackPanel>
                         </Grid>
 
@@ -202,11 +159,56 @@
                         </StackPanel>
 
                         <!-- Chronological Notes -->
-                        <StackPanel Margin="0,0,0,8">
+                        <StackPanel Margin="0,0,0,14">
                             <TextBlock Text="Investigator Chronological Notes &amp; Evidence Summary" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,6"/>
                             <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding InvestigationNotes, UpdateSourceTrigger=PropertyChanged}" Height="80" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
                                      IsReadOnly="{Binding IsTeacher}"/>
                         </StackPanel>
+
+                        <!-- ⚠️ 2. Flag Missing or Conflicting Information for Follow-Up -->
+                        <Border Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource WarningBrush}" BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="0,0,0,8">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="⚠️ Flag Missing or Conflicting Information" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                        <Border Visibility="{Binding HasActiveFollowUpFlag, Converter={StaticResource BoolToVis}}" Background="{DynamicResource WarningBgBrush}" BorderBrush="{DynamicResource WarningBrush}" BorderThickness="1" CornerRadius="4" Padding="6,1" Margin="8,0,0,0">
+                                            <TextBlock Text="Action Required" FontSize="10.5" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1" Content="Reconciled / Resolved" IsChecked="{Binding IsFollowUpResolved}"
+                                              Visibility="{Binding IsFollowUpFlagged, Converter={StaticResource BoolToVis}}"
+                                              Foreground="{DynamicResource SuccessBrush}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1.4*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="1*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Issue Classification *" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                        <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding FollowUpIssueOptions}" SelectedItem="{Binding FollowUpIssueType}" Height="32"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                                        <CheckBox Content="Flag for Follow-Up" IsChecked="{Binding IsFollowUpFlagged}" Foreground="{DynamicResource PrimaryTextBrush}" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock Text="Follow-Up Notes &amp; Missing / Conflicting Items *" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                                <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding FollowUpNotes, UpdateSourceTrigger=PropertyChanged}" Height="55" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10"/>
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="Clear Flag" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ClearFollowUpFlagCommand}" Visibility="{Binding IsFollowUpFlagged, Converter={StaticResource BoolToVis}}" Margin="0,0,8,0" Padding="10,4" FontSize="11"/>
+                                    <Button Content="✓ Mark Resolved" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ResolveFollowUpFlagCommand}" Visibility="{Binding HasActiveFollowUpFlag, Converter={StaticResource BoolToVis}}" Margin="0,0,8,0" Padding="10,4" FontSize="11"/>
+                                    <Button Content="⚠️ Save Follow-Up Flag" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveFollowUpFlagCommand}" Padding="12,4" FontSize="11"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Border>
 
@@ -234,8 +236,14 @@
                             </Grid>
                         </Border>
 
-                        <!-- Prominent Button: View Disciplinary Action & Counseling -->
-                        <Button Content="⚖️ View Disciplinary Actions &amp; Counseling" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding OpenDisciplinaryModalCommand}" Height="36" Margin="0,0,0,14" HorizontalAlignment="Stretch"/>
+                        <!-- Prominent Buttons: Disciplinary & Guidance Actions -->
+                        <Button Content="⚖️ View Disciplinary Actions &amp; Counseling" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding OpenDisciplinaryModalCommand}" Height="36" Margin="0,0,0,8" HorizontalAlignment="Stretch" FontSize="12.5" FontWeight="SemiBold"/>
+                        <Button Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding OpenDisciplineTrackingCommand}" Height="36" Padding="12,0" Margin="0,0,0,14" HorizontalAlignment="Stretch" Cursor="Hand" ToolTip="Open Suspension &amp; Probation Tracking Hub">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="🛡️" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Open Suspension &amp; Probation Tracking" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
 
                         <!-- Assigned Consequences List Header -->
                         <TextBlock Text="Assigned Consequences &amp; Interventions:" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
@@ -275,6 +283,7 @@
                                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                                     <Button Content="✏️" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding DataContext.StartEditActionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" ToolTip="Edit in full form" Padding="6,4" FontSize="11" Margin="4,0,2,0"/>
                                                     <Button Content="✓" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding DataContext.CompleteActionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" ToolTip="Mark as completed" Padding="6,4" FontSize="11" Margin="2,0,2,0"/>
+                                                    <Button Content="🎯" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding DataContext.ConfirmActionCompleteAndResolveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" ToolTip="Confirm complete &amp; mark incident resolved" Padding="6,4" FontSize="11" Margin="2,0,2,0"/>
                                                     <Button Content="✕" Style="{DynamicResource DangerButtonStyle}" Command="{Binding DataContext.DeleteActionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" ToolTip="Delete action" Padding="6,4" FontSize="11" Margin="2,0,0,0"/>
                                                 </StackPanel>
                                             </Grid>
@@ -286,6 +295,9 @@
                     </StackPanel>
                 </Border>
             </Grid>
+
+            <!-- 4. Maintain Investigation Timeline & Evidence Repository -->
+            <views:InvestigationTimelineControl Grid.Row="4" Margin="0,20,0,0"/>
         </Grid>
     </ScrollViewer>
 
@@ -374,6 +386,7 @@
                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                                             <Button Content="✏️ Edit Form" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding DataContext.StartEditActionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="0,0,6,0" Padding="8,4" FontSize="11"/>
                                                             <Button Content="✓ Complete" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding DataContext.CompleteActionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="0,0,6,0" Padding="8,4" FontSize="11"/>
+                                                            <Button Content="🎯 Resolve Case" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding DataContext.ConfirmActionCompleteAndResolveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="0,0,6,0" Padding="8,4" FontSize="11" ToolTip="Confirm complete &amp; mark incident resolved"/>
                                                             <Button Content="🗑️ Delete" Style="{DynamicResource DangerButtonStyle}" Command="{Binding DataContext.DeleteActionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="8,4" FontSize="11"/>
                                                         </StackPanel>
                                                     </StackPanel>

@@ -57,6 +57,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             IsStudentModalOpen = false;
             IsImportModalOpen = false;
             IsProfileModalOpen = false;
+            IsStudentDetailOpen = false;
         }
 
         private void OpenStudentProfileModal(Student s)

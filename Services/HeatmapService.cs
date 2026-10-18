@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SmartSchoolIncidentManagementSystem.Data;
 using SmartSchoolIncidentManagementSystem.Models;
 using System;
@@ -8,9 +8,19 @@ using System.Threading.Tasks;
 
 namespace SmartSchoolIncidentManagementSystem.Services
 {
+    public class HeatmapFilterParams
+    {
+        public string TimeframeMode { get; set; } = "This Month";
+        public DateTime? SpecificDate { get; set; }
+        public int? SelectedYear { get; set; }
+        public int? SelectedMonth { get; set; }
+        public string CategoryFilter { get; set; } = "All Categories";
+    }
+
     public interface IHeatmapService
     {
         Task<List<HeatmapNodeRaw>> GetCampusLocationDataAsync(string dateRange, string categoryFilter);
+        Task<List<HeatmapNodeRaw>> GetCampusLocationDataAsync(HeatmapFilterParams filters);
     }
 
     public class HeatmapNodeRaw
@@ -18,6 +28,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
         public string Location { get; set; } = string.Empty;
         public int TotalIncidents { get; set; }
         public string TopCategory { get; set; } = "Behavioral Misconduct";
+        public List<Incident> Incidents { get; set; } = new();
     }
 
     public class HeatmapService : IHeatmapService
@@ -29,71 +40,149 @@ namespace SmartSchoolIncidentManagementSystem.Services
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<List<HeatmapNodeRaw>> GetCampusLocationDataAsync(string dateRange, string categoryFilter)
+        public Task<List<HeatmapNodeRaw>> GetCampusLocationDataAsync(string dateRange, string categoryFilter)
         {
-            var list = new List<HeatmapNodeRaw>();
-
-            try
+            return GetCampusLocationDataAsync(new HeatmapFilterParams
             {
-                using var conn = _context.Database.GetDbConnection();
-                await conn.OpenAsync();
+                TimeframeMode = dateRange,
+                CategoryFilter = categoryFilter
+            });
+        }
 
-                using var cmd = conn.CreateCommand();
-                string sql = @"
-                    SELECT 
-                        Location, 
-                        COUNT(Id) as TotalIncidents,
-                        Category as TopCategory
-                    FROM IncidentLogs 
-                    WHERE Location IS NOT NULL AND Location != '' ";
+        public async Task<List<HeatmapNodeRaw>> GetCampusLocationDataAsync(HeatmapFilterParams filters)
+        {
+            using var db = new AppDbContext();
+            var query = db.Incidents.AsNoTracking().Include(i => i.Student).Include(i => i.Reporter).AsQueryable();
 
-                if (!string.IsNullOrEmpty(categoryFilter) && categoryFilter != "All Categories")
+            if (filters != null)
+            {
+                var mode = filters.TimeframeMode ?? "This Month";
+                if (mode.Equals("Specific Date (Day)", StringComparison.OrdinalIgnoreCase) ||
+                    mode.Equals("Specific Date", StringComparison.OrdinalIgnoreCase) ||
+                    mode.Equals("Day", StringComparison.OrdinalIgnoreCase))
                 {
-                    sql += " AND Category = @Category ";
-                    var pCat = cmd.CreateParameter();
-                    pCat.ParameterName = "@Category";
-                    pCat.Value = categoryFilter;
-                    cmd.Parameters.Add(pCat);
+                    if (filters.SpecificDate.HasValue)
+                    {
+                        var start = filters.SpecificDate.Value.Date;
+                        var end = start.AddDays(1);
+                        query = query.Where(i => i.IncidentDate >= start && i.IncidentDate < end);
+                    }
+                }
+                else if (mode.Equals("This Week", StringComparison.OrdinalIgnoreCase))
+                {
+                    var today = DateTime.Today;
+                    int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+                    var startOfWeek = today.AddDays(-diff);
+                    var endOfWeek = startOfWeek.AddDays(7);
+                    query = query.Where(i => i.IncidentDate >= startOfWeek && i.IncidentDate < endOfWeek);
+                }
+                else if (mode.Equals("Specific Month & Year", StringComparison.OrdinalIgnoreCase) ||
+                         mode.Equals("Month & Year", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (filters.SelectedYear.HasValue && filters.SelectedMonth.HasValue)
+                    {
+                        var start = new DateTime(filters.SelectedYear.Value, filters.SelectedMonth.Value, 1);
+                        var end = start.AddMonths(1);
+                        query = query.Where(i => i.IncidentDate >= start && i.IncidentDate < end);
+                    }
+                }
+                else if (mode.Equals("Specific Year", StringComparison.OrdinalIgnoreCase) ||
+                         mode.Equals("Year", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (filters.SelectedYear.HasValue)
+                    {
+                        var start = new DateTime(filters.SelectedYear.Value, 1, 1);
+                        var end = start.AddYears(1);
+                        query = query.Where(i => i.IncidentDate >= start && i.IncidentDate < end);
+                    }
+                }
+                else if (mode.Equals("This Month", StringComparison.OrdinalIgnoreCase))
+                {
+                    var start = DateTime.Now.AddDays(-30);
+                    query = query.Where(i => i.IncidentDate >= start);
+                }
+                else if (mode.Equals("This Semester", StringComparison.OrdinalIgnoreCase))
+                {
+                    var start = DateTime.Now.AddMonths(-6);
+                    query = query.Where(i => i.IncidentDate >= start);
                 }
 
-                sql += " GROUP BY Location ORDER BY TotalIncidents DESC;";
-                cmd.CommandText = sql;
-
-                using var reader = await cmd.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
+                if (!string.IsNullOrWhiteSpace(filters.CategoryFilter) && !filters.CategoryFilter.Equals("All Categories", StringComparison.OrdinalIgnoreCase))
                 {
-                    list.Add(new HeatmapNodeRaw
-                    {
-                        Location = reader.GetString(0),
-                        TotalIncidents = reader.GetInt32(1),
-                        TopCategory = reader.IsDBNull(2) ? "General Infraction" : reader.GetString(2)
-                    });
+                    query = query.Where(i => i.Category.Equals(filters.CategoryFilter, StringComparison.OrdinalIgnoreCase));
                 }
             }
-            catch { }
 
-            // Ensure rich campus heatmap dataset with default predefined locations if database records are sparse
-            var defaults = new List<HeatmapNodeRaw>
+            var incidents = await query.ToListAsync();
+
+            var canonicalZones = new List<string>
             {
-                new HeatmapNodeRaw { Location = "Cafeteria", TotalIncidents = 18, TopCategory = "Bullying & Harassment" },
-                new HeatmapNodeRaw { Location = "Main Hallway", TotalIncidents = 14, TopCategory = "Physical Altercation" },
-                new HeatmapNodeRaw { Location = "Gymnasium", TotalIncidents = 9, TopCategory = "Unexcused Absence" },
-                new HeatmapNodeRaw { Location = "Restrooms (Building A)", TotalIncidents = 8, TopCategory = "Vandalism" },
-                new HeatmapNodeRaw { Location = "Covered Court", TotalIncidents = 6, TopCategory = "Tardiness & Truancy" },
-                new HeatmapNodeRaw { Location = "Science Lab", TotalIncidents = 4, TopCategory = "Academic Dishonesty" },
-                new HeatmapNodeRaw { Location = "Library", TotalIncidents = 3, TopCategory = "Noise Disturbance" },
-                new HeatmapNodeRaw { Location = "East Parking Lot", TotalIncidents = 2, TopCategory = "Unauthorized Exit" }
+                "Gymnasium",
+                "Classrooms (Bldg A)",
+                "Science Labs",
+                "Cafeteria",
+                "Covered Court",
+                "Main Hallway",
+                "Library & Study",
+                "East Parking Lot"
             };
 
-            foreach (var def in defaults)
+            var zoneGroups = canonicalZones.ToDictionary(z => z, _ => new List<Incident>());
+
+            foreach (var inc in incidents)
             {
-                if (!list.Any(x => x.Location.Equals(def.Location, StringComparison.OrdinalIgnoreCase)))
+                string zone = MapToCanonicalZone(inc.Location);
+                if (zoneGroups.TryGetValue(zone, out var list))
                 {
-                    list.Add(def);
+                    list.Add(inc);
+                }
+                else
+                {
+                    zoneGroups["Classrooms (Bldg A)"].Add(inc);
                 }
             }
 
-            return list.OrderByDescending(x => x.TotalIncidents).ToList();
+            var result = new List<HeatmapNodeRaw>();
+            foreach (var zone in canonicalZones)
+            {
+                var list = zoneGroups[zone];
+                string topCategory = list.Any()
+                    ? list.GroupBy(i => i.Category).OrderByDescending(g => g.Count()).First().Key
+                    : "Stable Zone";
+
+                result.Add(new HeatmapNodeRaw
+                {
+                    Location = zone,
+                    TotalIncidents = list.Count,
+                    TopCategory = topCategory,
+                    Incidents = list.OrderByDescending(i => i.IncidentDate).ToList()
+                });
+            }
+
+            return result.OrderByDescending(x => x.TotalIncidents).ToList();
+        }
+
+        public static string MapToCanonicalZone(string? rawLocation)
+        {
+            if (string.IsNullOrWhiteSpace(rawLocation)) return "Classrooms (Bldg A)";
+            string loc = rawLocation.Trim().ToLowerInvariant();
+
+            if (loc.Contains("gym") || loc.Contains("sports") || loc.Contains("arena"))
+                return "Gymnasium";
+            if (loc.Contains("science") || loc.Contains("lab") || loc.Contains("chem") || loc.Contains("bio") || loc.Contains("physics") || loc.Contains("auditorium"))
+                return "Science Labs";
+            if (loc.Contains("cafeteria") || loc.Contains("canteen") || loc.Contains("dining") || loc.Contains("commons") || loc.Contains("food"))
+                return "Cafeteria";
+            if (loc.Contains("court") || loc.Contains("field") || loc.Contains("playground") || loc.Contains("outdoor") || loc.Contains("play"))
+                return "Covered Court";
+            if (loc.Contains("hallway") || loc.Contains("hall") || loc.Contains("corridor") || loc.Contains("admin") || loc.Contains("office") || loc.Contains("detention") || loc.Contains("faculty"))
+                return "Main Hallway";
+            if (loc.Contains("library") || loc.Contains("learning") || loc.Contains("resource") || loc.Contains("book"))
+                return "Library & Study";
+            if (loc.Contains("parking") || loc.Contains("gate") || loc.Contains("exit") || loc.Contains("perimeter") || loc.Contains("vehicle"))
+                return "East Parking Lot";
+
+            return "Classrooms (Bldg A)";
         }
     }
 }

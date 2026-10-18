@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:views="clr-namespace:SmartSchoolIncidentManagementSystem.Views"
              mc:Ignorable="d" 
              d:DesignHeight="850" d:DesignWidth="1200"
              Background="{DynamicResource AppBackgroundBrush}"
@@ -39,7 +40,46 @@
                             Visibility="{Binding CanManageIncidents, Converter={StaticResource BoolToVis}}"/>
 
                     <Button Content="↻ Refresh" Style="{DynamicResource SecondaryButtonStyle}"
-                            Command="{Binding RefreshCommand}" Height="36"/>
+                            Command="{Binding RefreshCommand}" Height="36" Visibility="Collapsed"/>
+                    <Button Style="{DynamicResource SecondaryButtonStyle}"
+                            Command="{Binding RefreshCommand}" Height="36" MinWidth="122" IsEnabled="{Binding IsNotLoading}">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Grid Width="18" Height="18" Margin="0,0,7,0" VerticalAlignment="Center">
+                                <TextBlock Text="&#x21BB;"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVis}}"/>
+                                <Grid Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                                    <Ellipse Stroke="{DynamicResource BorderBrush}" StrokeThickness="2"/>
+                                    <Path x:Name="RefreshButtonLoadingSpinner"
+                                          Data="M 9,2 A 7,7 0 0 1 16,9"
+                                          Stroke="{DynamicResource PrimaryBrush}"
+                                          StrokeThickness="2"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          RenderTransformOrigin="0.5,0.5">
+                                        <Path.RenderTransform>
+                                            <RotateTransform Angle="0"/>
+                                        </Path.RenderTransform>
+                                        <Path.Triggers>
+                                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                                <BeginStoryboard>
+                                                    <Storyboard RepeatBehavior="Forever">
+                                                        <DoubleAnimation Storyboard.TargetName="RefreshButtonLoadingSpinner"
+                                                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                                         From="0" To="360" Duration="0:0:0.75"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Path.Triggers>
+                                    </Path>
+                                </Grid>
+                            </Grid>
+                            <TextBlock Text="{Binding RefreshButtonText}" Foreground="{DynamicResource PrimaryTextBrush}" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
@@ -87,308 +127,142 @@
         </Border>
 
         <!-- 3. INCIDENTS (4-COLUMN RESPONSIVE CARDS) -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl ItemsSource="{Binding Incidents}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Columns="4"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Style="{DynamicResource RecordCardStyle}">
-                            <Border.InputBindings>
-                                <MouseBinding MouseAction="LeftClick"
-                                              Command="{Binding DataContext.ViewIncidentDetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                              CommandParameter="{Binding}"/>
-                            </Border.InputBindings>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+        <Grid Grid.Row="2">
+            <!-- Empty State Display -->
+            <Border Visibility="{Binding HasNoIncidents, Converter={StaticResource BoolToVis}}"
+                    Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="10" Padding="36,28" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="📋" FontSize="36" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                    <TextBlock Text="No incidents found" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="No incident records match your active search or filter criteria." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
 
-                                <!-- Top Row: Incident Number & Severity -->
-                                <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                                    <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource PrimaryBrush}" HorizontalAlignment="Left">
-                                        <TextBlock Text="{Binding IncidentNumber}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
-                                    </Border>
-                                    <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Right">
-                                        <TextBlock Text="{Binding Severity}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                    </Border>
-                                </DockPanel>
-
-                                <!-- Title -->
-                                <TextBlock Grid.Row="1" Text="{Binding Title}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,4"/>
-
-                                <!-- Student Name -->
-                                <TextBlock Grid.Row="2" Text="{Binding StudentDisplayName, StringFormat='👨‍🎓 {0}'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,4"/>
-
-                                <!-- Category & Date -->
-                                <StackPanel Grid.Row="3" Margin="0,0,0,8">
-                                    <TextBlock Text="{Binding Category, StringFormat='📁 {0}'}" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Text="{Binding IncidentDate, StringFormat='📅 {0:yyyy-MM-dd HH:mm}'}" FontSize="10" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0"/>
-                                </StackPanel>
-
-                                <!-- Bottom Badges: Risk & Status -->
-                                <DockPanel Grid.Row="4">
-                                    <Border CornerRadius="4" Padding="5,1" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Left">
-                                        <TextBlock Text="{Binding Risk, StringFormat='Risk: {0}'}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                    </Border>
-                                    <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource SurfaceBackgroundBrush}" HorizontalAlignment="Right">
-                                        <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}"/>
-                                    </Border>
-                                </DockPanel>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-        </Grid>
-
-        <!-- 4. MODAL OVERLAY: CREATE / VIEW / EDIT INCIDENT WITH LIVE RULE ENGINE -->
-        <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Visibility="{Binding IsIncidentModalOpen, Converter={StaticResource BoolToVis}}" Background="{DynamicResource ModalOverlayBrush}">
-            <Border Width="840" MaxHeight="720" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                    BorderThickness="1" CornerRadius="10" Padding="20">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- Header -->
-                    <Grid Grid.Row="0" Margin="0,0,0,14">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding ModalTitle}" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                            <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="4" Padding="6,2" Margin="10,0,0,0">
-                                <TextBlock Text="{Binding ModalIncidentNumber}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
-                            </Border>
-                        </StackPanel>
-                        <Button Content="✕" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CancelModalCommand}"
-                                HorizontalAlignment="Right" Width="30" Height="30" Padding="0"/>
-                    </Grid>
-
-                    <!-- Scrollable Form with Rule Engine and Email Integration -->
-                    <ScrollViewer Grid.Row="1" MaxHeight="520" VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <!-- Error Notice -->
-                            <Border Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1"
-                                    CornerRadius="6" Padding="10" Margin="0,0,0,12"
-                                    Visibility="{Binding ModalErrorMessage, Converter={StaticResource InverseBoolToVis}}">
-                                <TextBlock Text="{Binding ModalErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                            </Border>
-
-                            <!-- SECTION 1: STUDENT SELECTION -->
-                            <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,12">
-                                <StackPanel>
-                                    <TextBlock Text="1. Student Information" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,8"/>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="2*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                            <TextBlock Text="Primary Involved Student *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                            <TextBox Text="{Binding ModalStudentName, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" IsReadOnly="{Binding IsModalReadOnly}"/>
-                                            <!-- Auto-Suggestions Dropdown -->
-                                            <ListBox ItemsSource="{Binding StudentSuggestions}" Visibility="{Binding IsStudentSuggestionsOpen, Converter={StaticResource BoolToVis}}"
-                                                     MaxHeight="120" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,2,0,0">
-                                                <ListBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Button Content="{Binding DisplayName}" Style="{DynamicResource SecondaryButtonStyle}"
-                                                                Command="{Binding DataContext.SelectStudentSuggestionCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                                                CommandParameter="{Binding}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Height="28" Padding="6,0"/>
-                                                    </DataTemplate>
-                                                </ListBox.ItemTemplate>
-                                            </ListBox>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
-                                            <TextBlock Text="Grade &amp; Section" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                            <TextBox Text="{Binding ModalGradeSection}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" IsReadOnly="True"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="2">
-                                            <TextBlock Text="Parent Email (Auto-Retrieved)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                            <TextBox Text="{Binding ModalParentEmail}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" IsReadOnly="True"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- SECTION 2: INCIDENT DETAILS -->
-                            <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,12">
-                                <StackPanel>
-                                    <TextBlock Text="2. Incident Overview" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,8"/>
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="2*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                            <TextBlock Text="Incident Title *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                            <TextBox Text="{Binding ModalTitleField, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" IsReadOnly="{Binding IsModalReadOnly}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
-                                            <TextBlock Text="Incident Category" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                            <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding ModalCategory}" Style="{DynamicResource ModernComboBoxStyle}" Height="34" IsEnabled="{Binding IsModalEditing}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="2">
-                                            <TextBlock Text="Location / Zone" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                            <TextBox Text="{Binding ModalLocation, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" IsReadOnly="{Binding IsModalReadOnly}"/>
-                                        </StackPanel>
-                                    </Grid>
-
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="2*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                            <TextBlock Text="Date of Incident" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                            <DatePicker SelectedDate="{Binding ModalDate}" Style="{DynamicResource ModernDatePickerStyle}" Height="34" IsEnabled="{Binding IsModalEditing}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
-                                            <TextBlock Text="Time (HH:mm)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                            <TextBox Text="{Binding ModalTime}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" IsReadOnly="{Binding IsModalReadOnly}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="2">
-                                            <TextBlock Text="Reporting Staff / Teacher" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                            <TextBox Text="{Binding ModalReporter}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" IsReadOnly="{Binding IsModalReadOnly}"/>
-                                        </StackPanel>
-                                    </Grid>
-
-                                    <TextBlock Text="Incident Narrative / Description *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding ModalDescription, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="70" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" IsReadOnly="{Binding IsModalReadOnly}"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- SECTION 3: RULE-BASED DECISION SUPPORT -->
-                            <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,12">
-                                <StackPanel>
-                                    <Grid Margin="0,0,0,8">
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <TextBlock Text="⚡ Rule Engine Assessment" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
-                                            <TextBlock Text=" (Automated Classification &amp; Risk Scoring)" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                        <Button Content="Apply Recommendations" Style="{DynamicResource SecondaryButtonStyle}"
-                                                Command="{Binding ApplyRuleRecommendationsCommand}" HorizontalAlignment="Right" Height="28" Padding="8,0" FontSize="11"
-                                                IsEnabled="{Binding IsModalEditing}"/>
-                                    </Grid>
-
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Border Grid.Column="0" Background="{DynamicResource TableHoverBrush}" CornerRadius="4" Padding="8,6" Margin="0,0,6,0">
-                                            <StackPanel>
-                                                <TextBlock Text="Suggested Category" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                                <TextBlock Text="{Binding LiveSuggestedCategory}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <Border Grid.Column="1" Background="{DynamicResource TableHoverBrush}" CornerRadius="4" Padding="8,6" Margin="0,0,6,0">
-                                            <StackPanel>
-                                                <TextBlock Text="Recommended Severity" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                                <TextBlock Text="{Binding LiveSuggestedSeverity}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <Border Grid.Column="2" Background="{DynamicResource TableHoverBrush}" CornerRadius="4" Padding="8,6">
-                                            <StackPanel>
-                                                <TextBlock Text="Assessed Risk Level" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                                <TextBlock Text="{Binding LiveSuggestedRisk}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
-                                            </StackPanel>
-                                        </Border>
-                                    </Grid>
-
-                                    <!-- Repeat Offender Alert if Triggered -->
-                                    <Border Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1"
-                                            CornerRadius="4" Padding="8,6" Margin="0,0,0,8" Visibility="{Binding IsRepeatOffenderAlert, Converter={StaticResource BoolToVis}}">
-                                        <TextBlock Text="{Binding RepeatAlertMessage}" Foreground="{DynamicResource DangerBrush}" FontSize="11" FontWeight="Bold"/>
-                                    </Border>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- SECTION 4: ACTIONS & CONFLICT RESOLUTION -->
-                            <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,12">
-                                <StackPanel>
-                                    <TextBlock Text="3. Action &amp; Consequence" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,8"/>
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="2*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                            <TextBlock Text="Action Taken / Resolution Terms" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                            <TextBox Text="{Binding ModalActionTaken}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" IsReadOnly="{Binding IsModalReadOnly}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1">
-                                            <TextBlock Text="Incident Lifecycle Status" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                            <ComboBox ItemsSource="{Binding StatusFilterOptions}" SelectedItem="{Binding ModalStatus}" Style="{DynamicResource ModernComboBoxStyle}" Height="34" IsEnabled="{Binding IsModalEditing}"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- SECTION 5: AUTOMATED PARENT EMAIL DISPATCH -->
-                            <Border Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12,10">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding Incidents}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="4"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{DynamicResource RecordCardStyle}">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick"
+                                                  Command="{Binding DataContext.ViewIncidentDetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                  CommandParameter="{Binding}"/>
+                                </Border.InputBindings>
                                 <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <CheckBox Content="Dispatch Automated Parent Email Notification Upon Saving"
-                                                  IsChecked="{Binding SendParentNotification}" FontWeight="Bold"
-                                                  Foreground="{DynamicResource PrimaryTextBrush}" IsEnabled="{Binding IsModalEditing}"/>
-                                        <TextBlock Text="An official email disclosure will be automatically transmitted to the parent's stored email address." FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" Margin="20,2,0,0"/>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Top Row: Incident Number & Severity -->
+                                    <DockPanel Grid.Row="0" Margin="0,0,0,8">
+                                        <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource PrimaryBrush}" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding IncidentNumber}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                        </Border>
+                                        <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Right">
+                                            <TextBlock Text="{Binding Severity}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                        </Border>
+                                    </DockPanel>
+
+                                    <!-- Title -->
+                                    <TextBlock Grid.Row="1" Text="{Binding Title}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,4"/>
+
+                                    <!-- Student Name -->
+                                    <TextBlock Grid.Row="2" Text="{Binding StudentDisplayName, StringFormat='👨‍🎓 {0}'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,4"/>
+
+                                    <!-- Category & Date -->
+                                    <StackPanel Grid.Row="3" Margin="0,0,0,8">
+                                        <TextBlock Text="{Binding Category, StringFormat='📁 {0}'}" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding IncidentDate, StringFormat='📅 {0:yyyy-MM-dd HH:mm}'}" FontSize="10" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0"/>
                                     </StackPanel>
-                                    <TextBlock Grid.Column="1" Text="{Binding NotificationStatusText}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+
+                                    <!-- Bottom Badges: Risk & Status -->
+                                    <DockPanel Grid.Row="4">
+                                        <Border CornerRadius="4" Padding="5,1" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding Risk, StringFormat='Risk: {0}'}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        </Border>
+                                        <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource SurfaceBackgroundBrush}" HorizontalAlignment="Right">
+                                            <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                        </Border>
+                                    </DockPanel>
                                 </Grid>
                             </Border>
-                        </StackPanel>
-                    </ScrollViewer>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
 
-                    <!-- Bottom Actions -->
-                    <Grid Grid.Row="2" Margin="0,16,0,0">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                            <!-- In Read-Only View: Edit Button -->
-                            <Button Content="✏️ Edit Incident" Style="{DynamicResource SecondaryButtonStyle}"
-                                    Command="{Binding ToggleEditModeCommand}" Margin="0,0,8,0" Height="36"
-                                    Visibility="{Binding IsModalReadOnly, Converter={StaticResource BoolToVis}}"/>
-
-                            <!-- In Edit Mode: Cancel Edit (if existing record) -->
-                            <Button Content="✕ Cancel Edit" Style="{DynamicResource SecondaryButtonStyle}"
-                                    Command="{Binding CancelEditModeCommand}" Margin="0,0,8,0" Height="36"
-                                    Visibility="{Binding CanCancelEdit, Converter={StaticResource BoolToVis}}"/>
-
-                            <!-- In-Modal Delete Button -->
-                            <Button Content="🗑️ Delete Incident" Style="{DynamicResource DangerButtonStyle}"
-                                    Command="{Binding DeleteCurrentModalIncidentCommand}" Margin="0,0,8,0" Height="36"
-                                    Visibility="{Binding CanDeleteModalIncident, Converter={StaticResource BoolToVis}}"/>
-
-                            <!-- In-Modal Open Investigation Button -->
-                            <Button Content="🔍 Investigate Case" Style="{DynamicResource PrimaryButtonStyle}"
-                                    Command="{Binding InvestigateCurrentModalIncidentCommand}" Height="36"
-                                    Visibility="{Binding CanInvestigateModalIncident, Converter={StaticResource BoolToVis}}"/>
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <Button Content="Close" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CancelModalCommand}" Margin="0,0,8,0" Height="36"/>
-                            <Button Content="{Binding SaveModalButtonText}" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveModalCommand}" Height="36"
-                                    Visibility="{Binding IsModalEditing, Converter={StaticResource BoolToVis}}"/>
-                        </StackPanel>
+        <!-- Interactive loading overlay for refresh/search/filter reloads -->
+        <Grid Grid.RowSpan="3"
+              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+              Panel.ZIndex="20"
+              IsHitTestVisible="True">
+            <Border Background="{DynamicResource AppBackgroundBrush}" Opacity="0.78" CornerRadius="10"/>
+            <Border Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource PrimaryBrush}"
+                    BorderThickness="1.5"
+                    CornerRadius="8"
+                    Padding="30,24"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel HorizontalAlignment="Center">
+                    <Grid Width="68" Height="68" HorizontalAlignment="Center" Margin="0,0,0,14">
+                        <Ellipse Stroke="{DynamicResource BorderBrush}" StrokeThickness="5" Opacity="0.65"/>
+                        <Path x:Name="IncidentLoadingSpinner"
+                              Data="M 34,7 A 27,27 0 0 1 61,34"
+                              Stroke="{DynamicResource PrimaryBrush}"
+                              StrokeThickness="5"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              RenderTransformOrigin="0.5,0.5">
+                            <Path.RenderTransform>
+                                <RotateTransform Angle="0"/>
+                            </Path.RenderTransform>
+                            <Path.Triggers>
+                                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetName="IncidentLoadingSpinner"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                             From="0" To="360" Duration="0:0:0.85"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Path.Triggers>
+                        </Path>
                     </Grid>
-                </Grid>
+                    <TextBlock Text="{Binding LoadingStatusText}"
+                               FontSize="15"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Please wait while the incident board updates."
+                               FontSize="11"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,5,0,14"/>
+                    <ProgressBar Width="260"
+                                 Height="6"
+                                 IsIndeterminate="True"
+                                 Foreground="{DynamicResource PrimaryBrush}"
+                                 Background="{DynamicResource BorderBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"/>
+                </StackPanel>
             </Border>
         </Grid>
+        </Grid>
+
+        <!-- 4. MODAL OVERLAY: INCIDENT RECORD (INVOLVED PERSONS, WITNESSES, EVIDENCE & RULE ENGINE) -->
+        <views:IncidentRecordModalControl Margin="-260,-60,-20,-20" Panel.ZIndex="1000"/>
     </Grid>
 </UserControl>

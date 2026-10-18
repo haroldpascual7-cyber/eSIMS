@@ -5,6 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1100">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Grid>
     <Grid Margin="32,24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -20,7 +25,7 @@
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="↻ Refresh" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" Margin="0,0,8,0"/>
+                <Button Content="{Binding RefreshButtonText, FallbackValue='↻ Refresh'}" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}" Margin="0,0,8,0"/>
             </StackPanel>
         </Grid>
 
@@ -99,5 +104,234 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+    </Grid>
+
+    <!-- ═══════════════════ INCIDENT DETAILS MODAL ═══════════════════ -->
+    <Grid Panel.ZIndex="1000"
+          Background="{DynamicResource ModalOverlayBrush}"
+          Visibility="{Binding IsIncidentModalOpen, Converter={StaticResource BoolToVis}}">
+        <Border Width="620" MaxHeight="700"
+                VerticalAlignment="Center" HorizontalAlignment="Center"
+                Background="{DynamicResource CardBackgroundBrush}"
+                CornerRadius="14" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                Padding="32,28">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Modal Header -->
+                <DockPanel Grid.Row="0" Margin="0,0,0,20">
+                    <StackPanel DockPanel.Dock="Left">
+                        <!-- Incident Number + Risk badge -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="4" Padding="8,3" Margin="0,0,10,0">
+                                <TextBlock Text="{Binding ViewingIncident.IncidentNumber}" FontSize="12"
+                                           FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                            </Border>
+                            <!-- Risk badge -->
+                            <Border CornerRadius="4" Padding="8,3">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ViewingIncident.Risk}" Value="High">
+                                                <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ViewingIncident.Risk}" Value="Critical">
+                                                <Setter Property="Background" Value="{DynamicResource DangerBgBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ViewingIncident.Risk}" Value="Low">
+                                                <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding ViewingIncident.Risk, StringFormat='Risk: {0}'}" FontSize="11" FontWeight="Bold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource InfoBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ViewingIncident.Risk}" Value="High">
+                                                    <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ViewingIncident.Risk}" Value="Critical">
+                                                    <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ViewingIncident.Risk}" Value="Low">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="{Binding ViewingIncident.Title}"
+                                   FontSize="20" FontWeight="Bold"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    <Button Content="✕" DockPanel.Dock="Right"
+                            Command="{Binding CloseIncidentModalCommand}"
+                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Background="Transparent" BorderThickness="0"
+                            Foreground="{DynamicResource SecondaryTextBrush}" FontSize="16" Cursor="Hand"/>
+                </DockPanel>
+
+                <!-- Status + Severity strip -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,18">
+                    <!-- Status -->
+                    <Border CornerRadius="10" Padding="10,4" Margin="0,0,8,0">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ViewingIncident.Status}" Value="Resolved">
+                                        <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ViewingIncident.Status}" Value="Closed">
+                                        <Setter Property="Background" Value="{DynamicResource SurfaceBackgroundBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ViewingIncident.Status}" Value="UnderInvestigation">
+                                        <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding ViewingIncident.Status}" FontSize="11" FontWeight="Bold">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource InfoBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ViewingIncident.Status}" Value="Resolved">
+                                            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ViewingIncident.Status}" Value="Closed">
+                                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ViewingIncident.Status}" Value="UnderInvestigation">
+                                            <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Border>
+                    <!-- Severity -->
+                    <Border CornerRadius="10" Padding="10,4" Background="{DynamicResource SurfaceBackgroundBrush}">
+                        <TextBlock Text="{Binding ViewingIncident.Severity, StringFormat='Severity: {0}'}"
+                                   FontSize="11" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- Detail Fields -->
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- Divider -->
+                        <Border BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0" Margin="0,0,0,16"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left column -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="STUDENT INVOLVED" FontSize="10" FontWeight="Bold"
+                                           Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
+                                <TextBlock Text="{Binding ViewingIncident.StudentDisplayName}"
+                                           FontSize="13" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
+
+                                <TextBlock Text="CATEGORY" FontSize="10" FontWeight="Bold"
+                                           Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
+                                <TextBlock Text="{Binding ViewingIncident.Category}"
+                                           FontSize="13" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
+
+                                <TextBlock Text="LOCATION" FontSize="10" FontWeight="Bold"
+                                           Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
+                                <TextBlock Text="{Binding ViewingIncident.Location}"
+                                           FontSize="13" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
+                            </StackPanel>
+
+                            <!-- Right column -->
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="REPORTING STAFF" FontSize="10" FontWeight="Bold"
+                                           Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
+                                <TextBlock Text="{Binding ViewingIncident.ReporterDisplayName}"
+                                           FontSize="13" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
+
+                                <TextBlock Text="DATE OF INCIDENT" FontSize="10" FontWeight="Bold"
+                                           Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
+                                <TextBlock Text="{Binding ViewingIncident.IncidentDate, StringFormat='{}{0:MMMM dd, yyyy}'}"
+                                           FontSize="13" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
+
+                                <TextBlock Text="REPEAT INCIDENT" FontSize="10" FontWeight="Bold"
+                                           Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
+                                <TextBlock FontSize="13" Margin="0,0,0,14">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="No"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ViewingIncident.IsRepeatIncident}" Value="True">
+                                                    <Setter Property="Text" Value="⚠ Yes"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Description -->
+                        <TextBlock Text="DESCRIPTION" FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,6"/>
+                        <Border Background="{DynamicResource SurfaceBackgroundBrush}"
+                                CornerRadius="8" Padding="14,10" Margin="0,0,0,14">
+                            <TextBlock Text="{Binding ViewingIncident.Description}"
+                                       FontSize="13" Foreground="{DynamicResource PrimaryTextBrush}"
+                                       TextWrapping="Wrap" LineHeight="20"/>
+                        </Border>
+
+                        <!-- Recommended Action -->
+                        <TextBlock Text="RECOMMENDED ACTION" FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,6"/>
+                        <Border Background="{DynamicResource WarningBgBrush}"
+                                CornerRadius="8" Padding="14,10" Margin="0,0,0,4">
+                            <TextBlock Text="{Binding ViewingIncident.RecommendedAction}"
+                                       FontSize="13" Foreground="{DynamicResource WarningBrush}"
+                                       TextWrapping="Wrap" LineHeight="20"/>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Footer Buttons -->
+                <Grid Grid.Row="3" Margin="0,20,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Close"
+                            Command="{Binding CloseIncidentModalCommand}"
+                            Style="{DynamicResource SecondaryButtonStyle}" Height="40" FontSize="13"/>
+                    <Button Grid.Column="2" Content="🔍 Open Investigation Workspace"
+                            Command="{Binding OpenWorkspaceFromModalCommand}"
+                            Style="{DynamicResource PrimaryButtonStyle}" Height="40" FontSize="13"/>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+
     </Grid>
 </UserControl>

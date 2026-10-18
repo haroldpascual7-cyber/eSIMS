@@ -6,7 +6,12 @@ namespace SmartSchoolIncidentManagementSystem.Services
 {
     public class ThemeService : IThemeService
     {
-        public AppTheme CurrentTheme { get; private set; } = AppTheme.Dark;
+        public AppTheme CurrentTheme { get; private set; } = AppTheme.Light;
+
+        public ThemeService()
+        {
+            SetTheme(AppTheme.Light);
+        }
 
         public void SetTheme(AppTheme theme)
         {

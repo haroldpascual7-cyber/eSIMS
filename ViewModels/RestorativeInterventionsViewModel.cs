@@ -1,4 +1,4 @@
-﻿using SmartSchoolIncidentManagementSystem.Models;
+using SmartSchoolIncidentManagementSystem.Models;
 using SmartSchoolIncidentManagementSystem.Services;
 using SmartSchoolIncidentManagementSystem.ViewModels.Common;
 using System;
@@ -309,18 +309,35 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public ICommand SaveProgressCommand { get; }
         public ICommand PrintCertificateCommand { get; }
 
+        private bool _isLoading;
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set => SetProperty(ref _isLoading, value);
+        }
+
         private async Task InitializeDataAsync()
         {
-            var incidents = await _incidentService.GetAllIncidentsAsync();
-            AvailableIncidents.Clear();
-            foreach (var inc in incidents) AvailableIncidents.Add(inc.IncidentNumber);
-            if (AvailableIncidents.Any()) AddIncidentNumber = AvailableIncidents.First();
+            try
+            {
+                IsLoading = true;
+                var incidents = await _incidentService.GetAllIncidentsAsync();
+                AvailableIncidents.Clear();
+                foreach (var inc in incidents) AvailableIncidents.Add(inc.IncidentNumber);
+                if (AvailableIncidents.Any()) AddIncidentNumber = AvailableIncidents.First();
 
-            var students = await _incidentService.GetAllStudentsAsync();
-            AvailableStudents.Clear();
-            foreach (var st in students) AvailableStudents.Add($"{st.FullName} ({st.StudentNumber})");
+                var students = await _incidentService.GetAllStudentsAsync();
+                AvailableStudents.Clear();
+                foreach (var st in students) AvailableStudents.Add($"{st.FullName} ({st.StudentNumber})");
+                if (AvailableStudents.Any()) AddStudentName = "Juan Dela Cruz";
 
-            await LoadPlansAsync();
+                await LoadPlansAsync();
+            }
+            finally
+            {
+                await Task.Delay(100);
+                IsLoading = false;
+            }
         }
 
         private async Task LoadPlansAsync()

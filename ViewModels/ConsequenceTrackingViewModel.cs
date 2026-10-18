@@ -1,4 +1,4 @@
-﻿using SmartSchoolIncidentManagementSystem.Models;
+using SmartSchoolIncidentManagementSystem.Models;
 using SmartSchoolIncidentManagementSystem.Services;
 using SmartSchoolIncidentManagementSystem.ViewModels.Common;
 using System;
@@ -260,25 +260,41 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public ICommand MarkCompletedCommand { get; }
         public ICommand PrintNoticeSlipCommand { get; }
 
+        private bool _isLoading;
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set => SetProperty(ref _isLoading, value);
+        }
+
         private async Task InitializeDataAsync()
         {
-            var incidents = await _incidentService.GetAllIncidentsAsync();
-            AvailableIncidents.Clear();
-            foreach (var inc in incidents)
+            try
             {
-                AvailableIncidents.Add(inc.IncidentNumber);
-            }
-            if (AvailableIncidents.Any()) ModalIncidentNumber = AvailableIncidents.First();
+                IsLoading = true;
+                var incidents = await _incidentService.GetAllIncidentsAsync();
+                AvailableIncidents.Clear();
+                foreach (var inc in incidents)
+                {
+                    AvailableIncidents.Add(inc.IncidentNumber);
+                }
+                if (AvailableIncidents.Any()) ModalIncidentNumber = AvailableIncidents.First();
 
-            var students = await _incidentService.GetAllStudentsAsync();
-            AvailableStudents.Clear();
-            foreach (var st in students)
+                var students = await _incidentService.GetAllStudentsAsync();
+                AvailableStudents.Clear();
+                foreach (var st in students)
+                {
+                    AvailableStudents.Add($"{st.FullName} ({st.StudentNumber})");
+                }
+                if (AvailableStudents.Any()) ModalStudentName = "Juan Dela Cruz";
+
+                await LoadLogsAsync();
+            }
+            finally
             {
-                AvailableStudents.Add($"{st.FullName} ({st.StudentNumber})");
+                await Task.Delay(100);
+                IsLoading = false;
             }
-            if (AvailableStudents.Any()) ModalStudentName = "Juan Dela Cruz";
-
-            await LoadLogsAsync();
         }
 
         private async Task LoadLogsAsync()

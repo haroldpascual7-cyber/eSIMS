@@ -23,8 +23,8 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
         private string _searchText = string.Empty;
         private string _selectedCategoryFilter = "All Categories";
-        private IncidentStatus? _selectedStatusFilter;
-        private IncidentSeverity? _selectedSeverityFilter;
+        private string _selectedStatusFilter = "All Statuses";
+        private string _selectedSeverityFilter = "All Severities";
         private RiskLevel? _selectedRiskFilter;
         private DateTime? _filterStartDate;
         private DateTime? _filterEndDate;
@@ -54,7 +54,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             foreach (var cat in Categories) CategoryFilterOptions.Add(cat);
 
             SeverityFilterOptions = new ObservableCollection<string> { "All Severities", "Low", "Medium", "High", "Critical" };
-            StatusFilterOptions = new ObservableCollection<string> { "All Statuses", "Reported", "UnderInvestigation", "ActionTaken", "Resolved", "Closed" };
+            StatusFilterOptions = new ObservableCollection<string> { "All Statuses", "Reported", "UnderInvestigation", "ActionTaken", "Pending Counseling", "Resolved", "Closed" };
 
             // Commands
             NewIncidentCommand = new RelayCommand(OpenCreateModal);
@@ -62,7 +62,11 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             {
                 var target = (param as Incident) ?? SelectedIncident;
                 if (target != null) OpenEditModal(target);
-            }, _ => SelectedIncident != null);
+            }, param =>
+            {
+                var target = (param as Incident) ?? SelectedIncident;
+                return target != null && CanEditIncidentFromList(target);
+            });
 
             ViewIncidentDetailsCommand = new RelayCommand(param =>
             {
@@ -81,13 +85,13 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             });
 
             DeleteIncidentCommand = new RelayCommand(async () => await DeleteSelectedAsync(), () => SelectedIncident != null && CanDeleteIncident);
-            RefreshCommand = new RelayCommand(async () => await LoadIncidentsAsync());
+            RefreshCommand = new RelayCommand(async () => await RefreshIncidentsAsync(), () => !IsLoading);
             ClearFiltersCommand = new RelayCommand(async () =>
             {
                 SearchText = string.Empty;
                 SelectedCategoryFilter = "All Categories";
-                SelectedStatusFilter = null;
-                SelectedSeverityFilter = null;
+                SelectedStatusFilter = "All Statuses";
+                SelectedSeverityFilter = "All Severities";
                 SelectedRiskFilter = null;
                 FilterStartDate = null;
                 FilterEndDate = null;
@@ -116,6 +120,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public bool CanManageIncidents => SessionManager.HasPermission("System Administrator,Discipline Officer,Guidance Counselor,Teacher,Staff");
         public bool CanDeleteIncident => SessionManager.HasPermission("System Administrator,Discipline Officer");
         public bool CanOpenInvestigation => SessionManager.HasPermission("System Administrator,Discipline Officer,Guidance Counselor");
+        public bool CanEditSelectedIncident => SelectedIncident != null && CanEditIncidentFromList(SelectedIncident);
 
         public string SearchText
         {
@@ -129,13 +134,13 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             set { if (SetProperty(ref _selectedCategoryFilter, value)) _ = LoadIncidentsAsync(); }
         }
 
-        public IncidentStatus? SelectedStatusFilter
+        public string SelectedStatusFilter
         {
             get => _selectedStatusFilter;
             set { if (SetProperty(ref _selectedStatusFilter, value)) _ = LoadIncidentsAsync(); }
         }
 
-        public IncidentSeverity? SelectedSeverityFilter
+        public string SelectedSeverityFilter
         {
             get => _selectedSeverityFilter;
             set { if (SetProperty(ref _selectedSeverityFilter, value)) _ = LoadIncidentsAsync(); }
@@ -162,14 +167,37 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public Incident? SelectedIncident
         {
             get => _selectedIncident;
-            set => SetProperty(ref _selectedIncident, value);
+            set
+            {
+                if (SetProperty(ref _selectedIncident, value))
+                {
+                    OnPropertyChanged(nameof(CanEditSelectedIncident));
+                    CommandManager.InvalidateRequerySuggested();
+                }
+            }
         }
 
         public bool IsLoading
         {
             get => _isLoading;
-            set => SetProperty(ref _isLoading, value);
+            set
+            {
+                if (SetProperty(ref _isLoading, value))
+                {
+                    OnPropertyChanged(nameof(IsNotLoading));
+                    OnPropertyChanged(nameof(RefreshButtonText));
+                    OnPropertyChanged(nameof(LoadingStatusText));
+                    OnPropertyChanged(nameof(HasNoIncidents));
+                    CommandManager.InvalidateRequerySuggested();
+                }
+            }
         }
+
+        public bool IsNotLoading => !IsLoading;
+        public string RefreshButtonText => IsLoading ? "Refreshing..." : "Refresh";
+        public string LoadingStatusText => SearchText.Length > 0 || SelectedCategoryFilter != "All Categories" || SelectedStatusFilter != "All Statuses" || SelectedSeverityFilter != "All Severities"
+            ? "Refreshing filtered incident records"
+            : "Refreshing incident records";
 
         // Commands
         public ICommand NewIncidentCommand { get; }
@@ -182,24 +210,46 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
         public async Task LoadIncidentsAsync()
         {
+            await LoadIncidentsAsync(TimeSpan.Zero);
+        }
+
+        private async Task RefreshIncidentsAsync()
+        {
+            await LoadIncidentsAsync(TimeSpan.FromMilliseconds(300));
+        }
+
+        private async Task LoadIncidentsAsync(TimeSpan minimumLoadingTime)
+        {
+            var startedAt = DateTime.UtcNow;
             IsLoading = true;
+            await Task.Yield();
             try
             {
                 var items = await _incidentService.SearchIncidentsAsync(SearchText);
 
                 if (!string.IsNullOrWhiteSpace(SelectedCategoryFilter) && !SelectedCategoryFilter.Equals("All Categories", StringComparison.OrdinalIgnoreCase))
                 {
-                    items = items.Where(i => i.Category == SelectedCategoryFilter);
+                    items = items.Where(i => i.Category.Equals(SelectedCategoryFilter, StringComparison.OrdinalIgnoreCase));
                 }
 
-                if (SelectedStatusFilter.HasValue)
+                if (!string.IsNullOrWhiteSpace(SelectedStatusFilter) && !SelectedStatusFilter.Equals("All Statuses", StringComparison.OrdinalIgnoreCase))
                 {
-                    items = items.Where(i => i.Status == SelectedStatusFilter.Value);
+                    if (SelectedStatusFilter.Equals("Pending Counseling", StringComparison.OrdinalIgnoreCase))
+                    {
+                        items = items.Where(i => i.Status == IncidentStatus.ActionTaken);
+                    }
+                    else if (Enum.TryParse<IncidentStatus>(SelectedStatusFilter, true, out var statusEnum))
+                    {
+                        items = items.Where(i => i.Status == statusEnum);
+                    }
                 }
 
-                if (SelectedSeverityFilter.HasValue)
+                if (!string.IsNullOrWhiteSpace(SelectedSeverityFilter) && !SelectedSeverityFilter.Equals("All Severities", StringComparison.OrdinalIgnoreCase))
                 {
-                    items = items.Where(i => i.Severity == SelectedSeverityFilter.Value);
+                    if (Enum.TryParse<IncidentSeverity>(SelectedSeverityFilter, true, out var sevEnum))
+                    {
+                        items = items.Where(i => i.Severity == sevEnum);
+                    }
                 }
 
                 if (FilterStartDate.HasValue)
@@ -213,19 +263,6 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                     items = items.Where(i => i.IncidentDate <= endLimit);
                 }
 
-                // Scoped Teacher & Staff access
-                if (SessionManager.Role.Equals("Teacher", StringComparison.OrdinalIgnoreCase) ||
-                    SessionManager.Role.Equals("Staff", StringComparison.OrdinalIgnoreCase))
-                {
-                    var userAccount = SessionManager.Username;
-                    var userFullName = SessionManager.FullName;
-                    items = items.Where(i =>
-                        (!string.IsNullOrWhiteSpace(i.CreatedBy) && i.CreatedBy.Equals(userAccount, StringComparison.OrdinalIgnoreCase)) ||
-                        (!string.IsNullOrWhiteSpace(i.ReportingStaffTeacher) &&
-                         (i.ReportingStaffTeacher.Equals(userAccount, StringComparison.OrdinalIgnoreCase) ||
-                          i.ReportingStaffTeacher.Equals(userFullName, StringComparison.OrdinalIgnoreCase))));
-                }
-
                 Incidents.Clear();
                 foreach (var item in items)
                 {
@@ -234,9 +271,18 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             }
             finally
             {
+                var remaining = minimumLoadingTime - (DateTime.UtcNow - startedAt);
+                if (remaining > TimeSpan.Zero)
+                {
+                    await Task.Delay(remaining);
+                }
+
                 IsLoading = false;
+                OnPropertyChanged(nameof(HasNoIncidents));
             }
         }
+
+        public bool HasNoIncidents => Incidents.Count == 0 && !IsLoading;
 
         private async Task DeleteSelectedAsync()
         {

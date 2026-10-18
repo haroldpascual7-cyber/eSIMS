@@ -63,38 +63,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- Quick Login / Role Selection Section -->
-            <StackPanel Margin="0,0,0,12">
-                <StackPanel Orientation="Horizontal" Margin="2,0,0,4">
-                    <TextBlock Text="⚡" FontSize="13" Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                    <TextBlock Text="Quick Login" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
-                    <TextBlock Text="— Select role to auto-fill credentials" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                </StackPanel>
-
-                <ComboBox ItemsSource="{Binding RoleOptions}"
-                          SelectedItem="{Binding SelectedRole, Mode=TwoWay}"
-                          Style="{DynamicResource ModernComboBoxStyle}"
-                          Height="42"
-                          Cursor="Hand"/>
-
-                <!-- Role Indicator Banner -->
-                <Border Visibility="{Binding HasRoleIndicator, Converter={StaticResource BoolToVis}}"
-                        Background="{DynamicResource InfoBgBrush}"
-                        BorderBrush="{DynamicResource InfoBrush}"
-                        BorderThickness="1"
-                        CornerRadius="6"
-                        Padding="10,6"
-                        Margin="0,6,0,0">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="ℹ️" FontSize="12" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <TextBlock Text="{Binding RoleIndicatorMessage}"
-                                   Foreground="{DynamicResource InfoBrush}"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
-                                   VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
 
             <!-- Username Input -->
             <Border Height="44" CornerRadius="8" Background="{DynamicResource InputBackgroundBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1" Padding="14,0" Margin="0,0,0,10">

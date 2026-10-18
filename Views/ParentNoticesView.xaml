@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:views="clr-namespace:SmartSchoolIncidentManagementSystem.Views"
              mc:Ignorable="d" 
              d:DesignHeight="850" d:DesignWidth="1200"
              ClipToBounds="False">
@@ -24,46 +25,48 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Content="↻ Refresh" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" Margin="0,0,8,0"/>
-                    <Button Content="📑 Overdue Report (PDF)" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ExportOverdueReportCommand}" Margin="0,0,8,0"/>
-                    <Button Content="✉️ + Send Parent Notice" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding OpenCreateNoticeCommand}"/>
+                    <Button Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}"
+                            Content="{Binding RefreshButtonText, FallbackValue='↻ Refresh'}"
+                            Margin="0,0,8,0" Height="36" Padding="14,0" FontSize="12.5" FontWeight="SemiBold" ToolTip="Refresh Notice Registry"/>
+                    <Button Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ExportOverdueReportCommand}" Margin="0,0,8,0" Height="36" Padding="14,0" ToolTip="Export Overdue Compliance Report (PDF)">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="📑" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Overdue Report (PDF)" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding OpenCreateNoticeCommand}" Height="36" Padding="16,0" ToolTip="Compose and dispatch new official parent notice">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="✉️" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="+ Send Parent Notice" FontSize="12.5" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
 
             <!-- 2. Metric KPI Cards -->
             <Grid Grid.Row="1" Margin="0,0,0,16">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Total Dispatches -->
                 <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Margin="0,0,8,0" Padding="16,12">
                     <StackPanel>
                         <TextBlock Text="TOTAL DISPATCHES" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding TotalDispatchedCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
-
-                <!-- Pending Acknowledgment -->
                 <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Margin="4,0,4,0" Padding="16,12">
                     <StackPanel>
                         <TextBlock Text="PENDING RECEIPT" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
                         <TextBlock Text="{Binding PendingCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
-
-                <!-- Overdue Notices -->
                 <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Margin="4,0,4,0" Padding="16,12">
                     <StackPanel>
                         <TextBlock Text="OVERDUE COMPLIANCE" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}"/>
                         <TextBlock Text="{Binding OverdueCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
-
-                <!-- Acknowledged Compliance -->
                 <Border Grid.Column="3" Style="{DynamicResource CardBorderStyle}" Margin="8,0,0,0" Padding="16,12">
                     <StackPanel>
                         <TextBlock Text="ACKNOWLEDGED / SIGNED" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
@@ -73,16 +76,44 @@
             </Grid>
 
             <!-- 3. Search & Toolbar -->
-            <Border Grid.Row="2" Style="{DynamicResource CardBorderStyle}" Margin="0,0,0,16" Padding="16,12">
+            <Border Grid.Row="2" Style="{DynamicResource CardBorderStyle}" Margin="0,0,0,16" Padding="16,10">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="280"/>
-                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="320"/>
+                        <ColumnDefinition Width="190"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="0" Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
-                    <ComboBox Grid.Column="1" Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding StatusFilters}" SelectedItem="{Binding SelectedStatusFilter}"/>
+                    <!-- Search Input with Magnifying Glass -->
+                    <Grid Grid.Column="0" Margin="0,0,12,0">
+                        <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Height="36" Padding="30,0,10,0" VerticalContentAlignment="Center"/>
+                        <TextBlock Text="🔍" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="10,0,0,0" IsHitTestVisible="False"/>
+                        <TextBlock Text="Search notices, students, remarks..." FontSize="12" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center" Margin="32,0,0,0" IsHitTestVisible="False">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SearchText}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- Status Filter ComboBox -->
+                    <ComboBox Grid.Column="1" Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding StatusFilters}" SelectedItem="{Binding SelectedStatusFilter}" Height="36" VerticalContentAlignment="Center"/>
+
+                    <!-- Right Quick Count Pill -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="6" Padding="12,6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="📋 Official Records in View: " FontSize="11.5" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding FilteredNotices.Count}" FontSize="11.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
                 </Grid>
             </Border>
 
@@ -180,30 +211,71 @@
                 <!-- Tab 3: Official Templates -->
                 <TabItem Header="📄 Letter Templates" FontSize="13" FontWeight="SemiBold">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,8,0,0">
-                        <ItemsControl ItemsSource="{Binding Templates}">
+                        <ItemsControl ItemsSource="{Binding EnhancedTemplates}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <UniformGrid Columns="4"/>
+                                    <UniformGrid Columns="3"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Style="{DynamicResource RecordCardStyle}">
-                                        <Border.InputBindings>
-                                            <MouseBinding MouseAction="LeftClick"
-                                                          Command="{Binding DataContext.OpenTemplateCardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                          CommandParameter="{Binding}"/>
-                                        </Border.InputBindings>
+                                    <Border Style="{DynamicResource RecordCardStyle}" Margin="6" Padding="16">
                                         <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="*"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
+
+                                            <!-- 1. Header Badges -->
                                             <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                                                <TextBlock Text="📄" FontSize="14" Margin="0,0,6,0"/>
-                                                <TextBlock Text="{Binding TemplateName}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                                <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Left">
+                                                    <TextBlock Text="{Binding DocumentBadge}" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                                                </Border>
+                                                <Border CornerRadius="4" Padding="5,2" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Right">
+                                                    <TextBlock Text="{Binding ReferenceCode}" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                </Border>
                                             </DockPanel>
-                                            <TextBlock Grid.Row="1" Text="{Binding TemplateBody}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" MaxHeight="60"/>
+
+                                            <!-- 2. Letter Title -->
+                                            <DockPanel Grid.Row="1" Margin="0,0,0,4">
+                                                <TextBlock Text="{Binding Icon}" FontSize="15" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding TemplateName}" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                            </DockPanel>
+
+                                            <!-- 3. Subtitle / Department -->
+                                            <TextBlock Grid.Row="2" Text="REPUBLIC OF THE PHILIPPINES • SMART ACADEMY" FontSize="9" FontWeight="SemiBold" Foreground="{DynamicResource MutedTextBrush}" Margin="21,0,0,8"/>
+
+                                            <!-- 4. Realistic Letter Sheet Preview Box -->
+                                            <Border Grid.Row="3" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="12,10" Margin="0,0,0,8">
+                                                <StackPanel>
+                                                    <TextBlock Text="OFFICE OF STUDENT AFFAIRS &amp; GUIDANCE" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,4"/>
+                                                    <TextBlock Text="{Binding SampleExcerpt}" FontSize="10.5" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap" MaxHeight="60" TextTrimming="CharacterEllipsis" LineHeight="15"/>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!-- 5. Tear-Off Slip Indicator -->
+                                            <StackPanel Grid.Row="4" Margin="0,0,0,10">
+                                                <TextBlock Text="✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ✂" FontSize="8" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="Includes Official Parent Acknowledgment Slip" FontSize="9" FontStyle="Italic" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                            </StackPanel>
+
+                                            <!-- 6. Bottom Action Buttons Bar -->
+                                            <Grid Grid.Row="5">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Column="0" Content="👁️ Preview Letter" Style="{DynamicResource SecondaryButtonStyle}" Height="32" Padding="0" Margin="0,0,4,0" FontSize="11.5" FontWeight="SemiBold"
+                                                        Command="{Binding DataContext.PreviewTemplateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Grid.Column="1" Content="✉️ Dispatch" Style="{DynamicResource PrimaryButtonStyle}" Height="32" Padding="0" Margin="4,0,0,0" FontSize="11.5" FontWeight="Bold"
+                                                        Command="{Binding DataContext.UseTemplateInNoticeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding Template}"/>
+                                            </Grid>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -411,22 +483,7 @@
             </Border>
         </Grid>
 
-        <!-- MODAL 5: Letter Template Preview -->
-        <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Background="{DynamicResource ModalOverlayBrush}"
-              Visibility="{Binding IsViewTemplateModalOpen, Converter={StaticResource BoolToVis}}">
-            <Border Style="{DynamicResource CardBorderStyle}" Width="560" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
-                <StackPanel>
-                    <DockPanel Margin="0,0,0,14">
-                        <TextBlock Text="{Binding ViewingTemplate.TemplateName}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                        <Button Content="✕" Style="{DynamicResource SecondaryButtonStyle}" HorizontalAlignment="Right" Command="{Binding CloseTemplateCardCommand}" Width="30" Height="30" Padding="0"/>
-                    </DockPanel>
-                    <TextBlock Text="Template Body / Structure:" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                    <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,4,0,16">
-                        <TextBlock Text="{Binding ViewingTemplate.TemplateBody}" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap" MaxHeight="250"/>
-                    </Border>
-                    <Button Content="Close" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseTemplateCardCommand}" HorizontalAlignment="Right" Height="32" Width="80"/>
-                </StackPanel>
-            </Border>
-        </Grid>
+        <!-- MODAL 5: Letter Template Sheet Preview -->
+        <views:LetterTemplateSheetPreviewModal Visibility="{Binding IsViewTemplateModalOpen, Converter={StaticResource BoolToVis}}"/>
     </Grid>
 </UserControl>

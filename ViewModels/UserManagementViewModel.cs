@@ -200,7 +200,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = @"
-                    SELECT UserId, Username, FullName, Email, Role, Status, CreatedAt
+                    SELECT UserId, Username, FullName, Email, Role, Status, CreatedAt, ProfilePicturePath
                     FROM SystemUsers
                     ORDER BY UserId ASC;";
 
@@ -215,7 +215,8 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                         Email     = reader.GetString(3),
                         Role      = reader.GetString(4),
                         Status    = reader.GetString(5),
-                        CreatedAt = reader.IsDBNull(6) ? DateTime.Now : reader.GetDateTime(6)
+                        CreatedAt = reader.IsDBNull(6) ? DateTime.Now : reader.GetDateTime(6),
+                        ProfilePicturePath = reader.IsDBNull(7) ? null : reader.GetString(7)
                     });
                 }
             });
@@ -233,38 +234,11 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 }
                 UsersView.Refresh();
                 if (reselectItem != null)
+                {
                     SelectedUser = reselectItem;
+                    SelectedUserPhotoPath = reselectItem.ProfilePicturePath;
+                }
             });
-        }
-
-        // ---------- Validation ----------
-        private bool CanCreateUser()
-        {
-            return !IsEditMode
-                && !string.IsNullOrWhiteSpace(NewUsername)
-                && !string.IsNullOrWhiteSpace(NewFullName)
-                && !string.IsNullOrWhiteSpace(NewEmail)
-                && !string.IsNullOrWhiteSpace(NewPassword)
-                && !string.IsNullOrWhiteSpace(SelectedRole);
-        }
-
-        private bool CanSaveUser()
-        {
-            return IsEditMode
-                && SelectedUser != null
-                && !string.IsNullOrWhiteSpace(NewFullName)
-                && !string.IsNullOrWhiteSpace(NewEmail)
-                && !string.IsNullOrWhiteSpace(SelectedRole);
-        }
-
-        // ---------- Clear Form ----------
-        private void ClearForm()
-        {
-            NewUsername = string.Empty;
-            NewFullName = string.Empty;
-            NewEmail = string.Empty;
-            NewPassword = string.Empty;
-            SelectedRole = string.Empty;
         }
 
         // ---------- Create User ----------
