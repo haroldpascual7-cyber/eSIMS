@@ -1,0 +1,53 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# IDE
+.idea/
+*.CodeWorkspace
+.vscode/
+
+# NuGet
+*.nupkg
+nuget.exe
+
+# Package files
+packages/
+
+# Temporary files
+*.tmp
+*.log
+*.cache
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Published output
+publish/
+out/
+
+# Test coverage
+coverage/
+*.coverage
+test-results/
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# StyleCop
+StyleCopReport.xml
+
+# Entity Framework migrations snapshots
+*Snapshot.cs
+
+# Database files (*.db if local SQLite not part of project)
+*.db
