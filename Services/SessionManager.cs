@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using SmartSchoolIncidentManagementSystem.Data;
 
 namespace SmartSchoolIncidentManagementSystem.Services
 {
@@ -64,7 +65,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
             try
             {
-                using var conn = new Microsoft.Data.Sqlite.SqliteConnection(DatabaseInitializer.GetConnectionString());
+                using var conn = DatabaseProvider.CreateConnection();
                 conn.Open();
 
                 using var cmd = conn.CreateCommand();

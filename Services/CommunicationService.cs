@@ -29,6 +29,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
         private void EnsureTables()
         {
+            if (DatabaseProvider.IsMySql) return;
+
             try
             {
                 _context.Database.ExecuteSqlRaw(@"

@@ -30,6 +30,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
         private void EnsureTables()
         {
+            if (DatabaseProvider.IsMySql) return;
+
             try
             {
                 _context.Database.ExecuteSqlRaw(@"
@@ -106,8 +108,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
             await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-                INSERT OR REPLACE INTO AcknowledgmentLogs (Id, NoticeId, StudentName, IssueDate, DueDate, Status, DateAcknowledged, Remarks, AttachedFilePath)
+            cmd.CommandText = $@"
+                {DatabaseProvider.InsertOrReplaceKeyword} INTO AcknowledgmentLogs (Id, NoticeId, StudentName, IssueDate, DueDate, Status, DateAcknowledged, Remarks, AttachedFilePath)
                 VALUES (@Id, @NoticeId, @StudentName, @IssueDate, @DueDate, @Status, @DateAcknowledged, @Remarks, @AttachedFilePath);";
 
             AddParam(cmd, "@Id", log.Id);

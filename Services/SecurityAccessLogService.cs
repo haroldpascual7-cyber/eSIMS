@@ -1,6 +1,7 @@
-﻿using Microsoft.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using SmartSchoolIncidentManagementSystem.Data;
+using SmartSchoolIncidentManagementSystem.Helpers;
 using SmartSchoolIncidentManagementSystem.Models;
 using System;
 using System.Collections.Generic;
@@ -29,16 +30,11 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
         public void EnsureTableCreated()
         {
-            if (string.IsNullOrEmpty(_connectionString))
-            {
-                string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SmartSchool", "incidents.db");
-                Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
-                _connectionString = $"Data Source={dbPath}";
-            }
+            if (DatabaseProvider.IsMySql) return;
 
             try
             {
-                using var conn = new SqliteConnection(_connectionString);
+                using var conn = DatabaseProvider.CreateConnection();
                 conn.Open();
 
                 using var cmd = conn.CreateCommand();
@@ -109,7 +105,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
             EnsureTableCreated();
             try
             {
-                using var conn = new SqliteConnection(_connectionString);
+                using var conn = DatabaseProvider.CreateConnection();
                 await conn.OpenAsync();
 
                 using var cmd = conn.CreateCommand();
@@ -117,11 +113,11 @@ namespace SmartSchoolIncidentManagementSystem.Services
                     INSERT INTO AccessSecurityLogs (Timestamp, AttemptedUsername, MachineName, EventType, Status, Details)
                     VALUES (CURRENT_TIMESTAMP, @Username, @MachineName, @EventType, @Status, @Details);";
 
-                cmd.Parameters.AddWithValue("@Username", username);
-                cmd.Parameters.AddWithValue("@MachineName", Environment.MachineName);
-                cmd.Parameters.AddWithValue("@EventType", eventType);
-                cmd.Parameters.AddWithValue("@Status", status);
-                cmd.Parameters.AddWithValue("@Details", details);
+                cmd.AddParam("@Username", username);
+                cmd.AddParam("@MachineName", Environment.MachineName);
+                cmd.AddParam("@EventType", eventType);
+                cmd.AddParam("@Status", status);
+                cmd.AddParam("@Details", details);
 
                 await cmd.ExecuteNonQueryAsync();
             }
@@ -133,7 +129,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
             EnsureTableCreated();
             try
             {
-                using var conn = new SqliteConnection(_connectionString);
+                using var conn = DatabaseProvider.CreateConnection();
                 await conn.OpenAsync();
 
                 using var cmd = conn.CreateCommand();
@@ -141,7 +137,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
                     UPDATE Users 
                     SET IsLocked = 0, FailedAttempts = 0 
                     WHERE Username = @Username;";
-                cmd.Parameters.AddWithValue("@Username", username);
+                cmd.AddParam("@Username", username);
 
                 await cmd.ExecuteNonQueryAsync();
 

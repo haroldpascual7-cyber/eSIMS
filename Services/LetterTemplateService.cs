@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SmartSchoolIncidentManagementSystem.Data;
 using SmartSchoolIncidentManagementSystem.Models;
 using System;
@@ -29,6 +29,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
         private void EnsureTables()
         {
+            if (DatabaseProvider.IsMySql) return;
+
             try
             {
                 _context.Database.ExecuteSqlRaw(@"
@@ -161,8 +163,8 @@ Smart Academy'
             await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-                INSERT OR REPLACE INTO LetterTemplates (Id, TemplateName, TemplateBody, CreatedAt)
+            cmd.CommandText = $@"
+                {DatabaseProvider.InsertOrReplaceKeyword} INTO LetterTemplates (Id, TemplateName, TemplateBody, CreatedAt)
                 VALUES (@Id, @TemplateName, @TemplateBody, @CreatedAt);";
 
             AddParam(cmd, "@Id", template.Id);

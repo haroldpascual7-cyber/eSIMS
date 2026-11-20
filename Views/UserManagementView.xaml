@@ -152,7 +152,7 @@
             </Grid>
 
             <!-- 2-Card Layout (Left: Avatar Box, Right: Account Information Box) -->
-            <Grid Grid.Row="1" HorizontalAlignment="Left">
+            <Grid Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="230"/>
                     <ColumnDefinition Width="650"/>
@@ -211,11 +211,12 @@
                 </Border>
 
                 <!-- RIGHT CARD: ACCOUNT INFORMATION (VIEW & EDIT) -->
-                <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Padding="24,20" VerticalAlignment="Top">
+                <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Padding="24,20" VerticalAlignment="Stretch">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <!-- Header with Close Button -->
@@ -252,7 +253,7 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="160"/>
+                                    <ColumnDefinition Width="180"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
@@ -367,7 +368,8 @@
                         </StackPanel>
 
                         <!-- EDIT / CREATE MODE (When IsModalEditing == true) -->
-                        <StackPanel Grid.Row="1">
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel>
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -402,14 +404,27 @@
                             <!-- Password -->
                             <TextBlock Text="PASSWORD (LEAVE BLANK TO KEEP EXISTING)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{DynamicResource ModernTextBoxStyle}" Height="34" Margin="0,0,0,18"/>
+                                     Style="{DynamicResource ModernTextBoxStyle}" Height="34" Margin="0,0,0,0"/>
+                        </StackPanel>
+                        </ScrollViewer>
 
-                            <!-- In-Modal Edit Actions -->
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <!-- In-Modal Edit Actions — pinned at the bottom, always visible -->
+                        <Border Grid.Row="2">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsModalEditing}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
                                 <Button Content="✕ Cancel" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CancelEditModeCommand}" Margin="0,0,10,0" Height="36" Width="90"/>
                                 <Button Content="💾 Save Account" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SaveFromModalCommand}" Height="36" Padding="16,0"/>
                             </StackPanel>
-                        </StackPanel>
+                        </Border>
                     </Grid>
                 </Border>
             </Grid>

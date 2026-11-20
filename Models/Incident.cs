@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SmartSchoolIncidentManagementSystem.Models
 {
@@ -7,7 +8,13 @@ namespace SmartSchoolIncidentManagementSystem.Models
         public string IncidentNumber { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public string Category { get; set; } = "General Misconduct";
-        public string Description { get; set; } = string.Empty;
+
+        // Plain‑text description kept only in memory (for migration & rule engine). Will be cleared before persisting.
+        public string? Description { get; set; }
+
+        // Encrypted description stored in the DB. Format: version|nonce|tag|ciphertext (Base64 parts)
+        public string? DescriptionEncrypted { get; set; }
+
         public string Location { get; set; } = string.Empty;
         public DateTime IncidentDate { get; set; } = DateTime.Now;
 
@@ -31,7 +38,7 @@ namespace SmartSchoolIncidentManagementSystem.Models
         public IncidentSeverity Severity { get; set; } = IncidentSeverity.Low;
         public RiskLevel Risk { get; set; } = RiskLevel.Low;
 
-        // Rule-Based Engine Outputs
+        // Rule‑Based Engine Outputs
         public string RecommendedAction { get; set; } = string.Empty;
         public bool IsRepeatIncident { get; set; } = false;
         public int RepeatIncidentCount { get; set; } = 0;

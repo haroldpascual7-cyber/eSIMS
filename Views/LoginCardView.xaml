@@ -63,6 +63,50 @@
                 </StackPanel>
             </Border>
 
+            <!-- Database Selection Row -->
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <ComboBox Grid.Column="0"
+                          Height="42"
+                          ItemsSource="{Binding DatabaseOptions}"
+                          SelectedItem="{Binding SelectedDatabaseOption, UpdateSourceTrigger=PropertyChanged}"
+                          Style="{DynamicResource ModernComboBoxStyle}"
+                          ToolTip="Database Storage Engine"/>
+                <Button Grid.Column="2"
+                        Command="{Binding ConfigureDatabaseCommand}"
+                        Width="42"
+                        Height="42"
+                        Cursor="Hand"
+                        ToolTip="Configure MySQL Database"
+                        Background="Transparent"
+                        BorderThickness="0">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="gearBorder"
+                                    CornerRadius="8"
+                                    Background="{DynamicResource InputBackgroundBrush}"
+                                    BorderBrush="{DynamicResource InputBorderBrush}"
+                                    BorderThickness="1">
+                                <TextBlock Text="⚙️"
+                                           FontSize="15"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="gearBorder" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+
 
             <!-- Username Input -->
             <Border Height="44" CornerRadius="8" Background="{DynamicResource InputBackgroundBrush}" BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1" Padding="14,0" Margin="0,0,0,10">
@@ -104,18 +148,25 @@
             </Grid>
 
             <!-- Login Button -->
-            <Button Command="{Binding LoginCommand}" IsDefault="True" Height="44" Cursor="Hand" Margin="0,0,0,12">
+            <Button Command="{Binding LoginCommand}"
+                    IsEnabled="{Binding IsLoginButtonEnabled}"
+                    IsDefault="True"
+                    Height="44"
+                    Cursor="Hand"
+                    Margin="0,0,0,12">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="btnBorder" CornerRadius="8" Background="{DynamicResource PrimaryBrush}">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="Login" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}" VerticalAlignment="Center"/>
-                                <TextBlock Text="→" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                <TextBlock Text="{Binding LoginButtonText}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="→" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}" VerticalAlignment="Center" Margin="12,0,0,0"
+                                           Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVis}}"/>
                             </StackPanel>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource PrimaryHoverBrush}"/></Trigger>
                             <Trigger Property="IsPressed" Value="True"><Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource PrimaryActiveBrush}"/></Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter TargetName="btnBorder" Property="Opacity" Value="0.65"/></Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Button.Template>

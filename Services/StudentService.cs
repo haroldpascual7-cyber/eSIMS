@@ -70,16 +70,18 @@ namespace SmartSchoolIncidentManagementSystem.Services
             return await _context.Students.FirstOrDefaultAsync(s => s.StudentNumber.ToLower() == num);
         }
 
-        public async Task<bool> AddStudentAsync(Student student)
+                public async Task<bool> AddStudentAsync(Student student)
         {
             if (student == null) throw new ArgumentNullException(nameof(student));
 
+            // Ensure the StudentNumber is unique (case‑insensitive)
             bool exists = await _context.Students.AnyAsync(s => s.StudentNumber.ToLower() == student.StudentNumber.Trim().ToLower());
             if (exists)
             {
                 throw new InvalidOperationException($"A student with ID '{student.StudentNumber}' already exists.");
             }
 
+            // Normalise fields
             student.StudentNumber = student.StudentNumber.Trim();
             student.FirstName = student.FirstName.Trim();
             student.LastName = student.LastName.Trim();
@@ -89,6 +91,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
             await _context.Students.AddAsync(student);
             await _context.SaveChangesAsync();
+
             return true;
         }
 

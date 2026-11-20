@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using SmartSchoolIncidentManagementSystem.Models;
-using System;
+using SmartSchoolIncidentManagementSystem.Utilities;
+using System.Security.Cryptography;
+using System.Text;
 using System.Linq;
 
 namespace SmartSchoolIncidentManagementSystem.Data
@@ -10,7 +12,14 @@ namespace SmartSchoolIncidentManagementSystem.Data
         public static void Initialize(AppDbContext context)
         {
             context.Database.EnsureCreated();
-            EnsureTablesCreated(context);
+            if (DatabaseProvider.IsMySql)
+            {
+                Services.MySqlSchemaUpgrader.EnsureSchemaUpToDate();
+            }
+            else
+            {
+                SqliteSchemaMigrator.EnsureSchemaCreated(context);
+            }
 
             // 0. System Settings
             if (!context.SystemSettings.Any())
@@ -59,12 +68,12 @@ namespace SmartSchoolIncidentManagementSystem.Data
             {
                 context.Users.AddRange(new User[]
                 {
-                    new User { Username = "Admin", PasswordHash = "Admin123", Email = "Admin", Role = "Administrator" },
-                    new User { Username = "staff", PasswordHash = "staff123", Email = "staff", Role = "Staff" },
-                    new User { Username = "discipline_lead", PasswordHash = "discipline123", Email = "discipline_lead", Role = "Discipline Officer" },
-                    new User { Username = "guidance_counselor", PasswordHash = "guidance123", Email = "guidance_counselor", Role = "Guidance Counselor" },
-                    new User { Username = "admin", PasswordHash = "Admin123", Email = "admin@smartschool.edu", Role = "Administrator" },
-                    new User { Username = "teacher", PasswordHash = "teacher123", Email = "teacher@smartschool.edu", Role = "Teacher" }
+                    new User { Username = "Admin", PasswordHash = Helpers.PasswordHasher.Hash("Admin123"), Email = "Admin", Role = "Administrator" },
+                    new User { Username = "staff", PasswordHash = Helpers.PasswordHasher.Hash("staff123"), Email = "staff", Role = "Staff" },
+                    new User { Username = "discipline_lead", PasswordHash = Helpers.PasswordHasher.Hash("discipline123"), Email = "discipline_lead", Role = "Discipline Officer" },
+                    new User { Username = "guidance_counselor", PasswordHash = Helpers.PasswordHasher.Hash("guidance123"), Email = "guidance_counselor", Role = "Guidance Counselor" },
+                    new User { Username = "admin", PasswordHash = Helpers.PasswordHasher.Hash("Admin123"), Email = "admin@smartschool.edu", Role = "Administrator" },
+                    new User { Username = "teacher", PasswordHash = Helpers.PasswordHasher.Hash("teacher123"), Email = "teacher@smartschool.edu", Role = "Teacher" }
                 });
                 context.SaveChanges();
             }
@@ -82,6 +91,9 @@ namespace SmartSchoolIncidentManagementSystem.Data
             }
 
             // 4. Seed Incidents
+            // After seeding (or if data already exists), ensure all existing incident descriptions are hashed
+            HashExistingIncidentDescriptions(context);
+
             if (!context.Incidents.Any())
             {
                 context.Incidents.AddRange(new Incident[]
@@ -91,7 +103,7 @@ namespace SmartSchoolIncidentManagementSystem.Data
                         IncidentNumber = "INC-2026-00001",
                         Title = "Classroom Disruption",
                         Category = "Classroom Disruption",
-                        Description = "Student was repeatedly speaking out of turn and throwing paper airplanes during chemistry class.",
+                        Description = HashHelper.ComputeHash("Student was repeatedly speaking out of turn and throwing paper airplanes during chemistry class."),
                         Location = "Room 302 - Science Lab",
                         IncidentDate = DateTime.Now.AddDays(-20),
                         PrimaryInvolvedStudent = "John Doe (STD-1001)",
@@ -284,158 +296,34 @@ namespace SmartSchoolIncidentManagementSystem.Data
             }
         }
 
-        private static void EnsureTablesCreated(AppDbContext context)
+        private static void HashExistingIncidentDescriptions(AppDbContext context)
         {
             try
             {
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""Adviser"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""GuardianName"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""GuardianContact"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""MiddleName"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""Gender"" TEXT NOT NULL DEFAULT 'Male';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""DateOfBirth"" TEXT NULL;"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""Email"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""Phone"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""Address"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""TrackStrand"" TEXT NOT NULL DEFAULT 'Academic';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""GuardianRelation"" TEXT NOT NULL DEFAULT 'Parent';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""GuardianEmail"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""MedicalNotes"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Students"" ADD COLUMN ""ProfilePicturePath"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Incidents"" ADD COLUMN ""CreatedBy"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Incidents"" ADD COLUMN ""InvolvedPersons"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Incidents"" ADD COLUMN ""Witnesses"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Incidents"" ADD COLUMN ""EvidenceData"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Investigations"" ADD COLUMN ""InvestigationTimeline"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Investigations"" ADD COLUMN ""IsFollowUpFlagged"" INTEGER NOT NULL DEFAULT 0;"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Investigations"" ADD COLUMN ""FollowUpIssueType"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Investigations"" ADD COLUMN ""FollowUpNotes"" TEXT NOT NULL DEFAULT '';"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""Investigations"" ADD COLUMN ""IsFollowUpResolved"" INTEGER NOT NULL DEFAULT 0;"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""SuspensionOrders"" ADD COLUMN ""IncidentId"" INTEGER NULL;"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""SuspensionOrders"" ADD COLUMN ""StudentId"" INTEGER NULL;"); } catch { }
-                try { context.Database.ExecuteSqlRaw(@"ALTER TABLE ""SuspensionOrders"" ADD COLUMN ""Reason"" TEXT NOT NULL DEFAULT '';"); } catch { }
+                // Encrypt descriptions for all incidents that are not already encrypted
+                var incidentsToEncrypt = context.Incidents
+                    .Where(i => i.Description != null && string.IsNullOrEmpty(i.DescriptionEncrypted))
+                    .ToList();
 
-                context.Database.ExecuteSqlRaw(@"
-                    CREATE TABLE IF NOT EXISTS ""ProbationRecords"" (
-                        ""Id"" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                        ""RecordNumber"" TEXT NOT NULL DEFAULT '',
-                        ""IncidentId"" INTEGER NOT NULL,
-                        ""StudentId"" INTEGER NOT NULL,
-                        ""StartDate"" TEXT NOT NULL,
-                        ""EndDate"" TEXT NOT NULL,
-                        ""Reason"" TEXT NOT NULL DEFAULT '',
-                        ""ExpectedBehaviorConditions"" TEXT NOT NULL DEFAULT '',
-                        ""AssignedStaffId"" INTEGER NULL,
-                        ""ApprovedBy"" TEXT NOT NULL DEFAULT '',
-                        ""Status"" TEXT NOT NULL DEFAULT 'Active',
-                        ""ExtensionReason"" TEXT NOT NULL DEFAULT '',
-                        ""ClosedAt"" TEXT NULL,
-                        ""OutcomeSummary"" TEXT NOT NULL DEFAULT '',
-                        ""SyncId"" TEXT NOT NULL,
-                        ""IsSynced"" INTEGER NOT NULL DEFAULT 0,
-                        ""CreatedAt"" TEXT NOT NULL,
-                        ""UpdatedAt"" TEXT NOT NULL,
-                        FOREIGN KEY (""IncidentId"") REFERENCES ""Incidents"" (""Id"") ON DELETE RESTRICT,
-                        FOREIGN KEY (""StudentId"") REFERENCES ""Students"" (""Id"") ON DELETE RESTRICT,
-                        FOREIGN KEY (""AssignedStaffId"") REFERENCES ""StaffMembers"" (""Id"") ON DELETE SET NULL
-                    );
-                    CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ProbationRecords_SyncId"" ON ""ProbationRecords"" (""SyncId"");
-                    CREATE INDEX IF NOT EXISTS ""IX_ProbationRecords_IncidentId"" ON ""ProbationRecords"" (""IncidentId"");
-                    CREATE INDEX IF NOT EXISTS ""IX_ProbationRecords_StudentId"" ON ""ProbationRecords"" (""StudentId"");
+                foreach (var incident in incidentsToEncrypt)
+                {
+                    // Preserve original description in memory for rule engine (if needed)
+                    var plain = incident.Description;
+                    incident.DescriptionEncrypted = Utilities.AesGcmEncryption.Encrypt(plain);
+                    incident.Description = null; // clear plaintext
+                }
 
-                    CREATE TABLE IF NOT EXISTS ""ProbationProgressNotes"" (
-                        ""Id"" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                        ""ProbationRecordId"" INTEGER NOT NULL,
-                        ""NoteDate"" TEXT NOT NULL,
-                        ""ProgressStatus"" TEXT NOT NULL DEFAULT 'On Track',
-                        ""Notes"" TEXT NOT NULL DEFAULT '',
-                        ""RecordedBy"" TEXT NOT NULL DEFAULT '',
-                        ""SyncId"" TEXT NOT NULL,
-                        ""IsSynced"" INTEGER NOT NULL DEFAULT 0,
-                        ""CreatedAt"" TEXT NOT NULL,
-                        ""UpdatedAt"" TEXT NOT NULL,
-                        FOREIGN KEY (""ProbationRecordId"") REFERENCES ""ProbationRecords"" (""Id"") ON DELETE CASCADE
-                    );
-                    CREATE UNIQUE INDEX IF NOT EXISTS ""IX_ProbationProgressNotes_SyncId"" ON ""ProbationProgressNotes"" (""SyncId"");
-                    CREATE INDEX IF NOT EXISTS ""IX_ProbationProgressNotes_ProbationRecordId"" ON ""ProbationProgressNotes"" (""ProbationRecordId"");
-
-                    CREATE TABLE IF NOT EXISTS ""StudentMeritLogs"" (
-                        ""Id"" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                        ""MeritId"" TEXT NOT NULL DEFAULT '',
-                        ""StudentIdNumber"" TEXT NOT NULL DEFAULT '',
-                        ""StudentName"" TEXT NOT NULL DEFAULT '',
-                        ""CommendationType"" TEXT NOT NULL DEFAULT '',
-                        ""PointsAwarded"" INTEGER NOT NULL DEFAULT 5,
-                        ""DateAwarded"" TEXT NOT NULL,
-                        ""AwardedBy"" TEXT NOT NULL DEFAULT '',
-                        ""Citation"" TEXT NOT NULL DEFAULT '',
-                        ""SyncId"" TEXT NOT NULL,
-                        ""IsSynced"" INTEGER NOT NULL DEFAULT 0,
-                        ""CreatedAt"" TEXT NOT NULL,
-                        ""UpdatedAt"" TEXT NOT NULL
-                    );
-                    CREATE UNIQUE INDEX IF NOT EXISTS ""IX_StudentMeritLogs_SyncId"" ON ""StudentMeritLogs"" (""SyncId"");
-
-                    CREATE TABLE IF NOT EXISTS ""KeywordSensitivityRules"" (
-                        ""Id"" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                        ""RuleId"" TEXT NOT NULL DEFAULT '',
-                        ""Keyword"" TEXT NOT NULL DEFAULT '',
-                        ""Category"" TEXT NOT NULL DEFAULT '',
-                        ""Severity"" TEXT NOT NULL DEFAULT '',
-                        ""WeightScore"" INTEGER NOT NULL DEFAULT 0,
-                        ""MatchType"" TEXT NOT NULL DEFAULT '',
-                        ""AutoEscalate"" INTEGER NOT NULL DEFAULT 0,
-                        ""IsActive"" INTEGER NOT NULL DEFAULT 1,
-                        ""SyncId"" TEXT NOT NULL,
-                        ""IsSynced"" INTEGER NOT NULL DEFAULT 0,
-                        ""CreatedAt"" TEXT NOT NULL,
-                        ""UpdatedAt"" TEXT NOT NULL
-                    );
-                    CREATE UNIQUE INDEX IF NOT EXISTS ""IX_KeywordSensitivityRules_SyncId"" ON ""KeywordSensitivityRules"" (""SyncId"");
-
-                    CREATE TABLE IF NOT EXISTS ""LocationWeightRules"" (
-                        ""Id"" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                        ""LocationCode"" TEXT NOT NULL DEFAULT '',
-                        ""LocationName"" TEXT NOT NULL DEFAULT '',
-                        ""Building"" TEXT NOT NULL DEFAULT '',
-                        ""Category"" TEXT NOT NULL DEFAULT '',
-                        ""SupervisionLevel"" TEXT NOT NULL DEFAULT '',
-                        ""HasCCTV"" INTEGER NOT NULL DEFAULT 0,
-                        ""RiskMultiplier"" REAL NOT NULL DEFAULT 1.0,
-                        ""IsRestricted"" INTEGER NOT NULL DEFAULT 0,
-                        ""IsActive"" INTEGER NOT NULL DEFAULT 1,
-                        ""SyncId"" TEXT NOT NULL,
-                        ""IsSynced"" INTEGER NOT NULL DEFAULT 0,
-                        ""CreatedAt"" TEXT NOT NULL,
-                        ""UpdatedAt"" TEXT NOT NULL
-                    );
-                    CREATE UNIQUE INDEX IF NOT EXISTS ""IX_LocationWeightRules_SyncId"" ON ""LocationWeightRules"" (""SyncId"");
-
-                    CREATE TABLE IF NOT EXISTS ""RepeatOffenderRules"" (
-                        ""Id"" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                        ""PolicyId"" TEXT NOT NULL DEFAULT '',
-                        ""PolicyName"" TEXT NOT NULL DEFAULT '',
-                        ""Category"" TEXT NOT NULL DEFAULT '',
-                        ""LookbackDays"" INTEGER NOT NULL DEFAULT 30,
-                        ""ThresholdCount"" INTEGER NOT NULL DEFAULT 2,
-                        ""PenaltyType"" TEXT NOT NULL DEFAULT '',
-                        ""BonusPoints"" INTEGER NOT NULL DEFAULT 0,
-                        ""AutoSummons"" INTEGER NOT NULL DEFAULT 0,
-                        ""FlagProfile"" INTEGER NOT NULL DEFAULT 0,
-                        ""RequireDeanSignoff"" INTEGER NOT NULL DEFAULT 0,
-                        ""IsActive"" INTEGER NOT NULL DEFAULT 1,
-                        ""SyncId"" TEXT NOT NULL,
-                        ""IsSynced"" INTEGER NOT NULL DEFAULT 0,
-                        ""CreatedAt"" TEXT NOT NULL,
-                        ""UpdatedAt"" TEXT NOT NULL
-                    );
-                    CREATE UNIQUE INDEX IF NOT EXISTS ""IX_RepeatOffenderRules_SyncId"" ON ""RepeatOffenderRules"" (""SyncId"");
-                ");
+                if (incidentsToEncrypt.Any())
+                {
+                    context.SaveChanges();
+                }
             }
-            catch { /* Ignore if already created or using in-memory */ }
+            catch
+            {
+                // In case column was just added or table is in flux, don't crash startup
+            }
         }
-
-        private static void EnsureDemoUser(AppDbContext context, string username, string password, string email, string role)
+private static void EnsureDemoUser(AppDbContext context, string username, string password, string email, string role)
         {
             var user = context.Users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower() || u.Email.ToLower() == email.ToLower());
             if (user == null)
@@ -443,7 +331,7 @@ namespace SmartSchoolIncidentManagementSystem.Data
                 context.Users.Add(new User
                 {
                     Username = username,
-                    PasswordHash = password,
+                    PasswordHash = Helpers.PasswordHasher.Hash(password),
                     Email = email,
                     Role = role,
                     IsActive = true
@@ -452,7 +340,10 @@ namespace SmartSchoolIncidentManagementSystem.Data
             else
             {
                 user.Username = username;
-                user.PasswordHash = password;
+                if (string.IsNullOrEmpty(user.PasswordHash))
+                {
+                    user.PasswordHash = Helpers.PasswordHasher.Hash(password);
+                }
                 user.Email = email;
                 user.Role = role;
                 user.IsActive = true;

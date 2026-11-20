@@ -29,17 +29,25 @@ namespace SmartSchoolIncidentManagementSystem.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                string dbFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SmartSchool");
-                Directory.CreateDirectory(dbFolder);
-                string dbPath = Path.Combine(dbFolder, "incidents.db");
-                
-                optionsBuilder.UseSqlite($"Data Source={dbPath}");
+                if (DatabaseProvider.IsMySql)
+                {
+                    optionsBuilder.UseMySql(
+                        DatabaseProvider.GetConnectionString(),
+                        new MySqlServerVersion(new Version(8, 0, 0)));
+                }
+                else
+                {
+                    optionsBuilder.UseSqlite(DatabaseProvider.GetSqliteConnectionString());
+                }
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<SystemSetting>()
+                .Property(s => s.Key).HasMaxLength(200);
 
             modelBuilder.Entity<Student>().HasIndex(s => s.SyncId).IsUnique();
             modelBuilder.Entity<Staff>().HasIndex(s => s.SyncId).IsUnique();

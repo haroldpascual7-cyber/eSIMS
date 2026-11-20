@@ -171,7 +171,11 @@
             </CheckBox>
 
             <!-- 8. Sign Up Button -->
-            <Button Command="{Binding SignUpCommand}" Height="42" Cursor="Hand" Margin="0,0,0,10">
+            <Button Command="{Binding SignUpCommand}"
+                    IsEnabled="{Binding IsSignUpButtonEnabled}"
+                    Height="42"
+                    Cursor="Hand"
+                    Margin="0,0,0,10">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="suBtnBorder" CornerRadius="8" Background="{DynamicResource PrimaryBrush}">
@@ -183,6 +187,7 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="suBtnBorder" Property="Background" Value="{DynamicResource PrimaryHoverBrush}"/></Trigger>
                             <Trigger Property="IsPressed" Value="True"><Setter TargetName="suBtnBorder" Property="Background" Value="{DynamicResource PrimaryActiveBrush}"/></Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter TargetName="suBtnBorder" Property="Opacity" Value="0.65"/></Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Button.Template>

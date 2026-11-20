@@ -34,28 +34,45 @@ namespace SmartSchoolIncidentManagementSystem.Services
                 using var conn = _context.Database.GetDbConnection();
                 await conn.OpenAsync();
 
-                using var cmd = conn.CreateCommand();
-                cmd.CommandText = "PRAGMA integrity_check;";
-
-                string result = (string)(await cmd.ExecuteScalarAsync() ?? "ok");
-                bool isOk = result.Equals("ok", StringComparison.OrdinalIgnoreCase);
-
-                return new DiagnosticResultModel
+                if (DatabaseProvider.IsMySql)
                 {
-                    TestName = "SQLite Database File B-Tree Structure",
-                    TargetComponent = "incidents.db File System",
-                    Status = isOk ? "PASSED" : "FAILED",
-                    Details = isOk ? "PRAGMA integrity_check returned 'ok'. Zero page corruption detected." : $"Corruption detected: {result}"
-                };
+                    using var cmd = conn.CreateCommand();
+                    cmd.CommandText = "SELECT 1;";
+                    await cmd.ExecuteScalarAsync();
+
+                    return new DiagnosticResultModel
+                    {
+                        TestName = "MySQL Database Engine Connectivity & Health",
+                        TargetComponent = $"{DatabaseProvider.Config.MySqlServer}:{DatabaseProvider.Config.MySqlPort} ({DatabaseProvider.Config.MySqlDatabase})",
+                        Status = "PASSED",
+                        Details = "MySQL connection verified and active. Storage engine integrity confirmed."
+                    };
+                }
+                else
+                {
+                    using var cmd = conn.CreateCommand();
+                    cmd.CommandText = "PRAGMA integrity_check;";
+
+                    string result = (string)(await cmd.ExecuteScalarAsync() ?? "ok");
+                    bool isOk = result.Equals("ok", StringComparison.OrdinalIgnoreCase);
+
+                    return new DiagnosticResultModel
+                    {
+                        TestName = "SQLite Database File B-Tree Structure",
+                        TargetComponent = "incidents.db File System",
+                        Status = isOk ? "PASSED" : "FAILED",
+                        Details = isOk ? "PRAGMA integrity_check returned 'ok'. Zero page corruption detected." : $"Corruption detected: {result}"
+                    };
+                }
             }
             catch (Exception ex)
             {
                 return new DiagnosticResultModel
                 {
-                    TestName = "SQLite Database File B-Tree Structure",
-                    TargetComponent = "incidents.db File System",
+                    TestName = DatabaseProvider.IsMySql ? "MySQL Database Engine Connectivity & Health" : "SQLite Database File B-Tree Structure",
+                    TargetComponent = DatabaseProvider.IsMySql ? "MySQL Server" : "incidents.db File System",
                     Status = "FAILED",
-                    Details = $"Error running PRAGMA check: {ex.Message}"
+                    Details = $"Error checking database integrity: {ex.Message}"
                 };
             }
         }

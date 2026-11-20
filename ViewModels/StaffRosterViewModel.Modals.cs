@@ -1,4 +1,5 @@
-using Microsoft.Data.Sqlite;
+using SmartSchoolIncidentManagementSystem.Data;
+using SmartSchoolIncidentManagementSystem.Helpers;
 using SmartSchoolIncidentManagementSystem.Models;
 using SmartSchoolIncidentManagementSystem.Services;
 using SmartSchoolIncidentManagementSystem.ViewModels.Common;
@@ -150,12 +151,12 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
             await Task.Run(() =>
             {
-                using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                using var conn = DatabaseProvider.CreateConnection();
                 conn.Open();
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = "UPDATE StaffRoster SET Status = @Status WHERE StaffId = @Id;";
-                cmd.Parameters.AddWithValue("@Status", newStatus);
-                cmd.Parameters.AddWithValue("@Id", ViewingStaff.StaffId);
+                cmd.AddParam("@Status", newStatus);
+                cmd.AddParam("@Id", ViewingStaff.StaffId);
                 cmd.ExecuteNonQuery();
             });
 
@@ -188,18 +189,18 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 {
                     await Task.Run(() =>
                     {
-                        using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                        using var conn = DatabaseProvider.CreateConnection();
                         conn.Open();
                         using var cmd = conn.CreateCommand();
                         cmd.CommandText = @"
                             INSERT INTO StaffRoster (StaffNumber, FullName, Department, AssignmentRole, Email, Phone, Status, CreatedAt)
                             VALUES (@Num, @Name, @Dept, @Role, @Email, @Phone, 'Active', CURRENT_TIMESTAMP);";
-                        cmd.Parameters.AddWithValue("@Num",   EditStaffNumber.Trim());
-                        cmd.Parameters.AddWithValue("@Name",  EditFullName.Trim());
-                        cmd.Parameters.AddWithValue("@Dept",  EditDepartment);
-                        cmd.Parameters.AddWithValue("@Role",  EditRole);
-                        cmd.Parameters.AddWithValue("@Email", EditEmail.Trim());
-                        cmd.Parameters.AddWithValue("@Phone", EditPhone.Trim());
+                        cmd.AddParam("@Num",   EditStaffNumber.Trim());
+                        cmd.AddParam("@Name",  EditFullName.Trim());
+                        cmd.AddParam("@Dept",  EditDepartment);
+                        cmd.AddParam("@Role",  EditRole);
+                        cmd.AddParam("@Email", EditEmail.Trim());
+                        cmd.AddParam("@Phone", EditPhone.Trim());
                         cmd.ExecuteNonQuery();
                     });
 
@@ -215,19 +216,19 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
                     await Task.Run(() =>
                     {
-                        using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                        using var conn = DatabaseProvider.CreateConnection();
                         conn.Open();
                         using var cmd = conn.CreateCommand();
                         cmd.CommandText = @"
                             UPDATE StaffRoster
                             SET FullName = @Name, Department = @Dept, AssignmentRole = @Role, Email = @Email, Phone = @Phone
                             WHERE StaffId = @Id;";
-                        cmd.Parameters.AddWithValue("@Name",  EditFullName.Trim());
-                        cmd.Parameters.AddWithValue("@Dept",  EditDepartment);
-                        cmd.Parameters.AddWithValue("@Role",  EditRole);
-                        cmd.Parameters.AddWithValue("@Email", EditEmail.Trim());
-                        cmd.Parameters.AddWithValue("@Phone", EditPhone.Trim());
-                        cmd.Parameters.AddWithValue("@Id",    ViewingStaff.StaffId);
+                        cmd.AddParam("@Name",  EditFullName.Trim());
+                        cmd.AddParam("@Dept",  EditDepartment);
+                        cmd.AddParam("@Role",  EditRole);
+                        cmd.AddParam("@Email", EditEmail.Trim());
+                        cmd.AddParam("@Phone", EditPhone.Trim());
+                        cmd.AddParam("@Id",    ViewingStaff.StaffId);
                         cmd.ExecuteNonQuery();
                     });
 
@@ -241,7 +242,9 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 IsStaffModalOpen = false;
                 await LoadStaffAsync();
             }
-            catch (SqliteException ex) when (ex.Message.Contains("UNIQUE"))
+            catch (System.Data.Common.DbException ex)
+                when (ex.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase)
+                   || ex.Message.Contains("Duplicate", StringComparison.OrdinalIgnoreCase))
             {
                 MessageBox.Show($"Staff Number '{EditStaffNumber.Trim()}' already exists.", "Duplicate Staff ID",
                     MessageBoxButton.OK, MessageBoxImage.Warning);

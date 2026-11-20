@@ -1,4 +1,5 @@
-using Microsoft.Data.Sqlite;
+using SmartSchoolIncidentManagementSystem.Data;
+using SmartSchoolIncidentManagementSystem.Helpers;
 using SmartSchoolIncidentManagementSystem.Models;
 using SmartSchoolIncidentManagementSystem.Services;
 using SmartSchoolIncidentManagementSystem.ViewModels.Common;
@@ -39,7 +40,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
             await Task.Run(() =>
             {
-                using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                using var conn = DatabaseProvider.CreateConnection();
                 conn.Open();
 
                 using var cmd = conn.CreateCommand();
@@ -78,7 +79,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             {
                 await Task.Run(() =>
                 {
-                    using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                    using var conn = DatabaseProvider.CreateConnection();
                     conn.Open();
 
                     foreach (var p in Permissions)
@@ -93,12 +94,12 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                                 StaffAccess = @Stf,
                                 UpdatedAt = CURRENT_TIMESTAMP
                             WHERE PermissionId = @Id;";
-                        cmd.Parameters.AddWithValue("@Adm", p.AdminAccess ? 1 : 0);
-                        cmd.Parameters.AddWithValue("@Disc", p.DisciplineOfficerAccess ? 1 : 0);
-                        cmd.Parameters.AddWithValue("@Guid", p.GuidanceCounselorAccess ? 1 : 0);
-                        cmd.Parameters.AddWithValue("@Teach", p.TeacherAccess ? 1 : 0);
-                        cmd.Parameters.AddWithValue("@Stf", p.StaffAccess ? 1 : 0);
-                        cmd.Parameters.AddWithValue("@Id", p.PermissionId);
+                        cmd.AddParam("@Adm", p.AdminAccess ? 1 : 0);
+                        cmd.AddParam("@Disc", p.DisciplineOfficerAccess ? 1 : 0);
+                        cmd.AddParam("@Guid", p.GuidanceCounselorAccess ? 1 : 0);
+                        cmd.AddParam("@Teach", p.TeacherAccess ? 1 : 0);
+                        cmd.AddParam("@Stf", p.StaffAccess ? 1 : 0);
+                        cmd.AddParam("@Id", p.PermissionId);
                         cmd.ExecuteNonQuery();
                     }
                 });
@@ -125,7 +126,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
             await Task.Run(() =>
             {
-                using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                using var conn = DatabaseProvider.CreateConnection();
                 conn.Open();
 
                 using var cmd = conn.CreateCommand();

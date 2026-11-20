@@ -1,4 +1,5 @@
-using Microsoft.Data.Sqlite;
+using SmartSchoolIncidentManagementSystem.Data;
+using SmartSchoolIncidentManagementSystem.Helpers;
 using SmartSchoolIncidentManagementSystem.Models;
 using SmartSchoolIncidentManagementSystem.Services;
 using SmartSchoolIncidentManagementSystem.ViewModels.Common;
@@ -195,7 +196,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
             await Task.Run(() =>
             {
-                using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                using var conn = DatabaseProvider.CreateConnection();
                 conn.Open();
 
                 using var cmd = conn.CreateCommand();
@@ -252,7 +253,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             {
                 await Task.Run(() =>
                 {
-                    using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                    using var conn = DatabaseProvider.CreateConnection();
                     conn.Open();
 
                     using var cmd = conn.CreateCommand();
@@ -260,11 +261,11 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                         INSERT INTO SystemUsers (Username, FullName, Email, PasswordHash, Role, Status, CreatedAt)
                         VALUES (@Username, @FullName, @Email, @PasswordHash, @Role, 'Active', CURRENT_TIMESTAMP);";
 
-                    cmd.Parameters.AddWithValue("@Username", NewUsername.Trim());
-                    cmd.Parameters.AddWithValue("@FullName", NewFullName.Trim());
-                    cmd.Parameters.AddWithValue("@Email", NewEmail.Trim());
-                    cmd.Parameters.AddWithValue("@PasswordHash", hashedPassword);
-                    cmd.Parameters.AddWithValue("@Role", SelectedRole);
+                    cmd.AddParam("@Username", NewUsername.Trim());
+                    cmd.AddParam("@FullName", NewFullName.Trim());
+                    cmd.AddParam("@Email", NewEmail.Trim());
+                    cmd.AddParam("@PasswordHash", hashedPassword);
+                    cmd.AddParam("@Role", SelectedRole);
                     cmd.ExecuteNonQuery();
                 });
 
@@ -278,7 +279,9 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 ClearForm();
                 await LoadUsersAsync();
             }
-            catch (SqliteException ex) when (ex.Message.Contains("UNIQUE"))
+            catch (System.Data.Common.DbException ex)
+                when (ex.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase)
+                   || ex.Message.Contains("Duplicate", StringComparison.OrdinalIgnoreCase))
             {
                 MessageBox.Show($"Username '{NewUsername.Trim()}' already exists.",
                     "Duplicate Username", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -302,7 +305,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
                 await Task.Run(() =>
                 {
-                    using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                    using var conn = DatabaseProvider.CreateConnection();
                     conn.Open();
 
                     using var cmd = conn.CreateCommand();
@@ -312,7 +315,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                             UPDATE SystemUsers
                             SET FullName = @FullName, Email = @Email, Role = @Role, PasswordHash = @PasswordHash
                             WHERE UserId = @UserId;";
-                        cmd.Parameters.AddWithValue("@PasswordHash", hashedPassword);
+                        cmd.AddParam("@PasswordHash", hashedPassword);
                     }
                     else
                     {
@@ -322,10 +325,10 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                             WHERE UserId = @UserId;";
                     }
 
-                    cmd.Parameters.AddWithValue("@FullName", NewFullName.Trim());
-                    cmd.Parameters.AddWithValue("@Email", NewEmail.Trim());
-                    cmd.Parameters.AddWithValue("@Role", SelectedRole);
-                    cmd.Parameters.AddWithValue("@UserId", SelectedUser.UserId);
+                    cmd.AddParam("@FullName", NewFullName.Trim());
+                    cmd.AddParam("@Email", NewEmail.Trim());
+                    cmd.AddParam("@Role", SelectedRole);
+                    cmd.AddParam("@UserId", SelectedUser.UserId);
                     cmd.ExecuteNonQuery();
                 });
 
@@ -365,12 +368,12 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             {
                 await Task.Run(() =>
                 {
-                    using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                    using var conn = DatabaseProvider.CreateConnection();
                     conn.Open();
 
                     using var cmd = conn.CreateCommand();
                     cmd.CommandText = "DELETE FROM SystemUsers WHERE UserId = @UserId;";
-                    cmd.Parameters.AddWithValue("@UserId", targetId);
+                    cmd.AddParam("@UserId", targetId);
                     cmd.ExecuteNonQuery();
                 });
 
@@ -409,13 +412,13 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
             await Task.Run(() =>
             {
-                using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                using var conn = DatabaseProvider.CreateConnection();
                 conn.Open();
 
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = "UPDATE SystemUsers SET Status = @Status WHERE UserId = @UserId;";
-                cmd.Parameters.AddWithValue("@Status", newStatus);
-                cmd.Parameters.AddWithValue("@UserId", user.UserId);
+                cmd.AddParam("@Status", newStatus);
+                cmd.AddParam("@UserId", user.UserId);
                 cmd.ExecuteNonQuery();
             });
 
@@ -447,13 +450,13 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
             await Task.Run(() =>
             {
-                using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                using var conn = DatabaseProvider.CreateConnection();
                 conn.Open();
 
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = "UPDATE SystemUsers SET PasswordHash = @Hash WHERE UserId = @UserId;";
-                cmd.Parameters.AddWithValue("@Hash", hashedTemp);
-                cmd.Parameters.AddWithValue("@UserId", user.UserId);
+                cmd.AddParam("@Hash", hashedTemp);
+                cmd.AddParam("@UserId", user.UserId);
                 cmd.ExecuteNonQuery();
             });
 

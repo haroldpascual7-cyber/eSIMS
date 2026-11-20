@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace SmartSchoolIncidentManagementSystem.ViewModels
 {
-    public class LoginViewModel : ObservableObject
+    public partial class LoginViewModel : ObservableObject
     {
         private readonly IAuthService _authService;
         private readonly IThemeService _themeService;
@@ -19,6 +19,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         private string _password = string.Empty;
         private string _errorMessage = string.Empty;
         private bool _isLoading;
+        private bool _isLoginInProgress;
         private bool _isPasswordVisible;
 
         // Sign Up Properties
@@ -56,6 +57,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
             _settingsService.SettingsChanged += RefreshBranding;
             _ = InitializeSettingsAsync();
+            InitializeDatabaseSettings();
         }
 
         // Role Selection Dropdown Properties
@@ -313,8 +315,21 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public bool IsLoading
         {
             get => _isLoading;
-            set => SetProperty(ref _isLoading, value);
+            set
+            {
+                if (SetProperty(ref _isLoading, value))
+                {
+                    OnPropertyChanged(nameof(IsLoginButtonEnabled));
+                    OnPropertyChanged(nameof(IsSignUpButtonEnabled));
+                    OnPropertyChanged(nameof(LoginButtonText));
+                    CommandManager.InvalidateRequerySuggested();
+                }
+            }
         }
+
+        public bool IsLoginButtonEnabled => !IsLoading;
+        public bool IsSignUpButtonEnabled => !IsLoading;
+        public string LoginButtonText => IsLoading ? "Signing in..." : "Login";
 
         public ICommand LoginCommand { get; }
         public ICommand ToggleThemeCommand { get; }
@@ -346,17 +361,20 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
         public async Task ExecuteLoginAsync()
         {
-            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
-            {
-                ErrorMessage = "Please enter both username and password.";
-                return;
-            }
-
-            IsLoading = true;
-            ErrorMessage = string.Empty;
+            if (_isLoginInProgress) return;
+            _isLoginInProgress = true;
 
             try
             {
+                if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+                {
+                    ErrorMessage = "Please enter both username and password.";
+                    return;
+                }
+
+                IsLoading = true;
+                ErrorMessage = string.Empty;
+
                 var result = await _authService.LoginAsync(Username, Password);
                 if (result.Success)
                 {
@@ -374,6 +392,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             finally
             {
                 IsLoading = false;
+                _isLoginInProgress = false;
             }
         }
 

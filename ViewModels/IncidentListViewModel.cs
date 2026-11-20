@@ -86,6 +86,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
             DeleteIncidentCommand = new RelayCommand(async () => await DeleteSelectedAsync(), () => SelectedIncident != null && CanDeleteIncident);
             RefreshCommand = new RelayCommand(async () => await RefreshIncidentsAsync(), () => !IsLoading);
+            SearchCommand = new RelayCommand(async () => await LoadIncidentsAsync(), () => !IsLoading);
             ClearFiltersCommand = new RelayCommand(async () =>
             {
                 SearchText = string.Empty;
@@ -206,7 +207,9 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public ICommand OpenInvestigationCommand { get; }
         public ICommand DeleteIncidentCommand { get; }
         public ICommand RefreshCommand { get; }
+        public ICommand SearchCommand { get; }
         public ICommand ClearFiltersCommand { get; }
+
 
         public async Task LoadIncidentsAsync()
         {

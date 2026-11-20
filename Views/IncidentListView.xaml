@@ -40,7 +40,7 @@
                             Visibility="{Binding CanManageIncidents, Converter={StaticResource BoolToVis}}"/>
 
                     <Button Content="↻ Refresh" Style="{DynamicResource SecondaryButtonStyle}"
-                            Command="{Binding RefreshCommand}" Height="36" Visibility="Collapsed"/>
+                            Command="{Binding RefreshCommand}" Height="36" Visibility="Visible"/>
                     <Button Style="{DynamicResource SecondaryButtonStyle}"
                             Command="{Binding RefreshCommand}" Height="36" MinWidth="122" IsEnabled="{Binding IsNotLoading}">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -99,6 +99,7 @@
                 <StackPanel Grid.Column="0" Margin="0,0,10,0">
                     <TextBlock Text="Search (Incident #, Student, Title, Narrative)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="34"/>
+                    <Button Content="Search" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding SearchCommand}" Height="34" Margin="8,0,0,0" IsEnabled="{Binding IsNotLoading}"/>
                 </StackPanel>
 
                 <!-- Category Filter -->

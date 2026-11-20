@@ -1,6 +1,7 @@
-﻿using Microsoft.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using SmartSchoolIncidentManagementSystem.Data;
+using SmartSchoolIncidentManagementSystem.Helpers;
 using SmartSchoolIncidentManagementSystem.Models;
 using System;
 using System.Collections.Generic;
@@ -21,17 +22,11 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
         public static void EnsureTableCreated()
         {
-            if (string.IsNullOrEmpty(_connectionString))
-            {
-                string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SmartSchool", "incidents.db");
-                string dir = Path.GetDirectoryName(dbPath)!;
-                Directory.CreateDirectory(dir);
-                _connectionString = $"Data Source={dbPath}";
-            }
+            if (DatabaseProvider.IsMySql) return;
 
             try
             {
-                using var conn = new SqliteConnection(_connectionString);
+                using var conn = DatabaseProvider.CreateConnection();
                 conn.Open();
 
                 using var cmd = conn.CreateCommand();
@@ -71,7 +66,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
             try
             {
-                using var conn = new SqliteConnection(_connectionString);
+                using var conn = DatabaseProvider.CreateConnection();
                 await conn.OpenAsync();
 
                 using var cmd = conn.CreateCommand();
@@ -79,10 +74,10 @@ namespace SmartSchoolIncidentManagementSystem.Services
                     INSERT INTO SystemAuditLogs (Timestamp, UserId, ActionType, ModuleName, Description)
                     VALUES (CURRENT_TIMESTAMP, @UserId, @ActionType, @ModuleName, @Description);";
 
-                cmd.Parameters.AddWithValue("@UserId", string.IsNullOrWhiteSpace(userId) ? "SYSTEM" : userId);
-                cmd.Parameters.AddWithValue("@ActionType", actionType);
-                cmd.Parameters.AddWithValue("@ModuleName", moduleName);
-                cmd.Parameters.AddWithValue("@Description", description);
+                cmd.AddParam("@UserId", string.IsNullOrWhiteSpace(userId) ? "SYSTEM" : userId);
+                cmd.AddParam("@ActionType", actionType);
+                cmd.AddParam("@ModuleName", moduleName);
+                cmd.AddParam("@Description", description);
 
                 await cmd.ExecuteNonQueryAsync();
             }

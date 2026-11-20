@@ -45,9 +45,38 @@ namespace SmartSchoolIncidentManagementSystem
 
             try
             {
-                // Initialize SQLite DB and seed initial data
-                _context = new AppDbContext();
-                DbInitializer.Initialize(_context);
+                DatabaseProvider.Initialize();
+
+                if (DatabaseProvider.IsMySql)
+                {
+                    if (!DatabaseProvider.EnsureMySqlDatabase(out var dbError) ||
+                        !DatabaseProvider.TestConnection(out dbError))
+                    {
+                        MessageBox.Show($"MySQL unavailable; falling back to SQLite.\n\n{dbError}",
+                            "Database Fallback", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        DatabaseProvider.SetProvider(DatabaseProviderType.Sqlite);
+                    }
+                    else
+                    {
+                        // Ensure existing MySQL schema columns match model updates (e.g. DescriptionEncrypted)
+                        MySqlSchemaUpgrader.EnsureSchemaUpToDate();
+                    }
+                }
+
+                try
+                {
+                    _context = new AppDbContext();
+                    DbInitializer.Initialize(_context);
+                }
+                catch (Exception initEx) when (DatabaseProvider.IsMySql)
+                {
+                    MessageBox.Show($"MySQL initialization failed; falling back to SQLite.\n\n{initEx.Message}",
+                        "Database Fallback", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    DatabaseProvider.SetProvider(DatabaseProviderType.Sqlite);
+                    try { _context?.Dispose(); } catch { }
+                    _context = new AppDbContext();
+                    DbInitializer.Initialize(_context);
+                }
 
                 // Initialize SystemUsers, RolePermissions, and StaffRoster tables
                 DatabaseInitializer.InitializeAllTables();

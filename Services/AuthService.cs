@@ -1,4 +1,3 @@
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using SmartSchoolIncidentManagementSystem.Data;
 using SmartSchoolIncidentManagementSystem.Helpers;
@@ -29,13 +28,21 @@ namespace SmartSchoolIncidentManagementSystem.Services
             }
 
             var trimmedUsername = username.Trim();
-            var hashedPassword = SecurityHelper.ComputeSha256Hash(password);
+            string throttleKey = $"{trimmedUsername}|{Environment.MachineName}";
 
-            // 1. Try SystemUsers table first
+            // 1. Throttle check
+            if (LoginThrottle.IsLockedOut(throttleKey, out var remaining))
+            {
+                int minutes = (int)Math.Ceiling(remaining.TotalMinutes);
+                if (minutes < 1) minutes = 1;
+                return (false, $"Too many failed attempts. Try again in {minutes} minute{(minutes == 1 ? "" : "s")}.", null);
+            }
+
+            // 2. Try SystemUsers table first
             try
             {
                 DatabaseInitializer.InitializeSystemUsers();
-                using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                using var conn = DatabaseProvider.CreateConnection();
                 await conn.OpenAsync();
 
                 using var cmd = conn.CreateCommand();
@@ -43,38 +50,58 @@ namespace SmartSchoolIncidentManagementSystem.Services
                     SELECT UserId, Username, FullName, Email, Role, Status, PasswordHash
                     FROM SystemUsers
                     WHERE LOWER(Username) = LOWER(@Username) OR LOWER(Email) = LOWER(@Username);";
-                cmd.Parameters.AddWithValue("@Username", trimmedUsername);
+                cmd.AddParam("@Username", trimmedUsername);
 
                 using var reader = await cmd.ExecuteReaderAsync();
                 if (await reader.ReadAsync())
                 {
-                    var status = reader.GetString(5);
+                    int userId = reader.GetInt32(0);
+                    string userUname = reader.GetString(1);
+                    string fullName = reader.GetString(2);
+                    string email = reader.GetString(3);
+                    string role = reader.GetString(4);
+                    string status = reader.GetString(5);
+                    string storedHash = reader.GetString(6);
+
                     if (status.Equals("Suspended", StringComparison.OrdinalIgnoreCase))
                     {
                         return (false, "This account has been suspended. Please contact your administrator.", null);
                     }
 
-                    var storedHash = reader.GetString(6);
-                    bool passwordValid = storedHash == hashedPassword
-                        || storedHash == password
-                        || (trimmedUsername.Equals("admin", StringComparison.OrdinalIgnoreCase) && (password == "Admin123" || password == "admin123" || password == "AdminPassword123!"))
-                        || (trimmedUsername.Equals("staff", StringComparison.OrdinalIgnoreCase) && (password == "staff123" || password == "StaffPassword123!"))
-                        || ((trimmedUsername.Equals("discipline_lead", StringComparison.OrdinalIgnoreCase) || trimmedUsername.Equals("discipline", StringComparison.OrdinalIgnoreCase)) && (password == "discipline123" || password == "School2026!"))
-                        || ((trimmedUsername.Equals("guidance_counselor", StringComparison.OrdinalIgnoreCase) || trimmedUsername.Equals("guidance", StringComparison.OrdinalIgnoreCase)) && (password == "guidance123" || password == "School2026!"))
-                        || (trimmedUsername.Equals("teacher", StringComparison.OrdinalIgnoreCase) && (password == "teacher123" || password == "School2026!"));
+                    bool passwordValid = PasswordHasher.Verify(password, storedHash, out bool needsRehash);
 
                     if (passwordValid)
                     {
-                        var fullName = reader.GetString(2);
-                        var role = reader.GetString(4);
-                        var email = reader.GetString(3);
+                        await reader.CloseAsync();
 
+                        if (needsRehash)
+                        {
+                            try
+                            {
+                                string newHash = PasswordHasher.Hash(password);
+                                using var updateCmd = conn.CreateCommand();
+                                updateCmd.CommandText = "UPDATE SystemUsers SET PasswordHash = @NewHash WHERE UserId = @UserId;";
+                                updateCmd.AddParam("@NewHash", newHash);
+                                updateCmd.AddParam("@UserId", userId);
+                                await updateCmd.ExecuteNonQueryAsync();
+
+                                var efU = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId || u.Username.ToLower() == trimmedUsername.ToLower());
+                                if (efU != null)
+                                {
+                                    efU.PasswordHash = newHash;
+                                    await _context.SaveChangesAsync();
+                                }
+                            }
+                            catch { /* Ignore rehash persistence errors */ }
+                        }
+
+                        LoginThrottle.Reset(throttleKey);
                         SessionManager.SetSession(trimmedUsername, fullName, role);
 
                         var user = new User
                         {
-                            Id = reader.GetInt32(0),
-                            Username = reader.GetString(1),
+                            Id = userId,
+                            Username = userUname,
                             Email = email,
                             Role = role,
                             IsActive = true
@@ -86,13 +113,15 @@ namespace SmartSchoolIncidentManagementSystem.Services
                     }
                     else
                     {
+                        LoginThrottle.RecordFailure(throttleKey);
+                        await AuditLogger.LogAsync(trimmedUsername, "FAILED_LOGIN", "Authentication", $"Failed login attempt for user {trimmedUsername}.");
                         return (false, "Invalid username or password.", null);
                     }
                 }
             }
-            catch { }
+            catch { /* Fallback to EF Core Users table */ }
 
-            // 2. Fallback to EF Core Users table
+            // 3. Fallback to EF Core Users table
             var efUser = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username.ToLower() == trimmedUsername.ToLower() || u.Email.ToLower() == trimmedUsername.ToLower());
 
@@ -103,12 +132,20 @@ namespace SmartSchoolIncidentManagementSystem.Services
                     return (false, "This account has been deactivated. Please contact your administrator.", null);
                 }
 
-                if (efUser.PasswordHash == password || efUser.PasswordHash == hashedPassword
-                    || (efUser.Username.Equals("admin", StringComparison.OrdinalIgnoreCase) && (password == "Admin123" || password == "admin123"))
-                    || (efUser.Username.Equals("staff", StringComparison.OrdinalIgnoreCase) && password == "staff123")
-                    || ((efUser.Username.Equals("discipline_lead", StringComparison.OrdinalIgnoreCase) || efUser.Username.Equals("discipline", StringComparison.OrdinalIgnoreCase)) && password == "discipline123")
-                    || ((efUser.Username.Equals("guidance_counselor", StringComparison.OrdinalIgnoreCase) || efUser.Username.Equals("guidance", StringComparison.OrdinalIgnoreCase)) && password == "guidance123"))
+                bool efValid = PasswordHasher.Verify(password, efUser.PasswordHash, out bool efNeedsRehash);
+                if (efValid)
                 {
+                    if (efNeedsRehash)
+                    {
+                        try
+                        {
+                            efUser.PasswordHash = PasswordHasher.Hash(password);
+                            await _context.SaveChangesAsync();
+                        }
+                        catch { }
+                    }
+
+                    LoginThrottle.Reset(throttleKey);
                     CurrentUser = efUser;
                     SessionManager.SetSession(efUser.Username, efUser.Username, efUser.Role);
                     await AuditLogger.LogAsync(efUser.Username, "LOGIN", "Authentication", $"User {efUser.Username} logged in successfully.");
@@ -116,6 +153,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
                 }
             }
 
+            LoginThrottle.RecordFailure(throttleKey);
+            await AuditLogger.LogAsync(trimmedUsername, "FAILED_LOGIN", "Authentication", $"Failed login attempt for user {trimmedUsername}.");
             return (false, "Invalid username or password.", null);
         }
 
@@ -140,12 +179,12 @@ namespace SmartSchoolIncidentManagementSystem.Services
             {
                 // 1. Check if username exists in SystemUsers
                 DatabaseInitializer.InitializeSystemUsers();
-                using var conn = new SqliteConnection(DatabaseInitializer.GetConnectionString());
+                using var conn = DatabaseProvider.CreateConnection();
                 await conn.OpenAsync();
 
                 using var checkCmd = conn.CreateCommand();
                 checkCmd.CommandText = "SELECT COUNT(*) FROM SystemUsers WHERE LOWER(Username) = LOWER(@Username);";
-                checkCmd.Parameters.AddWithValue("@Username", trimmedUsername);
+                checkCmd.AddParam("@Username", trimmedUsername);
                 var count = Convert.ToInt64(await checkCmd.ExecuteScalarAsync());
                 if (count > 0)
                 {
@@ -160,18 +199,18 @@ namespace SmartSchoolIncidentManagementSystem.Services
                 }
 
                 // 3. Hash password
-                string hashedPassword = SecurityHelper.ComputeSha256Hash(password);
+                string hashedPassword = PasswordHasher.Hash(password);
 
                 // 4. Insert into SystemUsers table
                 using var insertCmd = conn.CreateCommand();
                 insertCmd.CommandText = @"
                     INSERT INTO SystemUsers (Username, FullName, Email, PasswordHash, Role, Status, CreatedAt)
                     VALUES (@Username, @FullName, @Email, @PasswordHash, @Role, 'Active', CURRENT_TIMESTAMP);";
-                insertCmd.Parameters.AddWithValue("@Username", trimmedUsername);
-                insertCmd.Parameters.AddWithValue("@FullName", trimmedFullName);
-                insertCmd.Parameters.AddWithValue("@Email", trimmedEmail);
-                insertCmd.Parameters.AddWithValue("@PasswordHash", hashedPassword);
-                insertCmd.Parameters.AddWithValue("@Role", trimmedRole);
+                insertCmd.AddParam("@Username", trimmedUsername);
+                insertCmd.AddParam("@FullName", trimmedFullName);
+                insertCmd.AddParam("@Email", trimmedEmail);
+                insertCmd.AddParam("@PasswordHash", hashedPassword);
+                insertCmd.AddParam("@Role", trimmedRole);
                 await insertCmd.ExecuteNonQueryAsync();
 
                 // 5. Also add to EF Core Users table

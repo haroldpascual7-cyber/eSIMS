@@ -1,3 +1,5 @@
+using SmartSchoolIncidentManagementSystem.Data;
+using SmartSchoolIncidentManagementSystem.Helpers;
 using SmartSchoolIncidentManagementSystem.Models;
 using SmartSchoolIncidentManagementSystem.Services;
 using SmartSchoolIncidentManagementSystem.ViewModels.Common;
@@ -95,12 +97,12 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                         SelectedUser.ProfilePicturePath = destFile;
                         await Task.Run(() =>
                         {
-                            using var conn = new Microsoft.Data.Sqlite.SqliteConnection(DatabaseInitializer.GetConnectionString());
+                            using var conn = DatabaseProvider.CreateConnection();
                             conn.Open();
                             using var cmd = conn.CreateCommand();
                             cmd.CommandText = "UPDATE SystemUsers SET ProfilePicturePath = @Path WHERE UserId = @UserId;";
-                            cmd.Parameters.AddWithValue("@Path", destFile);
-                            cmd.Parameters.AddWithValue("@UserId", SelectedUser.UserId);
+                            cmd.AddParam("@Path", destFile);
+                            cmd.AddParam("@UserId", SelectedUser.UserId);
                             cmd.ExecuteNonQuery();
                         });
                         UsersView.Refresh();
@@ -122,11 +124,11 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 SelectedUser.ProfilePicturePath = null;
                 await Task.Run(() =>
                 {
-                    using var conn = new Microsoft.Data.Sqlite.SqliteConnection(DatabaseInitializer.GetConnectionString());
+                    using var conn = DatabaseProvider.CreateConnection();
                     conn.Open();
                     using var cmd = conn.CreateCommand();
                     cmd.CommandText = "UPDATE SystemUsers SET ProfilePicturePath = NULL WHERE UserId = @UserId;";
-                    cmd.Parameters.AddWithValue("@UserId", SelectedUser.UserId);
+                    cmd.AddParam("@UserId", SelectedUser.UserId);
                     cmd.ExecuteNonQuery();
                 });
                 UsersView.Refresh();

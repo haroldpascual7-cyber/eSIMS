@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SmartSchoolIncidentManagementSystem.Data;
 using SmartSchoolIncidentManagementSystem.Models;
 using System;
@@ -33,6 +33,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
         private void EnsureTables()
         {
+            if (DatabaseProvider.IsMySql) return;
+
             try
             {
                 _context.Database.ExecuteSqlRaw(@"
@@ -228,8 +230,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
             await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-                INSERT OR REPLACE INTO IapMilestones (MilestoneId, PlanId, Title, DueDate, IsCompleted)
+            cmd.CommandText = $@"
+                {DatabaseProvider.InsertOrReplaceKeyword} INTO IapMilestones (MilestoneId, PlanId, Title, DueDate, IsCompleted)
                 VALUES (@MilestoneId, @PlanId, @Title, @DueDate, @IsCompleted);";
 
             AddParam(cmd, "@MilestoneId", milestone.MilestoneId);
