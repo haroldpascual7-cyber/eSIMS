@@ -67,7 +67,8 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             IIntegrityAuditService integrityService,
             ISecurityAccessLogService securityLogService,
             ICommunicationService commService,
-            IPdfExportService pdfService)
+            IPdfExportService pdfService,
+            Action? onBack = null)
         {
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
@@ -78,16 +79,20 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             _commService = commService ?? throw new ArgumentNullException(nameof(commService));
             _pdfService = pdfService ?? throw new ArgumentNullException(nameof(pdfService));
 
-            // Initialize Child ViewModels with dummy callbacks (since they operate directly within workspace tabs)
-            UserManagementVM = new UserManagementViewModel(() => { });
-            RbacVM = new RbacViewModel(() => { });
-            KeywordVM = new KeywordMatrixViewModel(_classificationService, () => { });
-            LocationVM = new LocationWeightingViewModel(_classificationService, () => { });
-            RepeatOffenderVM = new RepeatOffenderViewModel(_classificationService, () => { });
-            ActivityLogVM = new ActivityLogViewModel(_auditService, _pdfService, () => { });
-            IntegrityVM = new IntegrityAuditViewModel(_integrityService, _pdfService, () => { });
-            SecurityLogVM = new SecurityAccessLogViewModel(_securityLogService, _pdfService, () => { });
+            Action navigateBack = onBack ?? (() => { });
+
+            // Initialize Child ViewModels with back navigation callbacks
+            UserManagementVM = new UserManagementViewModel(navigateBack);
+            RbacVM = new RbacViewModel(navigateBack);
+            KeywordVM = new KeywordMatrixViewModel(_classificationService, navigateBack);
+            LocationVM = new LocationWeightingViewModel(_classificationService, navigateBack);
+            RepeatOffenderVM = new RepeatOffenderViewModel(_classificationService, navigateBack);
+            ActivityLogVM = new ActivityLogViewModel(_auditService, _pdfService, navigateBack);
+            IntegrityVM = new IntegrityAuditViewModel(_integrityService, _pdfService, navigateBack);
+            SecurityLogVM = new SecurityAccessLogViewModel(_securityLogService, _pdfService, navigateBack);
             AcademicVM = new AcademicStructureViewModel(_settingsService, _auditService);
+
+            BackToHubCommand = new RelayCommand(_ => navigateBack());
 
             // Commands
             SaveEmailSettingsCommand = new RelayCommand(async _ => await SaveEmailSettingsAsync(), _ => CanManageSettings);
@@ -203,6 +208,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public ICommand ResetDashboardLogoCommand { get; }
         public ICommand CreateBackupCommand { get; }
         public ICommand ToggleThemeCommand { get; }
+        public ICommand BackToHubCommand { get; }
 
         private async Task InitializeSettingsAsync()
         {

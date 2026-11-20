@@ -452,14 +452,9 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             if (!EnsureRolePermission("System Administrator,Discipline Officer", "System Settings")) return;
             ActiveSection = "Settings";
             var vm = new SettingsWorkspaceViewModel(
-                _settingsService,
-                _themeService,
-                _classificationService,
-                _auditService,
-                _integrityService,
-                _securityLogService,
-                _commService,
-                _pdfService);
+                _settingsService, _themeService, _classificationService, _auditService,
+                _integrityService, _securityLogService, _commService, _pdfService,
+                () => ShowDashboard());
             vm.SelectedTabIndex = tabIndex;
             CurrentViewModel = vm;
         }

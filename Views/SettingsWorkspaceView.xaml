@@ -15,7 +15,14 @@
 
             <!-- 1. Header -->
             <Grid Grid.Row="0" Margin="0,0,0,16">
-                <StackPanel Orientation="Vertical">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="&#x2190; Back to Hub" Style="{DynamicResource SecondaryButtonStyle}"
+                        Command="{Binding BackToHubCommand}" Height="36" Padding="14,0" Margin="0,0,16,0"
+                        VerticalAlignment="Center" ToolTip="Return to Main System Hub"/>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
                     <TextBlock Text="System Settings &amp; Institutional Configuration" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
                     <TextBlock Text="Configure user accounts, RBAC matrix, SMTP email dispatches, risk engine rules, school identity, and security logs." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
                 </StackPanel>
