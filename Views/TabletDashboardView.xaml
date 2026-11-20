@@ -57,9 +57,9 @@
 
         <!-- Top Right Header Control Button Style -->
         <Style x:Key="HeaderSquareButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#1E293B"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="BorderBrush" Value="#334155"/>
+            <Setter Property="Background" Value="{DynamicResource SidebarHoverBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -71,7 +71,8 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="btnBorder" Property="BorderBrush" Value="#3B82F6"/>
+                                <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                <Setter TargetName="btnBorder" Property="BorderBrush" Value="{DynamicResource PrimaryHoverBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

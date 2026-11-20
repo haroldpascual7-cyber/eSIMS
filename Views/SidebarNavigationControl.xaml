@@ -409,7 +409,7 @@
             </ScrollViewer>
 
             <!-- ==================== 3. BOTTOM USER PROFILE & ACTIONS ==================== -->
-            <Border Grid.Row="2" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
+            <Border Grid.Row="2" BorderBrush="{DynamicResource SidebarHoverBrush}" BorderThickness="0,1,0,0">
                 <Grid>
                     <!-- Expanded Bottom Bar: Full User Card + Theme & Exit Buttons -->
                     <Border Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}"
@@ -441,11 +441,11 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Button Grid.Column="0" Command="{Binding ToggleThemeCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="32" Padding="0" ToolTip="Toggle Light / Dark Mode" Margin="0,0,8,0">
-                                    <TextBlock Text="🌓" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Button Grid.Column="0" Command="{Binding ToggleThemeCommand}" Style="{DynamicResource SidebarActionButtonStyle}" Height="32" Padding="0" ToolTip="{Binding ThemeToggleTooltip, FallbackValue='Toggle Light / Dark Mode'}" Margin="0,0,8,0">
+                                    <TextBlock Text="{Binding ThemeToggleIcon, FallbackValue='🌓'}" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
 
-                                <Button Grid.Column="1" Command="{Binding LogoutCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="32" Padding="0" ToolTip="Log Out of System">
+                                <Button Grid.Column="1" Command="{Binding LogoutCommand}" Style="{DynamicResource SidebarActionButtonStyle}" Height="32" Padding="0" ToolTip="Log Out of System">
                                     <TextBlock Text="🚪 Exit" FontSize="11.5" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                             </Grid>
@@ -465,15 +465,15 @@
                             </Border>
 
                             <!-- Theme Toggle Icon Button -->
-                            <Button Command="{Binding ToggleThemeCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                            <Button Command="{Binding ToggleThemeCommand}" Style="{DynamicResource SidebarActionButtonStyle}"
                                     Width="38" Height="32" Padding="0" Margin="0,0,0,6" HorizontalAlignment="Center"
-                                    ToolTip="Toggle Light / Dark Mode"
+                                    ToolTip="{Binding ThemeToggleTooltip, FallbackValue='Toggle Light / Dark Mode'}"
                                     ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">
-                                <TextBlock Text="🌓" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ThemeToggleIcon, FallbackValue='🌓'}" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Button>
 
                             <!-- Logout Icon Button -->
-                            <Button Command="{Binding LogoutCommand}" Style="{DynamicResource SecondaryButtonStyle}"
+                            <Button Command="{Binding LogoutCommand}" Style="{DynamicResource SidebarActionButtonStyle}"
                                     Width="38" Height="32" Padding="0" HorizontalAlignment="Center"
                                     ToolTip="Log Out of System"
                                     ToolTipService.Placement="Right" ToolTipService.HorizontalOffset="12">

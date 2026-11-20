@@ -8,6 +8,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
     public interface IThemeService
     {
+        event System.Action<AppTheme>? ThemeChanged;
         AppTheme CurrentTheme { get; }
         void SetTheme(AppTheme theme);
         void ToggleTheme();

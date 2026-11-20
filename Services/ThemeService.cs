@@ -6,6 +6,7 @@ namespace SmartSchoolIncidentManagementSystem.Services
 {
     public class ThemeService : IThemeService
     {
+        public event Action<AppTheme>? ThemeChanged;
         public AppTheme CurrentTheme { get; private set; } = AppTheme.Light;
 
         public ThemeService()
@@ -37,11 +38,13 @@ namespace SmartSchoolIncidentManagementSystem.Services
                 if (src.Contains("LightTheme.xaml") || src.Contains("DarkTheme.xaml"))
                 {
                     merged[i] = newThemeDict;
+                    ThemeChanged?.Invoke(CurrentTheme);
                     return;
                 }
             }
 
             merged.Insert(0, newThemeDict);
+            ThemeChanged?.Invoke(CurrentTheme);
         }
 
         public void ToggleTheme()

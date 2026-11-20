@@ -114,13 +114,12 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             NavigateAuditTrailCommand = new RelayCommand(() => ShowSettingsWorkspace(5));
             NavigateUserManagementCommand = new RelayCommand(() => ShowSettingsWorkspace(0));
             NavigateSystemSettingsCommand = new RelayCommand(() => ShowSettingsWorkspace(4));
-
             ToggleThemeCommand = new RelayCommand(ToggleTheme);
             LogoutCommand = new RelayCommand(Logout);
             InitializeNotificationSystem();
             InitializeBrandingSupport();
+            InitializeSidebarSupport();
             ViewNotificationsCommand = OpenNotificationModalCommand;
-
             _currentViewModel = new LoginViewModel(_authService, _themeService, _settingsService, OnLoginSuccess);
             _isAuthenticated = false;
         }

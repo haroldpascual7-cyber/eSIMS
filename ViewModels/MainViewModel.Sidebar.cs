@@ -41,5 +41,35 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         {
             IsSidebarCollapsed = !IsSidebarCollapsed;
         });
+
+        /// <summary>
+        /// Indicates if the application is currently in dark mode.
+        /// </summary>
+        public bool IsDarkMode => _themeService.CurrentTheme == Services.AppTheme.Dark;
+
+        /// <summary>
+        /// Dynamic icon for theme toggle button (shows opposite target theme or current mode).
+        /// </summary>
+        public string ThemeToggleIcon => IsDarkMode ? "☀️" : "🌙";
+
+        /// <summary>
+        /// Dynamic tooltip for theme toggle button.
+        /// </summary>
+        public string ThemeToggleTooltip => IsDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode";
+
+        /// <summary>
+        /// Initializes theme change monitoring for the sidebar.
+        /// </summary>
+        private void InitializeSidebarSupport()
+        {
+            _themeService.ThemeChanged += OnThemeChangedNotify;
+        }
+
+        private void OnThemeChangedNotify(Services.AppTheme newTheme)
+        {
+            OnPropertyChanged(nameof(IsDarkMode));
+            OnPropertyChanged(nameof(ThemeToggleIcon));
+            OnPropertyChanged(nameof(ThemeToggleTooltip));
+        }
     }
 }
