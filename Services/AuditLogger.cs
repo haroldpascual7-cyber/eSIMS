@@ -106,8 +106,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
             AuditLogger.EnsureTableCreated();
             var list = new List<AuditLogModel>();
 
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT LogId, Timestamp, UserId, ActionType, ModuleName, Description FROM SystemAuditLogs ORDER BY LogId DESC;";

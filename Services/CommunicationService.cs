@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore;
 using SmartSchoolIncidentManagementSystem.Data;
 using SmartSchoolIncidentManagementSystem.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,11 +19,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
     public class CommunicationService : ICommunicationService
     {
-        private readonly AppDbContext _context;
-
-        public CommunicationService(AppDbContext context)
+        public CommunicationService(AppDbContext? context = null)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
             EnsureTables();
         }
 
@@ -33,7 +30,11 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
             try
             {
-                _context.Database.ExecuteSqlRaw(@"
+                using var conn = DatabaseProvider.CreateConnection();
+                if (conn.State != ConnectionState.Open) conn.Open();
+
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = @"
                     CREATE TABLE IF NOT EXISTS DispatchLogs (
                         Id TEXT PRIMARY KEY,
                         StudentId TEXT NOT NULL,
@@ -44,18 +45,23 @@ namespace SmartSchoolIncidentManagementSystem.Services
                         Status TEXT NOT NULL,
                         SentAt DATETIME DEFAULT CURRENT_TIMESTAMP
                     );
-                ");
+                ";
+                cmd.ExecuteNonQuery();
 
-                int count = _context.Database.SqlQueryRaw<int>("SELECT COUNT(*) FROM DispatchLogs;").AsEnumerable().FirstOrDefault();
+                using var countCmd = conn.CreateCommand();
+                countCmd.CommandText = "SELECT COUNT(*) FROM DispatchLogs;";
+                int count = Convert.ToInt32(countCmd.ExecuteScalar() ?? 0);
                 if (count == 0)
                 {
-                    _context.Database.ExecuteSqlRaw(@"
+                    using var seedCmd = conn.CreateCommand();
+                    seedCmd.CommandText = @"
                         INSERT INTO DispatchLogs (Id, StudentId, GuardianName, ContactDestination, Channel, MessageBody, Status, SentAt)
                         VALUES
                         ('dsp-001', 'STD-1042', 'Maria Dela Cruz', '+63 917-555-1234', 'SMS', 'Smart Academy Alert: Please be advised that Juan Dela Cruz was involved in a behavioral infraction today. Check email for details.', 'Sent', datetime('now', '-2 hours')),
                         ('dsp-002', 'STD-1002', 'Sarah Smith', 'sarah.smith@gmail.com', 'Email', 'Smart Academy Notification: Formal Notice of Parent-Counselor Conference scheduled for Jane Smith on 2026-08-29.', 'Sent', datetime('now', '-1 day')),
                         ('dsp-003', 'STD-1005', 'Patricia Brown', '+63 917-999-0000', 'SMS', 'Urgent Notice: Michael Brown has been issued a Suspension Order starting tomorrow. Please contact Guidance Office.', 'Sent', datetime('now', '-3 days'));
-                    ");
+                    ";
+                    seedCmd.ExecuteNonQuery();
                 }
             }
             catch { }
@@ -72,15 +78,11 @@ namespace SmartSchoolIncidentManagementSystem.Services
             EnsureTables();
             
             // SIMULATION MODE: Simulating API Gateway network delay (e.g. Twilio / Semaphore API)
-            // TO INJECT REAL TWILIO:
-            // TwilioClient.Init("ACCOUNT_SID", "AUTH_TOKEN");
-            // var sms = MessageResource.Create(body: message, from: new PhoneNumber("+123456789"), to: new PhoneNumber(phoneNumber));
-
             await Task.Delay(1000); // Simulated dispatch latency
 
             string logId = Guid.NewGuid().ToString();
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
@@ -103,15 +105,11 @@ namespace SmartSchoolIncidentManagementSystem.Services
             EnsureTables();
 
             // SIMULATION MODE: Simulating SMTP dispatch (e.g. MailKit / SmtpClient)
-            // TO INJECT REAL SMTP:
-            // using var client = new SmtpClient("smtp.smartschool.edu", 587) { Credentials = new NetworkCredential("alerts@smartschool.edu", "pass") };
-            // client.Send(new MailMessage("alerts@smartschool.edu", emailAddress, subject, message));
-
             await Task.Delay(1000); // Simulated email latency
 
             string logId = Guid.NewGuid().ToString();
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
@@ -133,8 +131,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
         {
             EnsureTables();
             var list = new List<DispatchLog>();
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = $"SELECT Id, StudentId, GuardianName, ContactDestination, Channel, MessageBody, Status, SentAt FROM DispatchLogs ORDER BY SentAt DESC LIMIT {count};";
@@ -163,8 +161,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
             EnsureTables();
             await Task.Delay(1000);
 
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"

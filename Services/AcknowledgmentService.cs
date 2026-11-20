@@ -1,9 +1,8 @@
-using Microsoft.EntityFrameworkCore;
 using SmartSchoolIncidentManagementSystem.Data;
 using SmartSchoolIncidentManagementSystem.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,11 +19,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
     public class AcknowledgmentService : IAcknowledgmentService
     {
-        private readonly AppDbContext _context;
-
-        public AcknowledgmentService(AppDbContext context)
+        public AcknowledgmentService(AppDbContext? context = null)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
             EnsureTables();
         }
 
@@ -34,7 +30,11 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
             try
             {
-                _context.Database.ExecuteSqlRaw(@"
+                using var conn = DatabaseProvider.CreateConnection();
+                if (conn.State != ConnectionState.Open) conn.Open();
+
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = @"
                     CREATE TABLE IF NOT EXISTS AcknowledgmentLogs (
                         Id TEXT PRIMARY KEY,
                         NoticeId TEXT NOT NULL,
@@ -46,19 +46,24 @@ namespace SmartSchoolIncidentManagementSystem.Services
                         Remarks TEXT,
                         AttachedFilePath TEXT
                     );
-                ");
+                ";
+                cmd.ExecuteNonQuery();
 
-                int count = _context.Database.SqlQueryRaw<int>("SELECT COUNT(*) FROM AcknowledgmentLogs;").AsEnumerable().FirstOrDefault();
+                using var countCmd = conn.CreateCommand();
+                countCmd.CommandText = "SELECT COUNT(*) FROM AcknowledgmentLogs;";
+                int count = Convert.ToInt32(countCmd.ExecuteScalar() ?? 0);
                 if (count == 0)
                 {
-                    _context.Database.ExecuteSqlRaw(@"
+                    using var seedCmd = conn.CreateCommand();
+                    seedCmd.CommandText = @"
                         INSERT INTO AcknowledgmentLogs (Id, NoticeId, StudentName, IssueDate, DueDate, Status, DateAcknowledged, Remarks, AttachedFilePath)
                         VALUES
                         ('ack-001', 'NTC-2026-001', 'Juan Dela Cruz', '2026-08-20', '2026-08-25', 'Pending', '', '', ''),
                         ('ack-002', 'NTC-2026-002', 'Jane Smith', '2026-08-15', '2026-08-20', 'Acknowledged', '2026-08-18', 'Parent attended conference meeting in person. Discussed counseling roadmap.', 'Scanned_Slips/jane_smith_signed.pdf'),
                         ('ack-003', 'NTC-2026-003', 'Michael Brown', '2026-08-10', '2026-08-15', 'Overdue', '', '', ''),
                         ('ack-004', 'NTC-2026-004', 'Sarah Davis', '2026-08-22', '2026-08-28', 'Pending', '', '', '');
-                    ");
+                    ";
+                    seedCmd.ExecuteNonQuery();
                 }
             }
             catch { }
@@ -74,8 +79,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
         {
             EnsureTables();
             var list = new List<AcknowledgmentLog>();
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT Id, NoticeId, StudentName, IssueDate, DueDate, Status, DateAcknowledged, Remarks, AttachedFilePath FROM AcknowledgmentLogs ORDER BY IssueDate DESC;";
@@ -104,8 +109,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
             if (log == null) throw new ArgumentNullException(nameof(log));
             EnsureTables();
 
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = $@"
@@ -129,8 +134,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
         {
             EnsureTables();
 
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
@@ -153,8 +158,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
         public async Task DeleteLogAsync(string id)
         {
             EnsureTables();
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "DELETE FROM AcknowledgmentLogs WHERE Id = @Id;";
             AddParam(cmd, "@Id", id);

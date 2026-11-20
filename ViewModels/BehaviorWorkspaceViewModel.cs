@@ -258,12 +258,19 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
         public async void SelectStudent(Student s)
         {
-            SelectedStudent = s;
-            StudentSearchText = s.FullName;
-            StudentSuggestions.Clear();
-            IsStudentSuggestionsOpen = false;
+            try
+            {
+                SelectedStudent = s;
+                StudentSearchText = s.FullName;
+                StudentSuggestions.Clear();
+                IsStudentSuggestionsOpen = false;
 
-            await LoadStudentBehaviorDataAsync(s);
+                await LoadStudentBehaviorDataAsync(s);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error selecting student: {ex.Message}");
+            }
         }
 
         private async Task LoadStudentBehaviorDataAsync(Student s)
@@ -316,6 +323,10 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 _actionPlans.Clear();
                 foreach (var iap in studentIaps) _actionPlans.Add(iap);
                 ActiveIapCount = studentIaps.Count;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading student behavior data: {ex.Message}");
             }
             finally
             {

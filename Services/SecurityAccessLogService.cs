@@ -76,8 +76,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
             EnsureTableCreated();
             var list = new List<AccessSecurityLogModel>();
 
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT Id, Timestamp, AttemptedUsername, MachineName, EventType, Status, Details FROM AccessSecurityLogs ORDER BY Id DESC;";

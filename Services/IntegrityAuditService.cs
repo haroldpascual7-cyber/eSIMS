@@ -1,10 +1,9 @@
-using Microsoft.EntityFrameworkCore;
 using SmartSchoolIncidentManagementSystem.Data;
 using SmartSchoolIncidentManagementSystem.Helpers;
 using SmartSchoolIncidentManagementSystem.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,19 +19,16 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
     public class IntegrityAuditService : IIntegrityAuditService
     {
-        private readonly AppDbContext _context;
-
-        public IntegrityAuditService(AppDbContext context)
+        public IntegrityAuditService(AppDbContext? context = null)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public async Task<DiagnosticResultModel> CheckSqliteDatabaseIntegrityAsync()
         {
             try
             {
-                using var conn = _context.Database.GetDbConnection();
-                await conn.OpenAsync();
+                using var conn = DatabaseProvider.CreateConnection();
+                if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
                 if (DatabaseProvider.IsMySql)
                 {
@@ -82,8 +78,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
             int orphanCount = 0;
             try
             {
-                using var conn = _context.Database.GetDbConnection();
-                await conn.OpenAsync();
+                using var conn = DatabaseProvider.CreateConnection();
+                if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = @"
@@ -115,8 +111,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
             try
             {
-                using var conn = _context.Database.GetDbConnection();
-                await conn.OpenAsync();
+                using var conn = DatabaseProvider.CreateConnection();
+                if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
                 using var countCmd = conn.CreateCommand();
                 countCmd.CommandText = "SELECT COUNT(*) FROM Incidents;";
@@ -181,8 +177,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
             int repaired = 0;
             try
             {
-                using var conn = _context.Database.GetDbConnection();
-                await conn.OpenAsync();
+                using var conn = DatabaseProvider.CreateConnection();
+                if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = @"

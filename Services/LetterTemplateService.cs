@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore;
 using SmartSchoolIncidentManagementSystem.Data;
 using SmartSchoolIncidentManagementSystem.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,11 +19,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
     public class LetterTemplateService : ILetterTemplateService
     {
-        private readonly AppDbContext _context;
-
-        public LetterTemplateService(AppDbContext context)
+        public LetterTemplateService(AppDbContext? context = null)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
             EnsureTables();
         }
 
@@ -33,19 +30,27 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
             try
             {
-                _context.Database.ExecuteSqlRaw(@"
+                using var conn = DatabaseProvider.CreateConnection();
+                if (conn.State != ConnectionState.Open) conn.Open();
+
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = @"
                     CREATE TABLE IF NOT EXISTS LetterTemplates (
                         Id TEXT PRIMARY KEY,
                         TemplateName TEXT NOT NULL,
                         TemplateBody TEXT NOT NULL,
                         CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
                     );
-                ");
+                ";
+                cmd.ExecuteNonQuery();
 
-                int count = _context.Database.SqlQueryRaw<int>("SELECT COUNT(*) FROM LetterTemplates;").AsEnumerable().FirstOrDefault();
+                using var countCmd = conn.CreateCommand();
+                countCmd.CommandText = "SELECT COUNT(*) FROM LetterTemplates;";
+                int count = Convert.ToInt32(countCmd.ExecuteScalar() ?? 0);
                 if (count == 0)
                 {
-                    _context.Database.ExecuteSqlRaw(@"
+                    using var seedCmd = conn.CreateCommand();
+                    seedCmd.CommandText = @"
                         INSERT INTO LetterTemplates (Id, TemplateName, TemplateBody) VALUES
                         (
                             'tpl-001',
@@ -111,7 +116,8 @@ Issued by:
 Class Adviser / Guidance Counselor
 Smart Academy'
                         );
-                    ");
+                    ";
+                    seedCmd.ExecuteNonQuery();
                 }
             }
             catch { }
@@ -127,8 +133,8 @@ Smart Academy'
         {
             EnsureTables();
             var list = new List<LetterTemplate>();
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT Id, TemplateName, TemplateBody, CreatedAt FROM LetterTemplates ORDER BY TemplateName ASC;";
@@ -159,8 +165,8 @@ Smart Academy'
             if (template == null) throw new ArgumentNullException(nameof(template));
             EnsureTables();
 
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = $@"
@@ -177,8 +183,8 @@ Smart Academy'
 
         public async Task DeleteTemplateAsync(string id)
         {
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "DELETE FROM LetterTemplates WHERE Id = @Id;";

@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore;
 using SmartSchoolIncidentManagementSystem.Data;
 using SmartSchoolIncidentManagementSystem.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,11 +23,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
     public class ActionPlanService : IActionPlanService
     {
-        private readonly AppDbContext _context;
-
-        public ActionPlanService(AppDbContext context)
+        public ActionPlanService(AppDbContext? context = null)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
             EnsureTables();
         }
 
@@ -37,7 +34,11 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
             try
             {
-                _context.Database.ExecuteSqlRaw(@"
+                using var conn = DatabaseProvider.CreateConnection();
+                if (conn.State != ConnectionState.Open) conn.Open();
+
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = @"
                     CREATE TABLE IF NOT EXISTS IndividualActionPlans (
                         Id TEXT PRIMARY KEY,
                         StudentId TEXT NOT NULL,
@@ -74,13 +75,17 @@ namespace SmartSchoolIncidentManagementSystem.Services
                         FilePath TEXT NOT NULL,
                         UploadDate TEXT NOT NULL
                     );
-                ");
+                ";
+                cmd.ExecuteNonQuery();
 
                 // Seed sample plan for Juan Dela Cruz if empty
-                int planCount = _context.Database.SqlQueryRaw<int>("SELECT COUNT(*) FROM IndividualActionPlans").AsEnumerable().FirstOrDefault();
+                using var countCmd = conn.CreateCommand();
+                countCmd.CommandText = "SELECT COUNT(*) FROM IndividualActionPlans;";
+                int planCount = Convert.ToInt32(countCmd.ExecuteScalar() ?? 0);
                 if (planCount == 0)
                 {
-                    _context.Database.ExecuteSqlRaw(@"
+                    using var seedCmd = conn.CreateCommand();
+                    seedCmd.CommandText = @"
                         INSERT INTO IndividualActionPlans (Id, StudentId, StudentName, GradeSection, FocusArea, AssignedCounselor, RiskTier, StartDate, ReviewDate, ProblemStatement, CoreRoadmapObjectives, Status)
                         VALUES (
                             'IAP-2026-001',
@@ -107,7 +112,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
                         VALUES
                         ('n1', 'IAP-2026-001', 'David Taylor (Counselor)', '2026-08-05 10:30', 'Student attended intake session receptive to guidance. Identified peer provocation triggers.'),
                         ('n2', 'IAP-2026-001', 'David Taylor (Counselor)', '2026-08-18 14:15', 'Completed counseling Module 1. Juan demonstrated deep breathing and escalation pause techniques.');
-                    ");
+                    ";
+                    seedCmd.ExecuteNonQuery();
                 }
             }
             catch { }
@@ -123,8 +129,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
         {
             EnsureTables();
             var plans = new List<IndividualActionPlan>();
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT Id, StudentId, StudentName, GradeSection, FocusArea, AssignedCounselor, RiskTier, StartDate, ReviewDate, ProblemStatement, CoreRoadmapObjectives, Status, CreatedAt FROM IndividualActionPlans ORDER BY CreatedAt DESC;";
@@ -171,8 +177,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
             if (plan == null) throw new ArgumentNullException(nameof(plan));
             EnsureTables();
 
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
@@ -203,8 +209,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
         public async Task UpdatePlanAsync(IndividualActionPlan plan)
         {
             if (plan == null) throw new ArgumentNullException(nameof(plan));
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
@@ -226,8 +232,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
         public async Task AddMilestoneAsync(IapMilestone milestone)
         {
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = $@"
@@ -245,8 +251,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
         public async Task ToggleMilestoneAsync(string milestoneId, bool isCompleted)
         {
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "UPDATE IapMilestones SET IsCompleted = @IsCompleted WHERE MilestoneId = @MilestoneId;";
@@ -258,8 +264,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
         public async Task AddNoteAsync(IapCounselorNote note)
         {
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
@@ -277,8 +283,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
 
         public async Task AddAttachmentAsync(IapAttachment attachment)
         {
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
@@ -297,8 +303,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
         private async Task<List<IapMilestone>> GetMilestonesForPlanAsync(string planId)
         {
             var list = new List<IapMilestone>();
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT MilestoneId, PlanId, Title, DueDate, IsCompleted FROM IapMilestones WHERE PlanId = @PlanId;";
@@ -322,8 +328,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
         private async Task<List<IapCounselorNote>> GetNotesForPlanAsync(string planId)
         {
             var list = new List<IapCounselorNote>();
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT NoteId, PlanId, Author, NoteDate, Content FROM IapCounselorNotes WHERE PlanId = @PlanId ORDER BY NoteDate DESC;";
@@ -347,8 +353,8 @@ namespace SmartSchoolIncidentManagementSystem.Services
         private async Task<List<IapAttachment>> GetAttachmentsForPlanAsync(string planId)
         {
             var list = new List<IapAttachment>();
-            using var conn = _context.Database.GetDbConnection();
-            await conn.OpenAsync();
+            using var conn = DatabaseProvider.CreateConnection();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT AttachmentId, PlanId, FileName, FilePath, UploadDate FROM IapAttachments WHERE PlanId = @PlanId;";
