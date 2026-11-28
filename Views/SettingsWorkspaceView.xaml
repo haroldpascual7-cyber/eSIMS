@@ -7,47 +7,23 @@
              mc:Ignorable="d" 
              d:DesignHeight="850" d:DesignWidth="1200">
     <Grid Background="{DynamicResource AppBackgroundBrush}">
-        <Grid Margin="32,24">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <!-- 1. Header -->
-            <Grid Grid.Row="0" Margin="0,0,0,16">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Content="&#x2190; Back to Hub" Style="{DynamicResource SecondaryButtonStyle}"
-                        Command="{Binding BackToHubCommand}" Height="36" Padding="14,0" Margin="0,0,16,0"
-                        VerticalAlignment="Center" ToolTip="Return to Main System Hub"/>
-                <StackPanel Grid.Column="1" Orientation="Vertical">
-                    <TextBlock Text="Settings" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                    <TextBlock Text="Accounts, mail, rules, branding, logs." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
-                </StackPanel>
-            </Grid>
-
-            <!-- 2. Main Tabbed Workspaces -->
-            <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" SelectedIndex="{Binding SelectedTabIndex}">
+        <Grid Margin="20,10,20,14">
+            <!-- Main Tabbed Workspaces (titlebar already shows eSIMS · Administration) -->
+            <TabControl Background="Transparent" BorderThickness="0" SelectedIndex="{Binding SelectedTabIndex}">
                 <!-- Tab 1: User Accounts (Admin Only) -->
-                <TabItem Header="👥 User Accounts" FontSize="14" FontWeight="SemiBold"
+                <TabItem Header="👥 User Accounts" FontSize="13" FontWeight="SemiBold"
                          Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVis}}">
-                    <Border Style="{DynamicResource CardBorderStyle}" Padding="0" Margin="0,12,0,0">
-                        <views:UserManagementView DataContext="{Binding UserManagementVM}"/>
-                    </Border>
+                    <views:UserManagementView DataContext="{Binding UserManagementVM}" Margin="0,8,0,0"/>
                 </TabItem>
 
                 <!-- Tab 2: RBAC Matrix (Admin Only) -->
-                <TabItem Header="🔐 RBAC Matrix" FontSize="14" FontWeight="SemiBold"
+                <TabItem Header="🔐 RBAC Matrix" FontSize="13" FontWeight="SemiBold"
                          Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVis}}">
-                    <Border Style="{DynamicResource CardBorderStyle}" Padding="0" Margin="0,12,0,0">
-                        <views:RbacView DataContext="{Binding RbacVM}"/>
-                    </Border>
+                    <views:RbacView DataContext="{Binding RbacVM}" Margin="0,8,0,0"/>
                 </TabItem>
 
                 <!-- Tab 3: Email & SMTP Alerts -->
-                <TabItem Header="📧 Email &amp; SMTP Alerts" FontSize="14" FontWeight="SemiBold">
+                <TabItem Header="📧 Email &amp; SMTP" FontSize="13" FontWeight="SemiBold">
                     <Border Style="{DynamicResource CardBorderStyle}" Padding="24" Margin="0,12,0,0">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel MaxWidth="700" HorizontalAlignment="Left">
@@ -111,27 +87,25 @@
                 </TabItem>
 
                 <!-- Tab 4: Risk Rules & Engine -->
-                <TabItem Header="⚖️ Disciplinary &amp; Risk Rules" FontSize="14" FontWeight="SemiBold">
-                    <Border Style="{DynamicResource CardBorderStyle}" Padding="16" Margin="0,12,0,0">
-                        <TabControl Background="Transparent" BorderThickness="0">
-                            <TabItem Header="🔤 Keyword Sensitivity Matrix" FontSize="14">
-                                <views:KeywordMatrixView DataContext="{Binding KeywordVM}" Margin="0,8,0,0"/>
-                            </TabItem>
-                            <TabItem Header="📍 Location Weightings" FontSize="14">
-                                <views:LocationWeightingView DataContext="{Binding LocationVM}" Margin="0,8,0,0"/>
-                            </TabItem>
-                            <TabItem Header="🔄 Repeat Offender Triggers" FontSize="14">
-                                <views:RepeatOffenderTriggersView DataContext="{Binding RepeatOffenderVM}" Margin="0,8,0,0"/>
-                            </TabItem>
-                            <TabItem Header="🏫 Grade Levels, Sections &amp; Departments" FontSize="14">
-                                <views:AcademicStructureView DataContext="{Binding AcademicVM}" Margin="0,8,0,0"/>
-                            </TabItem>
-                        </TabControl>
-                    </Border>
+                <TabItem Header="⚖️ Risk Rules" FontSize="13" FontWeight="SemiBold">
+                    <TabControl Background="Transparent" BorderThickness="0" Margin="0,8,0,0">
+                        <TabItem Header="🔤 Keyword Matrix" FontSize="13">
+                            <views:KeywordMatrixView DataContext="{Binding KeywordVM}" Margin="0,6,0,0"/>
+                        </TabItem>
+                        <TabItem Header="📍 Location Weights" FontSize="13">
+                            <views:LocationWeightingView DataContext="{Binding LocationVM}" Margin="0,6,0,0"/>
+                        </TabItem>
+                        <TabItem Header="🔄 Repeat Offenders" FontSize="13">
+                            <views:RepeatOffenderTriggersView DataContext="{Binding RepeatOffenderVM}" Margin="0,6,0,0"/>
+                        </TabItem>
+                        <TabItem Header="🏫 Academic Structure" FontSize="13">
+                            <views:AcademicStructureView DataContext="{Binding AcademicVM}" Margin="0,6,0,0"/>
+                        </TabItem>
+                    </TabControl>
                 </TabItem>
 
                 <!-- Tab 5: Branding & Maintenance -->
-                <TabItem Header="🎨 Branding &amp; Maintenance" FontSize="14" FontWeight="SemiBold">
+                <TabItem Header="🎨 Branding &amp; Backup" FontSize="13" FontWeight="SemiBold">
                     <Border Style="{DynamicResource CardBorderStyle}" Padding="16,12" Margin="0,12,0,0">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel MaxWidth="920" HorizontalAlignment="Left">
@@ -325,21 +299,19 @@
                 </TabItem>
 
                 <!-- Tab 6: Security & Audit Logs (Admin Only) -->
-                <TabItem Header="🛡️ Security &amp; Audit Logs" FontSize="14" FontWeight="SemiBold"
+                <TabItem Header="🛡️ Security &amp; Audit" FontSize="13" FontWeight="SemiBold"
                          Visibility="{Binding IsAdmin, Converter={StaticResource BoolToVis}}">
-                    <Border Style="{DynamicResource CardBorderStyle}" Padding="16" Margin="0,12,0,0">
-                        <TabControl Background="Transparent" BorderThickness="0">
-                            <TabItem Header="📋 System Activity Ledger" FontSize="14">
-                                <views:ActivityLogView DataContext="{Binding ActivityLogVM}" Margin="0,8,0,0"/>
-                            </TabItem>
-                            <TabItem Header="🔒 Hash Integrity Audits" FontSize="14">
-                                <views:IntegrityAuditView DataContext="{Binding IntegrityVM}" Margin="0,8,0,0"/>
-                            </TabItem>
-                            <TabItem Header="🔑 Access &amp; Login Security" FontSize="14">
-                                <views:SecurityAccessLogView DataContext="{Binding SecurityLogVM}" Margin="0,8,0,0"/>
-                            </TabItem>
-                        </TabControl>
-                    </Border>
+                    <TabControl Background="Transparent" BorderThickness="0" Margin="0,8,0,0">
+                        <TabItem Header="📋 Activity Ledger" FontSize="13">
+                            <views:ActivityLogView DataContext="{Binding ActivityLogVM}" Margin="0,6,0,0"/>
+                        </TabItem>
+                        <TabItem Header="🔒 Integrity Audits" FontSize="13">
+                            <views:IntegrityAuditView DataContext="{Binding IntegrityVM}" Margin="0,6,0,0"/>
+                        </TabItem>
+                        <TabItem Header="🔑 Access Security" FontSize="13">
+                            <views:SecurityAccessLogView DataContext="{Binding SecurityLogVM}" Margin="0,6,0,0"/>
+                        </TabItem>
+                    </TabControl>
                 </TabItem>
             </TabControl>
         </Grid>

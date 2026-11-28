@@ -4,219 +4,334 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="640">
+             d:DesignHeight="480" d:DesignWidth="420">
 
-    <Border Width="640" MaxHeight="680"
-            Background="{DynamicResource CardBackgroundBrush}"
-            BorderBrush="{DynamicResource BorderBrush}"
+    <UserControl.Resources>
+        <Style x:Key="NotifContainerStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource FlyoutBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsKioskActive}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource KioskFlyoutBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource KioskBarBorderBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NotifDividerStyle" TargetType="Border">
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsKioskActive}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource KioskDividerBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NotifPrimaryTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsKioskActive}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource KioskTextPrimaryBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NotifSecondaryTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsKioskActive}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource KioskTextSecondaryBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NotifMutedTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsKioskActive}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource KioskTextMutedBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NotifAccentTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsKioskActive}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource KioskAccentBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Border MinWidth="300" MaxWidth="420"
+            Style="{StaticResource NotifContainerStyle}"
             BorderThickness="1"
             CornerRadius="8"
             ClipToBounds="True">
         <Border.Effect>
-            <DropShadowEffect Color="#000000" Opacity="0.30" BlurRadius="24" ShadowDepth="6"/>
+            <DropShadowEffect Color="#000000" Opacity="{DynamicResource ShadowOpacityFlyout}" BlurRadius="20" ShadowDepth="4" Direction="270"/>
         </Border.Effect>
 
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/> <!-- Header -->
-                <RowDefinition Height="Auto"/> <!-- Filters & Actions Toolbar -->
-                <RowDefinition Height="*"/>    <!-- Notification Feed -->
-                <RowDefinition Height="Auto"/> <!-- Footer -->
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- 1. MODAL HEADER -->
-            <Border Grid.Row="0" Background="{DynamicResource SurfaceBackgroundBrush}"
-                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
-                    Padding="16,12">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+            <!-- 1. COMPACT HEADER -->
+            <Grid Grid.Row="0" Margin="14,12,10,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Width="34" Height="34" CornerRadius="999"
-                                Background="{DynamicResource InfoBgBrush}"
-                                BorderBrush="{DynamicResource InfoBrush}" BorderThickness="1"
-                                Margin="0,0,10,0">
-                            <TextBlock Text="🔔" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="Notification Center" FontSize="18" FontWeight="Bold"
-                                           Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
-                                <Border Visibility="{Binding HasUnreadNotifications, Converter={StaticResource BoolToVis}}"
-                                        Background="{DynamicResource DangerBrush}" CornerRadius="8"
-                                        Padding="7,2" Margin="10,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding UnreadNotificationCount, StringFormat='{}{0} New'}"
-                                               FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
-                                </Border>
-                            </StackPanel>
-                            <TextBlock Text="Incident updates and alerts"
-                                       FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
-                        </StackPanel>
-                    </StackPanel>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Notifications" FontSize="15" FontWeight="SemiBold"
+                               Style="{StaticResource NotifPrimaryTextStyle}" VerticalAlignment="Center"/>
+                    <Border Visibility="{Binding HasUnreadNotifications, Converter={StaticResource BoolToVis}}"
+                            Background="{DynamicResource DangerBrush}" CornerRadius="999"
+                            Padding="7,1" Margin="8,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding UnreadNotificationCount}"
+                                   FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                    </Border>
+                </StackPanel>
 
-                    <!-- Close Modal Button -->
-                    <Button Grid.Column="1" Command="{Binding CloseNotificationModalCommand}"
-                            Width="32" Height="32" Background="Transparent" BorderThickness="0"
-                            Foreground="{DynamicResource SecondaryTextBrush}" FontSize="14" FontWeight="Bold"
-                            Cursor="Hand" ToolTip="Close Notification Center">
-                        <TextBlock Text="✕" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Command="{Binding MarkAllNotificationsAsReadCommand}"
+                            Content="Mark all read" FontSize="12" Height="26" Padding="8,0"
+                            ToolTip="Mark all notifications as read">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource LinkButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsKioskActive}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource KioskAccentBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
                     </Button>
-                </Grid>
+                    <Button Command="{Binding CloseNotificationModalCommand}"
+                            Content="✕" FontSize="12" Margin="4,0,0,0" ToolTip="Close">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource CompactIconButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsKioskActive}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource KioskTextPrimaryBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- 2. COMPACT FILTER BAR -->
+            <Border Grid.Row="1" Style="{StaticResource NotifDividerStyle}" BorderThickness="0,0,0,1" Padding="14,0,14,8">
+                <StackPanel Orientation="Horizontal">
+                    <Button Command="{Binding FilterAllNotificationsCommand}" Height="26" Padding="10,0" Margin="0,0,6,0" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsKioskActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource KioskButtonBgBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource KioskTextPrimaryBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource KioskTileBorderBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsAllFilterActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="All" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </Button>
+
+                    <Button Command="{Binding FilterUnreadNotificationsCommand}" Height="26" Padding="10,0" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsKioskActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource KioskButtonBgBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource KioskTextPrimaryBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource KioskTileBorderBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsUnreadFilterActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="Unread" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </Button>
+                </StackPanel>
             </Border>
 
-            <!-- 2. FILTER TABS & TOOLBAR -->
-            <Border Grid.Row="1" Background="{DynamicResource TableRowAltBrush}"
-                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1"
-                    Padding="20,10">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Filter Buttons: All vs Unread -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Command="{Binding FilterAllNotificationsCommand}"
-                                Height="28" Padding="12,0" Margin="0,0,6,0" Cursor="Hand">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsAllFilterActive}" Value="True">
-                                            <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                            <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
-                                            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                            <TextBlock Text="All Notifications" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        </Button>
-
-                        <Button Command="{Binding FilterUnreadNotificationsCommand}"
-                                Height="28" Padding="12,0" Cursor="Hand">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsUnreadFilterActive}" Value="True">
-                                            <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                            <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
-                                            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                            <TextBlock Text="Unread Only" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        </Button>
-                    </StackPanel>
-
-                    <!-- Mark All Read Button -->
-                    <Button Grid.Column="1" Command="{Binding MarkAllNotificationsAsReadCommand}"
-                            Style="{DynamicResource SecondaryButtonStyle}"
-                            Height="28" Padding="10,0" Cursor="Hand" ToolTip="Mark all notifications as read">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="✓ " FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="Mark all as read" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                </Grid>
-            </Border>
-
-            <!-- 3. NOTIFICATION LIST FEED -->
-            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="20,14">
+            <!-- 3. CLEAN FLAT NOTIFICATION LIST -->
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel>
                     <!-- Empty State -->
-                    <Border Visibility="{Binding HasFilteredNotifications, Converter={StaticResource InverseBoolToVis}}"
-                            Background="{DynamicResource CardBackgroundBrush}"
-                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                            CornerRadius="8" Padding="32,40" Margin="0,20">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock Text="🎉" FontSize="40" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                            <TextBlock Text="You're all caught up!" FontSize="18" FontWeight="Bold"
-                                       Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center"/>
-                            <TextBlock Text="No unread notifications."
-                                       FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}"
-                                       HorizontalAlignment="Center" Margin="0,4,0,0" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="380"/>
-                        </StackPanel>
-                    </Border>
+                    <StackPanel Visibility="{Binding HasFilteredNotifications, Converter={StaticResource InverseBoolToVis}}"
+                                HorizontalAlignment="Center" Margin="20,36">
+                        <TextBlock Text="You're all caught up" FontSize="14" FontWeight="SemiBold"
+                                   Style="{StaticResource NotifPrimaryTextStyle}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="No unread notifications." FontSize="12"
+                                   Style="{StaticResource NotifMutedTextStyle}" HorizontalAlignment="Center" Margin="0,3,0,0"/>
+                    </StackPanel>
 
-                    <!-- Notification Cards List -->
                     <ItemsControl ItemsSource="{Binding FilteredNotifications}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Margin="0,0,0,10" Padding="12,8" CornerRadius="8"
-                                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                <Border BorderThickness="0,0,0,1" Padding="14,10" Cursor="Hand" ToolTip="Click to open">
                                     <Border.Style>
                                         <Style TargetType="Border">
-                                            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsRead}" Value="False">
-                                                    <Setter Property="Background" Value="{DynamicResource TableRowAltBrush}"/>
-                                                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                                                <DataTrigger Binding="{Binding DataContext.IsKioskActive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource KioskDividerBrush}"/>
                                                 </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsRead}" Value="False">
+                                                    <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
+                                                </DataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsRead}" Value="False"/>
+                                                        <Condition Binding="{Binding DataContext.IsKioskActive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Background" Value="{DynamicResource KioskFlyoutUnreadBrush}"/>
+                                                </MultiDataTrigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="{DynamicResource TableHoverBrush}"/>
+                                                </Trigger>
+                                                <MultiTrigger>
+                                                    <MultiTrigger.Conditions>
+                                                        <Condition Property="IsMouseOver" Value="True"/>
+                                                    </MultiTrigger.Conditions>
+                                                </MultiTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                                        <Condition Binding="{Binding DataContext.IsKioskActive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Background" Value="{DynamicResource KioskFlyoutHoverBrush}"/>
+                                                </MultiDataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
+                                    <Border.InputBindings>
+                                        <MouseBinding MouseAction="LeftClick"
+                                                      Command="{Binding DataContext.NavigateNotificationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      CommandParameter="{Binding}"/>
+                                    </Border.InputBindings>
 
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/> <!-- Category Icon Pill -->
-                                            <ColumnDefinition Width="*"/>    <!-- Details & Message -->
-                                            <ColumnDefinition Width="Auto"/> <!-- Navigation Button -->
+                                            <ColumnDefinition Width="14"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <!-- Category Icon Pill -->
-                                        <Border Grid.Column="0" Width="40" Height="40" CornerRadius="8"
-                                                Background="{DynamicResource SurfaceBackgroundBrush}"
-                                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                                                Margin="0,0,12,0" VerticalAlignment="Top">
-                                            <TextBlock Text="{Binding Icon}" FontSize="18"
-                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
+                                        <!-- Unread indicator dot -->
+                                        <Ellipse Grid.Column="0" Width="6" Height="6"
+                                                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,5,0,0"
+                                                 Visibility="{Binding IsRead, Converter={StaticResource InverseBoolToVis}}">
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Fill" Value="{DynamicResource PrimaryBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DataContext.IsKioskActive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                            <Setter Property="Fill" Value="{DynamicResource KioskAccentBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
 
-                                        <!-- Message & Metadata Details -->
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0">
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                                <!-- Category Badge -->
-                                                <Border Background="{DynamicResource InfoBgBrush}" CornerRadius="4" Padding="6,1" Margin="0,0,6,0">
-                                                    <TextBlock Text="{Binding Category}" FontSize="12" FontWeight="Bold"
-                                                               Foreground="{DynamicResource PrimaryBrush}"/>
-                                                </Border>
-
-                                                <!-- Relative Time -->
-                                                <TextBlock Text="{Binding TimeAgoText}" FontSize="12"
-                                                           Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
-
-                                                <!-- Unread Dot -->
-                                                <Ellipse Width="6" Height="6" Fill="{DynamicResource DangerBrush}"
-                                                         Margin="8,0,0,0" VerticalAlignment="Center"
-                                                         Visibility="{Binding IsRead, Converter={StaticResource InverseBoolToVis}}"/>
+                                        <StackPanel Grid.Column="1" Margin="0,0,8,0">
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                                                <TextBlock Text="{Binding Category}" FontSize="11" FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DataContext.IsKioskActive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource KioskAccentBrush}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Text=" · " FontSize="11">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DataContext.IsKioskActive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource KioskTextMutedBrush}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding TimeAgoText}" FontSize="11">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DataContext.IsKioskActive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource KioskTextMutedBrush}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                             </StackPanel>
 
-                                            <!-- Title -->
-                                            <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="Bold"
-                                                       Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding DataContext.IsKioskActive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource KioskTextPrimaryBrush}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
 
-                                            <!-- Message -->
-                                            <TextBlock Text="{Binding Message}" FontSize="12"
-                                                       Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap"
-                                                       Margin="0,3,0,0" LineHeight="16"/>
+                                            <TextBlock Text="{Binding Message}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,0" LineHeight="16">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding DataContext.IsKioskActive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource KioskTextSecondaryBrush}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </StackPanel>
 
-                                        <!-- Navigation Action Button -->
-                                        <Button Grid.Column="2"
-                                                Command="{Binding DataContext.NavigateNotificationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                CommandParameter="{Binding}"
-                                                Style="{DynamicResource PrimaryButtonStyle}"
-                                                Height="32" Padding="12,0" VerticalAlignment="Center"
-                                                Cursor="Hand" ToolTip="Open relevant workspace">
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <TextBlock Text="Navigate" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
-                                                <TextBlock Text=" →" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                        </Button>
+                                        <TextBlock Grid.Column="2" Text="›" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DataContext.IsKioskActive, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource KioskTextMutedBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -224,28 +339,6 @@
                     </ItemsControl>
                 </StackPanel>
             </ScrollViewer>
-
-            <!-- 4. MODAL FOOTER -->
-            <Border Grid.Row="3" Background="{DynamicResource SurfaceBackgroundBrush}"
-                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0"
-                    Padding="16,12">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="Active Role: " FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <TextBlock Text="{Binding CurrentUserRole}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
-                        <TextBlock Text=" • All notifications synchronized" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                    </StackPanel>
-
-                    <Button Grid.Column="1" Command="{Binding CloseNotificationModalCommand}"
-                            Style="{DynamicResource SecondaryButtonStyle}"
-                            Height="32" Padding="18,0" Content="Close" Cursor="Hand"/>
-                </Grid>
-            </Border>
         </Grid>
     </Border>
 </UserControl>

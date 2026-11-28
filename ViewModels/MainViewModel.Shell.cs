@@ -27,6 +27,9 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         /// <summary>True when the left navigation sidebar should be shown (authenticated, non-kiosk views).</summary>
         public bool ShowSidebar => IsAuthenticated && !IsKioskActive;
 
+        /// <summary>True when the top shell title bar should be shown (authenticated, non-kiosk views).</summary>
+        public bool ShowTitleBar => IsAuthenticated && !IsKioskActive;
+
         /// <summary>True while the operational dashboard is on screen.</summary>
         public bool IsHomeActive => ActiveSection == "Dashboard Overview";
 

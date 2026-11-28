@@ -9,116 +9,93 @@
              ClipToBounds="False">
     <Grid Background="{DynamicResource AppBackgroundBrush}" ClipToBounds="False">
         <!-- Main Workspace Layout -->
-        <Grid Margin="32,24">
+        <Grid Margin="20,12,20,14">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- 1. Header & Actions -->
-            <Grid Grid.Row="0" Margin="0,0,0,16">
-                <StackPanel Orientation="Vertical">
-                    <TextBlock Text="Parent Notices &amp; Official Disclosures" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                    <TextBlock Text="Summons, notices and acknowledgments." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
-                </StackPanel>
+            <!-- 1. UNIFIED FLAT TOOLBAR (no boxed filter bar, no redundant header) -->
+            <Grid Grid.Row="0" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="280"/>
+                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <!-- Search Input with Magnifying Glass -->
+                <Grid Grid.Column="0" Margin="0,0,8,0">
+                    <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Height="34" Padding="30,0,10,0" VerticalContentAlignment="Center"/>
+                    <TextBlock Text="🔍" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="10,0,0,0" IsHitTestVisible="False"/>
+                    <TextBlock Text="Search notices, students..." FontSize="13" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center" Margin="30,0,0,0" IsHitTestVisible="False">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SearchText}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+                <!-- Status Filter ComboBox -->
+                <ComboBox Grid.Column="1" Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding StatusFilters}" SelectedItem="{Binding SelectedStatusFilter}" Height="34" Margin="0,0,10,0" VerticalContentAlignment="Center"/>
+
+                <TextBlock Grid.Column="2" Text="{Binding FilteredNotices.Count, StringFormat='{}{0} records'}" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center"/>
+
+                <!-- Right Actions -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}"
                             Content="{Binding RefreshButtonText, FallbackValue='↻ Refresh'}"
-                            Margin="0,0,8,0" Height="36" Padding="14,0" FontSize="14" FontWeight="SemiBold" ToolTip="Refresh Notice Registry"/>
-                    <Button Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ExportOverdueReportCommand}" Margin="0,0,8,0" Height="36" Padding="14,0" ToolTip="Export Overdue Compliance Report (PDF)">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="📑" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Overdue Report (PDF)" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        </StackPanel>
+                            Margin="0,0,8,0" Height="34" Padding="12,0" ToolTip="Refresh Notice Registry"/>
+                    <Button Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ExportOverdueReportCommand}" Margin="0,0,8,0" Height="34" Padding="12,0" ToolTip="Export Overdue Compliance Report (PDF)">
+                        <TextBlock Text="📑 Overdue Report" FontWeight="SemiBold" VerticalAlignment="Center"/>
                     </Button>
-                    <Button Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding OpenCreateNoticeCommand}" Height="36" Padding="16,0" ToolTip="Compose and dispatch new official parent notice">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="✉️" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="+ Send Parent Notice" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}" VerticalAlignment="Center"/>
-                        </StackPanel>
+                    <Button Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding OpenCreateNoticeCommand}" Height="34" Padding="14,0" ToolTip="Compose and dispatch new official parent notice">
+                        <TextBlock Text="+ Send Parent Notice" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}" VerticalAlignment="Center"/>
                     </Button>
                 </StackPanel>
             </Grid>
 
             <!-- 2. Metric KPI Cards -->
-            <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid Grid.Row="1" Margin="0,0,0,12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Margin="0,0,8,0" Padding="16,12">
+                <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Margin="0,0,8,0" Padding="14,10">
                     <StackPanel>
-                        <TextBlock Text="TOTAL DISPATCHES" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <TextBlock Text="{Binding TotalDispatchedCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,4,0,0"/>
+                        <TextBlock Text="TOTAL DISPATCHES" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding TotalDispatchedCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,2,0,0"/>
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Margin="4,0,4,0" Padding="16,12">
+                <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Margin="4,0,4,0" Padding="14,10">
                     <StackPanel>
-                        <TextBlock Text="PENDING RECEIPT" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
-                        <TextBlock Text="{Binding PendingCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,4,0,0"/>
+                        <TextBlock Text="PENDING RECEIPT" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
+                        <TextBlock Text="{Binding PendingCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,2,0,0"/>
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Margin="4,0,4,0" Padding="16,12">
+                <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Margin="4,0,4,0" Padding="14,10">
                     <StackPanel>
-                        <TextBlock Text="OVERDUE COMPLIANCE" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}"/>
-                        <TextBlock Text="{Binding OverdueCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,4,0,0"/>
+                        <TextBlock Text="OVERDUE COMPLIANCE" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}"/>
+                        <TextBlock Text="{Binding OverdueCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,2,0,0"/>
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="3" Style="{DynamicResource CardBorderStyle}" Margin="8,0,0,0" Padding="16,12">
+                <Border Grid.Column="3" Style="{DynamicResource CardBorderStyle}" Margin="8,0,0,0" Padding="14,10">
                     <StackPanel>
-                        <TextBlock Text="ACKNOWLEDGED / SIGNED" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
-                        <TextBlock Text="{Binding AcknowledgedCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" Margin="0,4,0,0"/>
+                        <TextBlock Text="ACKNOWLEDGED / SIGNED" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
+                        <TextBlock Text="{Binding AcknowledgedCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" Margin="0,2,0,0"/>
                     </StackPanel>
                 </Border>
             </Grid>
 
-            <!-- 3. Search & Toolbar -->
-            <Border Grid.Row="2" Style="{DynamicResource CardBorderStyle}" Margin="0,0,0,16" Padding="16,8">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="320"/>
-                        <ColumnDefinition Width="190"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Search Input with Magnifying Glass -->
-                    <Grid Grid.Column="0" Margin="0,0,12,0">
-                        <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Height="36" Padding="30,0,10,0" VerticalContentAlignment="Center"/>
-                        <TextBlock Text="🔍" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="10,0,0,0" IsHitTestVisible="False"/>
-                        <TextBlock Text="Search notices, students, remarks..." FontSize="14" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center" Margin="32,0,0,0" IsHitTestVisible="False">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SearchText}" Value="">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Grid>
-
-                    <!-- Status Filter ComboBox -->
-                    <ComboBox Grid.Column="1" Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding StatusFilters}" SelectedItem="{Binding SelectedStatusFilter}" Height="36" VerticalContentAlignment="Center"/>
-
-                    <!-- Right Quick Count Pill -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="4" Padding="12,6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="📋 Official Records in View: " FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                <TextBlock Text="{Binding FilteredNotices.Count}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <!-- 4. Tabbed Content: Registry vs Dispatch Log vs Templates -->
-            <TabControl Grid.Row="3" Background="Transparent" BorderThickness="0">
+            <!-- 3. Tabbed Content: Registry vs Dispatch Log vs Templates -->
+            <TabControl Grid.Row="2" Background="Transparent" BorderThickness="0">
                 <!-- Tab 1: Notice Registry & Acknowledgments -->
                 <TabItem Header="📋 Notice Registry &amp; Slips" FontSize="14" FontWeight="SemiBold">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,8,0,0">

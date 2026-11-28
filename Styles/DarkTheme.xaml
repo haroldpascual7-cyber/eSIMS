@@ -181,6 +181,7 @@
     <SolidColorBrush x:Key="TableRowAltBrush" Color="#1A1A1A"/>
     <SolidColorBrush x:Key="TableHoverBrush" Color="#0FFFFFFF"/>
     <SolidColorBrush x:Key="ModalOverlayBrush" Color="#66000000"/>
+    <SolidColorBrush x:Key="DropdownBackdropBrush" Color="#01000000"/>
 
     <SolidColorBrush x:Key="PrimaryTextBrush" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="SecondaryTextBrush" Color="#C5C5C5"/>
@@ -215,6 +216,24 @@
     <SolidColorBrush x:Key="Chart6Brush" Color="#4CC9C0"/>
     <SolidColorBrush x:Key="ChartGridBrush" Color="#333333"/>
 
+    <!-- Login card & inputs (deep midnight-indigo glass matching campus wallpaper in Dark mode) -->
+    <SolidColorBrush x:Key="LoginCardBackgroundBrush" Color="#E6061329"/>
+    <SolidColorBrush x:Key="LoginCardBorderBrush" Color="#3838BDF8"/>
+    <SolidColorBrush x:Key="LoginInputBackgroundBrush" Color="#CC0A1C3B"/>
+    <SolidColorBrush x:Key="LoginInputHoverBrush" Color="#D9102852"/>
+    <SolidColorBrush x:Key="LoginInputBorderBrush" Color="#3860CDFF"/>
+    <SolidColorBrush x:Key="LoginPrimaryTextBrush" Color="#F8FAFC"/>
+    <SolidColorBrush x:Key="LoginSecondaryTextBrush" Color="#CBD5E1"/>
+    <SolidColorBrush x:Key="LoginMutedTextBrush" Color="#7C92B2"/>
+    <SolidColorBrush x:Key="LoginAccentTextBrush" Color="#60CDFF"/>
+    <SolidColorBrush x:Key="LoginPrimaryButtonBrush" Color="#0078D4"/>
+    <SolidColorBrush x:Key="LoginPrimaryButtonHoverBrush" Color="#1A8CE0"/>
+    <SolidColorBrush x:Key="LoginPrimaryButtonActiveBrush" Color="#0067B8"/>
+    <SolidColorBrush x:Key="LoginWaveFillBrush" Color="#60CDFF"/>
+    <SolidColorBrush x:Key="LoginDividerBrush" Color="#2960CDFF"/>
+    <SolidColorBrush x:Key="LoginPopupBackgroundBrush" Color="#F5081630"/>
+    <SolidColorBrush x:Key="LoginPopupItemHoverBrush" Color="#2460CDFF"/>
+
     <SolidColorBrush x:Key="LoginBrandingTextBrush" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="LoginBrandingSubtextBrush" Color="#E2E8F0"/>
     <SolidColorBrush x:Key="LoginBrandingMutedBrush" Color="#CBD5E1"/>
@@ -222,5 +241,27 @@
     <SolidColorBrush x:Key="LoginBrandingBackdropBrush" Color="#00000000"/>
     <SolidColorBrush x:Key="LoginBrandingBorderBrush" Color="#00000000"/>
     <Thickness x:Key="LoginBrandingBorderThickness">0</Thickness>
+
+    <!-- Kiosk / Tablet board (harmonized with deep-blue wave background & SIDS banner) -->
+    <SolidColorBrush x:Key="KioskBarBrush" Color="#D9040C17"/>
+    <SolidColorBrush x:Key="KioskBarBorderBrush" Color="#3338BDF8"/>
+    <SolidColorBrush x:Key="KioskTileBaseBrush" Color="#D9081326"/>
+    <SolidColorBrush x:Key="KioskTilePrimaryBrush" Color="#E60A2B54"/>
+    <SolidColorBrush x:Key="KioskTileTealBrush" Color="#E6083848"/>
+    <SolidColorBrush x:Key="KioskTileDangerBrush" Color="#E6451018"/>
+    <SolidColorBrush x:Key="KioskTileBorderBrush" Color="#2E60CDFF"/>
+    <SolidColorBrush x:Key="KioskTileHoverBrush" Color="#E6103C6B"/>
+    <SolidColorBrush x:Key="KioskTileHoverBorderBrush" Color="#FF60CDFF"/>
+    <SolidColorBrush x:Key="KioskTileDisabledBrush" Color="#99040A14"/>
+    <SolidColorBrush x:Key="KioskTextPrimaryBrush" Color="#F8FAFC"/>
+    <SolidColorBrush x:Key="KioskTextSecondaryBrush" Color="#BAE6FD"/>
+    <SolidColorBrush x:Key="KioskTextMutedBrush" Color="#94A3B8"/>
+    <SolidColorBrush x:Key="KioskAccentBrush" Color="#60CDFF"/>
+    <SolidColorBrush x:Key="KioskButtonBgBrush" Color="#1AFFFFFF"/>
+    <SolidColorBrush x:Key="KioskButtonHoverBrush" Color="#3360CDFF"/>
+    <SolidColorBrush x:Key="KioskFlyoutBrush" Color="#F506101F"/>
+    <SolidColorBrush x:Key="KioskFlyoutHoverBrush" Color="#2460CDFF"/>
+    <SolidColorBrush x:Key="KioskFlyoutUnreadBrush" Color="#1860CDFF"/>
+    <SolidColorBrush x:Key="KioskDividerBrush" Color="#2660CDFF"/>
 
 </ResourceDictionary>

@@ -17,7 +17,7 @@
 
     <!-- =============================== CARDS =============================== -->
     <Style x:Key="CardStyle" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorSolidBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="{DynamicResource CornerRadiusSurface}"/>
@@ -38,7 +38,7 @@
         <Setter Property="Cursor" Value="Arrow"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorSecondaryBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource SolidBackgroundFillColorTertiaryBrush}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorSecondaryBrush}"/>
             </Trigger>
         </Style.Triggers>

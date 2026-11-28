@@ -10,43 +10,29 @@
     </UserControl.Resources>
 
     <Grid>
-    <Grid Margin="32,24">
+    <Grid Margin="20,12,20,14">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Grid Grid.Row="0" Margin="0,0,0,20">
-            <StackPanel Orientation="Vertical">
-                <TextBlock Text="Investigation &amp; Case Workspace" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                <TextBlock Text="Investigations, findings and actions." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
-            </StackPanel>
+        <!-- Flat Search & Actions Toolbar (no boxed card, no redundant title) -->
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="{Binding RefreshButtonText, FallbackValue='↻ Refresh'}" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}" Margin="0,0,8,0"/>
+            <TextBox Grid.Column="0" Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Height="34" Margin="0,0,12,0"/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="🔍 Open Investigation Workspace" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding OpenWorkspaceCommand}" Height="34" Margin="0,0,8,0"/>
+                <Button Content="{Binding RefreshButtonText, FallbackValue='↻ Refresh'}" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}" Height="34"/>
             </StackPanel>
         </Grid>
 
-        <!-- Filter & Search Toolbar -->
-        <Border Grid.Row="1" Style="{DynamicResource CardBorderStyle}" Margin="0,0,0,16" Padding="16,12">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Search Box -->
-                <TextBox Grid.Column="0" Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0"/>
-
-                <!-- Open Workspace -->
-                <Button Grid.Column="1" Content="🔍 Open Investigation Workspace" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding OpenWorkspaceCommand}"/>
-            </Grid>
-        </Border>
-
         <!-- Investigations 4-Column Card Grid -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <ItemsControl ItemsSource="{Binding Incidents}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

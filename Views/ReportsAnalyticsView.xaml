@@ -7,37 +7,19 @@
              mc:Ignorable="d" 
              d:DesignHeight="850" d:DesignWidth="1200">
     <Grid Background="{DynamicResource AppBackgroundBrush}">
-        <Grid Margin="32,24">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <!-- 1. Header -->
-            <Grid Grid.Row="0" Margin="0,0,0,16">
-                <StackPanel Orientation="Vertical">
-                    <TextBlock Text="Reports &amp; Campus Safety Analytics" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                    <TextBlock Text="Heatmaps, trends and summaries." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Content="{Binding RefreshButtonText, FallbackValue='↻ Refresh Analytics'}" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}" Height="36" Padding="14,0"/>
-                </StackPanel>
-            </Grid>
-
-            <!-- 2. Tabbed Reports -->
-            <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" SelectedIndex="{Binding SelectedTabIndex}">
+        <Grid Margin="20,10,20,14">
+            <!-- Tabbed Reports (titlebar already shows eSIMS · Reports) -->
+            <TabControl Background="Transparent" BorderThickness="0" SelectedIndex="{Binding SelectedTabIndex}">
                 <!-- Tab 1: Campus Danger Heatmap -->
                 <TabItem Header="🗺️ Campus Safety Heatmap" FontSize="14" FontWeight="SemiBold">
-                    <Grid Margin="0,12,0,0">
+                    <Grid Margin="0,10,0,0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Filter Bar -->
-                        <Border Grid.Row="0" Style="{DynamicResource CardBorderStyle}" Padding="12,8" Margin="0,0,0,12">
-                            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Flat Filter Bar -->
+                        <WrapPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,10">
                                 <TextBlock Text="Timeframe:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,8,0"/>
                                 <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding TimeframeModes}" SelectedItem="{Binding SelectedTimeframeMode}" Width="170" Margin="0,0,12,0"/>
 
@@ -62,9 +44,9 @@
                                 <TextBlock Text="Category:" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,8,0"/>
                                 <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedHeatmapCategory}" Width="170" Margin="0,0,16,0"/>
 
-                                <Button Content="📑 Export Heatmap (PDF)" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding ExportLocationReportCommand}"/>
-                            </WrapPanel>
-                        </Border>
+                            <Button Content="📑 Export Heatmap (PDF)" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding ExportLocationReportCommand}" Margin="0,0,8,0"/>
+                            <Button Content="{Binding RefreshButtonText, FallbackValue='↻ Refresh'}" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}"/>
+                        </WrapPanel>
 
                         <!-- Main Split: Top Zones List / Incident Inspector vs Campus Canvas -->
                         <Grid Grid.Row="1">

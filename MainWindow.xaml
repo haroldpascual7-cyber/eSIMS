@@ -108,7 +108,7 @@
 
         <!-- ============================= TITLE BAR ========================= -->
         <Grid x:Name="TitleBar" Grid.Row="0" Height="34"
-              Visibility="{Binding IsKioskActive, Converter={StaticResource InverseBoolToVis}}"
+              Visibility="{Binding ShowTitleBar, Converter={StaticResource BoolToVis}}"
               Background="{DynamicResource LayeredTitleBarBrush}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -131,6 +131,7 @@
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
                         WindowChrome.IsHitTestVisibleInChrome="True">
                 <Button Style="{StaticResource TitleBarButtonStyle}" Command="{Binding NavigateHomeCommand}"
+                        Visibility="{Binding IsAuthenticated, Converter={StaticResource BoolToVis}}"
                         ToolTip="Open the dashboard" AutomationProperties.Name="Dashboard">
                     <StackPanel Orientation="Horizontal">
                         <Path Data="{StaticResource Icon.Home}" Style="{StaticResource IconSmStyle}" Margin="0,0,6,0"/>
@@ -139,6 +140,7 @@
                 </Button>
 
                 <Button Style="{StaticResource TitleBarButtonStyle}" Command="{Binding NavigateKioskCommand}"
+                        Visibility="{Binding IsAuthenticated, Converter={StaticResource BoolToVis}}"
                         ToolTip="Open the full-screen kiosk board" AutomationProperties.Name="Kiosk board">
                     <StackPanel Orientation="Horizontal">
                         <Path Data="{StaticResource Icon.Fullscreen}" Style="{StaticResource IconSmStyle}" Margin="0,0,6,0"/>
@@ -164,6 +166,7 @@
                 </Grid>
 
                 <Button Style="{StaticResource IconButtonStyle}" Command="{Binding ToggleThemeCommand}"
+                        Visibility="{Binding IsAuthenticated, Converter={StaticResource BoolToVis}}"
                         ToolTip="{Binding ThemeToggleTooltip, FallbackValue='Switch light / dark'}"
                         AutomationProperties.Name="Toggle theme">
                     <Path>
@@ -180,45 +183,93 @@
                     </Path>
                 </Button>
 
-                <Button Style="{StaticResource IconButtonStyle}" Command="{Binding ViewNotificationsCommand}"
+                <Button Style="{StaticResource IconButtonStyle}" Width="34" Focusable="False"
+                        Visibility="{Binding IsAuthenticated, Converter={StaticResource BoolToVis}}"
+                        Command="{Binding ViewNotificationsCommand}"
                         ToolTip="Notifications" AutomationProperties.Name="Notifications">
-                    <Grid>
-                        <Path Data="{StaticResource Icon.Bell}" Style="{StaticResource IconSmStyle}"/>
-                        <Border Style="{StaticResource CountBadgeStyle}" Margin="0,-4,-6,0"
+                    <Grid Width="28" Height="28">
+                        <Path Data="{StaticResource Icon.Bell}" Style="{StaticResource IconStyle}"
+                              Width="15" Height="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border Style="{StaticResource CountBadgeStyle}"
+                                MinWidth="14" Height="14" CornerRadius="7" Padding="3,0"
+                                Margin="0,1,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"
                                 Visibility="{Binding HasUnreadNotifications, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="{Binding UnreadNotificationCount}"
-                                       FontSize="10" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}"
+                                       FontSize="9" FontWeight="Bold"
+                                       Foreground="{DynamicResource ButtonTextBrush}"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
                 </Button>
 
-                <Button Style="{StaticResource CaptionButtonStyle}" Click="OnMinimizeWindowClick"
-                        ToolTip="Minimise" AutomationProperties.Name="Minimise">
-                    <Path Data="{StaticResource Icon.Minimize}" Style="{StaticResource IconSmStyle}"/>
-                </Button>
+                <!-- Profile Icon & Dropdown -->
+                <Grid Visibility="{Binding IsAuthenticated, Converter={StaticResource BoolToVis}}" Margin="4,0,10,0" VerticalAlignment="Center">
+                    <ToggleButton x:Name="ProfileMenuButton" Width="28" Height="28" Cursor="Hand" Focusable="False"
+                                  ToolTip="{Binding UserDisplayName}" AutomationProperties.Name="User profile">
+                        <ToggleButton.Template>
+                            <ControlTemplate TargetType="ToggleButton">
+                                <Border x:Name="Root" Width="26" Height="26" CornerRadius="999"
+                                        Background="{DynamicResource PrimaryBrush}"
+                                        BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1">
+                                    <TextBlock Text="{Binding UserInitials}" FontSize="11" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource ButtonTextBrush}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Root" Property="Background" Value="{DynamicResource PrimaryHoverBrush}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter TargetName="Root" Property="Background" Value="{DynamicResource PrimaryActiveBrush}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </ToggleButton.Template>
+                    </ToggleButton>
 
-                <Button Style="{StaticResource CaptionButtonStyle}" Click="OnMaximizeWindowClick"
-                        ToolTip="Maximise or restore" AutomationProperties.Name="Maximise">
-                    <Path>
-                        <Path.Style>
-                            <Style TargetType="Path" BasedOn="{StaticResource IconSmStyle}">
-                                <Setter Property="Data" Value="{StaticResource Icon.Maximize}"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
-                                        <Setter Property="Data" Value="{StaticResource Icon.Restore}"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Path.Style>
-                    </Path>
-                </Button>
+                    <Popup x:Name="ProfileMenuPopup"
+                           IsOpen="{Binding IsChecked, ElementName=ProfileMenuButton, Mode=TwoWay}"
+                           PlacementTarget="{Binding ElementName=ProfileMenuButton}"
+                           Placement="Bottom" HorizontalOffset="-172" VerticalOffset="6"
+                           StaysOpen="False" AllowsTransparency="True">
+                        <Border Width="210" Background="{DynamicResource FlyoutBackgroundBrush}"
+                                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                CornerRadius="8" Padding="6" Margin="6">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" Opacity="{DynamicResource ShadowOpacityFlyout}" BlurRadius="14" ShadowDepth="3" Direction="270"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <Grid Margin="8,6,8,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Width="28" Height="28" CornerRadius="999" Background="{DynamicResource PrimaryBrush}" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding UserInitials}" FontSize="11" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource ButtonTextBrush}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding CurrentUserName}" FontSize="13" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding CurrentUserRole}" FontSize="11"
+                                                   Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </Grid>
 
-                <Button Style="{StaticResource CaptionCloseButtonStyle}" Click="OnCloseWindowClick"
-                        ToolTip="Close" AutomationProperties.Name="Close">
-                    <Path Data="{StaticResource Icon.Close}" Style="{StaticResource IconSmStyle}"/>
-                </Button>
+                                <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="4,0,4,4"/>
+
+                                <Button Style="{StaticResource SubtleButtonStyle}" Height="32" Padding="8,0"
+                                        HorizontalContentAlignment="Left" Click="OnProfileLogoutClick">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource Icon.Logout}" Style="{StaticResource IconSmStyle}" Margin="0,0,8,0"/>
+                                        <TextBlock Text="Log out" FontSize="13" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
             </StackPanel>
         </Grid>
 
@@ -233,28 +284,30 @@
                                             Visibility="{Binding ShowSidebar, Converter={StaticResource BoolToVis}}"/>
 
             <ContentControl Grid.Column="1" Content="{Binding CurrentViewModel}" ClipToBounds="False"/>
-
-            <!-- Kiosk board hides the chrome, so keep exactly one way out -->
-            <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,12,0"
-                    Style="{StaticResource StandardButtonStyle}"
-                    Command="{Binding NavigateHomeCommand}"
-                    ToolTip="Leave the kiosk board and return to the dashboard"
-                    AutomationProperties.Name="Leave kiosk board"
-                    Visibility="{Binding IsKioskActive, Converter={StaticResource BoolToVis}}"
-                    Panel.ZIndex="40">
-                <StackPanel Orientation="Horizontal">
-                    <Path Data="{StaticResource Icon.Back}" Style="{StaticResource IconSmStyle}" Margin="0,0,6,0"/>
-                    <TextBlock Text="Exit kiosk" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
         </Grid>
 
-        <!-- ================== NOTIFICATION CENTER (MODAL) ================== -->
+        <!-- ================== NOTIFICATION CENTER (DROPDOWN) =============== -->
         <Grid Grid.RowSpan="2"
               Visibility="{Binding IsNotificationModalOpen, Converter={StaticResource BoolToVis}}"
-              Panel.ZIndex="3000"
-              Background="{DynamicResource ModalOverlayBrush}">
-            <views:NotificationCenterModalView HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              Panel.ZIndex="3000">
+            <Border Background="{DynamicResource DropdownBackdropBrush}">
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding CloseNotificationModalCommand}"/>
+                </Border.InputBindings>
+            </Border>
+            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Margin" Value="16,38,16,16"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsKioskActive}" Value="True">
+                                <Setter Property="Margin" Value="18,74,18,16"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <views:NotificationCenterModalView HorizontalAlignment="Right" VerticalAlignment="Top"/>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

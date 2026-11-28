@@ -4,17 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="950" d:DesignWidth="1280"
+             d:DesignHeight="760" d:DesignWidth="1200"
              Background="{DynamicResource AppBackgroundBrush}">
 
     <UserControl.Resources>
-        <!-- Interactive Information Card (icard) Style -->
-        <Style x:Key="InteractiveInfoCardStyle" TargetType="Border">
+        <Style x:Key="KpiCardStyle" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Padding" Value="16,14"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,10"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
@@ -23,388 +22,253 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="InlineStatCellStyle" TargetType="Border">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource TableHoverBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="24,18">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/> <!-- 1. Header Bar -->
-                <RowDefinition Height="Auto"/> <!-- 2. Tier 1 Incidents Telemetry (5 icards) -->
-                <RowDefinition Height="Auto"/> <!-- 3. Tier 2 School Operations Telemetry (4 icards) -->
-                <RowDefinition Height="*"/>    <!-- 4. Live Recent Incident Feed & Audit Log -->
-            </Grid.RowDefinitions>
+    <!-- Single-screen, non-scrolling dashboard layout -->
+    <Grid Margin="20,12,20,14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- 0. Compact flat header + scope & refresh -->
+            <RowDefinition Height="Auto"/> <!-- 1. Tier 1: 5 Primary Safety KPIs -->
+            <RowDefinition Height="Auto"/> <!-- 2. Tier 2: Unified Operations Strip -->
+            <RowDefinition Height="*"/>    <!-- 3. Recent Incidents Table (fills remaining viewport) -->
+        </Grid.RowDefinitions>
 
-            <!-- 1. TOP HEADER BAR: WORKSPACE TITLE & LIVE USER PROFILE -->
-            <Border Grid.Row="0" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="18,14" Margin="0,0,0,16">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+        <!-- 0. FLAT ACTION BAR (titlebar already shows eSIMS · Dashboard) -->
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <Button Content="{Binding CampusOverviewTabHeader}"
+                        Command="{Binding SelectCampusOverviewCommand}"
+                        Height="32" Padding="12,0" Margin="0,0,6,0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsCampusOverviewActive}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Content="{Binding MyCaseloadTabHeader}"
+                        Command="{Binding SelectMyCaseloadCommand}"
+                        Height="32" Padding="12,0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsMyCaseloadActive}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
 
-                    <!-- Workspace Branding Header -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding DashboardTitle}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                        <TextBlock Text="{Binding RoleSubheader}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,3,0,0"/>
-                    </StackPanel>
+            <Button Content="{Binding RefreshButtonText, FallbackValue='↻ Refresh'}"
+                    Style="{DynamicResource SecondaryButtonStyle}"
+                    Command="{Binding RefreshCommand}"
+                    IsEnabled="{Binding IsNotRefreshing}"
+                    Height="32" Padding="12,0"
+                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                    ToolTip="Refresh Operational Metrics"/>
+        </Grid>
 
-                    <!-- Right User Profile Pill & Actions -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <!-- User Profile Card -->
-                        <Border Background="{DynamicResource TableHoverBrush}" CornerRadius="8" Padding="12,6" Margin="0,0,10,0">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border Width="28" Height="28" CornerRadius="999" Background="{DynamicResource PrimaryBrush}" Margin="0,0,8,0">
-                                    <TextBlock Text="👤" FontSize="14" Foreground="{DynamicResource ButtonTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding UserFullName}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,1,0,0">
-                                        <TextBlock Text="{Binding UserRole}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                        <TextBlock Text=" • " FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                        <TextBlock Text="● Online" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SuccessBrush}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
+        <!-- 1. TIER 1: PRIMARY SAFETY & INCIDENT METRICS (5 equal columns) -->
+        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                        <!-- Notification Bell Badge Button -->
-                        <Border Visibility="{Binding IsNotificationBadgeVisible, Converter={StaticResource BoolToVis}}" Margin="0,0,8,0">
-                            <Button Command="{Binding ViewNotificationsCommand}"
-                                    Background="{DynamicResource DangerBrush}" BorderBrush="{DynamicResource DangerBrush}"
-                                    Height="38" Padding="12,0" ToolTip="Open Notifications Modal">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="🔔" FontSize="14" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                    <TextBlock Text="{Binding NewIncidentCount}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Button>
-                        </Border>
-
-                        <!-- Theme Switcher Button -->
-                        <Button Content="🌓" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ToggleThemeCommand}" 
-                                Height="38" Width="38" Padding="0" Margin="0,0,8,0" FontSize="14" ToolTip="Toggle Light / Dark Mode"/>
-
-                        <!-- Refresh Button -->
-                        <Button Content="{Binding RefreshButtonText, FallbackValue='↻ Refresh'}" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}" Height="38" Padding="12,0" Margin="0,0,8,0" ToolTip="Refresh Operational Metrics"/>
-
-                        <!-- Return to Full-Screen Tablet Launcher Button -->
-                        <Button Content="🗂️ Tablet Launcher" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding ReturnToTabletDashboardCommand}" Height="38" Padding="14,0" ToolTip="Switch back to full-screen Metro Tablet launcher"/>
-                    </StackPanel>
-                </Grid>
+            <!-- Total Incidents -->
+            <Border Grid.Column="0" Style="{StaticResource KpiCardStyle}" Margin="0,0,8,0" ToolTip="Click to open Incident Registry">
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding CardClickTotalCommand}"/>
+                </Border.InputBindings>
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,4">
+                        <TextBlock Text="{Binding CardTotalTitle}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="→" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Right"/>
+                    </DockPanel>
+                    <TextBlock Text="{Binding TotalIncidents}" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    <TextBlock Text="{Binding TotalIncidentsSubtitle, FallbackValue='All safety reports'}" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
             </Border>
 
-            <!-- 2. TIER 1: INCIDENT & CASE SAFETY TELEMETRY (5 ICARDS) -->
-            <Grid Grid.Row="1" Margin="0,0,0,16">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+            <!-- Reported / Triage -->
+            <Border Grid.Column="1" Style="{StaticResource KpiCardStyle}" Margin="0,0,8,0" ToolTip="Click to view Open &amp; Reported Incidents">
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding CardClickReportedCommand}"/>
+                </Border.InputBindings>
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,4">
+                        <TextBlock Text="{Binding CardReportedTitle}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="→" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Right"/>
+                    </DockPanel>
+                    <TextBlock Text="{Binding OpenIncidents}" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
+                    <TextBlock Text="{Binding CardReportedSubtitle}" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </Border>
 
-                <!-- Scope Toggle Row -->
-                <Grid Grid.Row="0" Margin="0,0,0,10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Content="{Binding CampusOverviewTabHeader}"
-                            Command="{Binding SelectCampusOverviewCommand}"
-                            Height="32" Padding="14,0" Margin="0,0,6,0"
-                            Style="{DynamicResource PrimaryButtonStyle}"
-                            IsEnabled="{Binding IsMyCaseloadActive}"/>
-                    <Button Grid.Column="1" Content="{Binding MyCaseloadTabHeader}"
-                            Command="{Binding SelectMyCaseloadCommand}"
-                            Height="32" Padding="14,0"
-                            Style="{DynamicResource PrimaryButtonStyle}"
-                            IsEnabled="{Binding IsCampusOverviewActive}"/>
-                    <TextBlock Grid.Column="2" Text="{Binding ScopeBadgeText}"
-                               FontSize="12" Foreground="{DynamicResource MutedTextBrush}"
-                               VerticalAlignment="Center" HorizontalAlignment="Right"
-                               FontStyle="Italic"/>
-                </Grid>
+            <!-- Active Inquiries -->
+            <Border Grid.Column="2" Style="{StaticResource KpiCardStyle}" Margin="0,0,8,0" ToolTip="Click to view Investigations Workspace">
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding CardClickInquiriesCommand}"/>
+                </Border.InputBindings>
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,4">
+                        <TextBlock Text="{Binding CardInquiriesTitle}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="→" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Right"/>
+                    </DockPanel>
+                    <TextBlock Text="{Binding TotalInvestigations}" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}"/>
+                    <TextBlock Text="{Binding CardInquiriesSubtitle}" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </Border>
 
-                <TextBlock Grid.Row="1" Text="SAFETY &amp; INCIDENT METRICS" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="2,0,0,8"/>
+            <!-- Cases Resolved -->
+            <Border Grid.Column="3" Style="{StaticResource KpiCardStyle}" Margin="0,0,8,0" ToolTip="Click to view Resolved Cases">
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding CardClickResolvedCommand}"/>
+                </Border.InputBindings>
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,4">
+                        <TextBlock Text="{Binding CardResolvedTitle}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="→" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Right"/>
+                    </DockPanel>
+                    <TextBlock Text="{Binding ResolvedIncidents}" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
+                    <TextBlock Text="{Binding CardResolvedSubtitle}" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </Border>
 
-                <Grid Grid.Row="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+            <!-- High / Critical Risk -->
+            <Border Grid.Column="4" Style="{StaticResource KpiCardStyle}" ToolTip="Click to inspect Critical &amp; High Risk Incidents">
+                <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding CardClickCriticalCommand}"/>
+                </Border.InputBindings>
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,4">
+                        <TextBlock Text="{Binding CardCriticalTitle}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="→" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Right"/>
+                    </DockPanel>
+                    <TextBlock Text="{Binding CriticalIncidents}" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}"/>
+                    <TextBlock Text="{Binding CardCriticalSubtitle}" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </Border>
+        </Grid>
 
-                    <!-- iCard 1: Total Incidents -->
-                    <Border Grid.Column="0" Style="{StaticResource InteractiveInfoCardStyle}" Margin="0,0,8,0" ToolTip="Click to open Incident Registry">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding CardClickTotalCommand}"/>
-                        </Border.InputBindings>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0" Margin="0,0,0,10">
-                                <Border Width="32" Height="32" CornerRadius="4" Background="{DynamicResource PrimaryBrush}" HorizontalAlignment="Left">
-                                    <TextBlock Text="🚨" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <TextBlock Text="→" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Text="{Binding TotalIncidents}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                            <StackPanel Grid.Row="2" Margin="0,4,0,0">
-                                <TextBlock Text="{Binding CardTotalTitle}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                <TextBlock Text="{Binding TotalIncidentsSubtitle, FallbackValue='All safety reports'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
+        <!-- 2. TIER 2: UNIFIED SCHOOL OPERATIONS STRIP (1 clean container instead of 4 extra boxes) -->
+        <Border Grid.Row="2" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                    <!-- iCard 2: Reported / Open -->
-                    <Border Grid.Column="1" Style="{StaticResource InteractiveInfoCardStyle}" Margin="0,0,8,0" ToolTip="Click to view Open &amp; Reported Incidents">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding CardClickReportedCommand}"/>
-                        </Border.InputBindings>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0" Margin="0,0,0,10">
-                                <Border Width="32" Height="32" CornerRadius="4" Background="{DynamicResource WarningBgBrush}" HorizontalAlignment="Left">
-                                    <TextBlock Text="📝" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <TextBlock Text="→" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Text="{Binding OpenIncidents}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
-                            <StackPanel Grid.Row="2" Margin="0,4,0,0">
-                                <TextBlock Text="{Binding CardReportedTitle}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                <TextBlock Text="{Binding CardReportedSubtitle}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- iCard 3: Active Investigations -->
-                    <Border Grid.Column="2" Style="{StaticResource InteractiveInfoCardStyle}" Margin="0,0,8,0" ToolTip="Click to view Investigations Workspace">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding CardClickInquiriesCommand}"/>
-                        </Border.InputBindings>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0" Margin="0,0,0,10">
-                                <Border Width="32" Height="32" CornerRadius="4" Background="{DynamicResource InfoBgBrush}" HorizontalAlignment="Left">
-                                    <TextBlock Text="🔍" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <TextBlock Text="→" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Text="{Binding TotalInvestigations}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}"/>
-                            <StackPanel Grid.Row="2" Margin="0,4,0,0">
-                                <TextBlock Text="{Binding CardInquiriesTitle}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                <TextBlock Text="{Binding CardInquiriesSubtitle}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- iCard 4: Cases Resolved -->
-                    <Border Grid.Column="3" Style="{StaticResource InteractiveInfoCardStyle}" Margin="0,0,8,0" ToolTip="Click to view Resolved Cases">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding CardClickResolvedCommand}"/>
-                        </Border.InputBindings>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0" Margin="0,0,0,10">
-                                <Border Width="32" Height="32" CornerRadius="4" Background="{DynamicResource SuccessBgBrush}" HorizontalAlignment="Left">
-                                    <TextBlock Text="✅" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <TextBlock Text="→" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Text="{Binding ResolvedIncidents}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}"/>
-                            <StackPanel Grid.Row="2" Margin="0,4,0,0">
-                                <TextBlock Text="{Binding CardResolvedTitle}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                <TextBlock Text="{Binding CardResolvedSubtitle}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- iCard 5: Critical / High Risk -->
-                    <Border Grid.Column="4" Style="{StaticResource InteractiveInfoCardStyle}" ToolTip="Click to inspect Critical &amp; High Risk Incidents">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding CardClickCriticalCommand}"/>
-                        </Border.InputBindings>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0" Margin="0,0,0,10">
-                                <Border Width="32" Height="32" CornerRadius="4" Background="{DynamicResource DangerBgBrush}" HorizontalAlignment="Left">
-                                    <TextBlock Text="⚠️" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <TextBlock Text="→" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Text="{Binding CriticalIncidents}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}"/>
-                            <StackPanel Grid.Row="2" Margin="0,4,0,0">
-                                <TextBlock Text="{Binding CardCriticalTitle}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                <TextBlock Text="{Binding CardCriticalSubtitle}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                </Grid>
-            </Grid>
-
-            <!-- 3. TIER 2: SCHOOL OPERATIONS & INTERVENTIONS TELEMETRY (4 ICARDS) -->
-            <Grid Grid.Row="2" Margin="0,0,0,18">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0" Text="POPULATION &amp; BEHAVIORAL SUPPORT TELEMETRY" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="2,0,0,8"/>
-
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- iCard 6: Enrolled Students -->
-                    <Border Grid.Column="0" Style="{StaticResource InteractiveInfoCardStyle}" Margin="0,0,8,0" ToolTip="Click to open Students Directory">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateStudentsCommand}"/>
-                        </Border.InputBindings>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0" Margin="0,0,0,10">
-                                <Border Width="32" Height="32" CornerRadius="4" Background="{DynamicResource PrimaryBrush}" HorizontalAlignment="Left">
-                                    <TextBlock Text="👥" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <TextBlock Text="→" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Text="{Binding TotalStudents}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                            <StackPanel Grid.Row="2" Margin="0,4,0,0">
-                                <TextBlock Text="Enrolled Students" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                <TextBlock Text="Active student directory" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- iCard 7: Faculty & Staff -->
-                    <Border Grid.Column="1" Style="{StaticResource InteractiveInfoCardStyle}" Margin="0,0,8,0" ToolTip="Click to view Staff &amp; Faculty Records">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateUserManagementCommand}"/>
-                        </Border.InputBindings>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0" Margin="0,0,0,10">
-                                <Border Width="32" Height="32" CornerRadius="4" Background="{DynamicResource InfoBgBrush}" HorizontalAlignment="Left">
-                                    <TextBlock Text="🏫" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <TextBlock Text="→" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Text="{Binding TotalStaff}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}"/>
-                            <StackPanel Grid.Row="2" Margin="0,4,0,0">
-                                <TextBlock Text="Faculty &amp; Staff" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                <TextBlock Text="Educators &amp; school staff" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- iCard 8: Action & Merit Plans -->
-                    <Border Grid.Column="2" Style="{StaticResource InteractiveInfoCardStyle}" Margin="0,0,8,0" ToolTip="Click to open Behavior &amp; IAP Workspace">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateBehaviorCommand}"/>
-                        </Border.InputBindings>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0" Margin="0,0,0,10">
-                                <Border Width="32" Height="32" CornerRadius="4" Background="{DynamicResource WarningBgBrush}" HorizontalAlignment="Left">
-                                    <TextBlock Text="📈" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <TextBlock Text="→" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Text="{Binding TotalActionPlans}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}"/>
-                            <StackPanel Grid.Row="2" Margin="0,4,0,0">
-                                <TextBlock Text="Action &amp; Merit Plans" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                <TextBlock Text="Restorative &amp; IAP tracking" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- iCard 9: Parent Notices Dispatched -->
-                    <Border Grid.Column="3" Style="{StaticResource InteractiveInfoCardStyle}" ToolTip="Click to open Parent Notices &amp; Letters">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateParentNoticesCommand}"/>
-                        </Border.InputBindings>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0" Margin="0,0,0,10">
-                                <Border Width="32" Height="32" CornerRadius="4" Background="{DynamicResource TableHoverBrush}" HorizontalAlignment="Left">
-                                    <TextBlock Text="📬" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <TextBlock Text="→" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Text="{Binding TotalParentNotices}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
-                            <StackPanel Grid.Row="2" Margin="0,4,0,0">
-                                <TextBlock Text="Parent Disclosures" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                <TextBlock Text="Official letters dispatched" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,1,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                </Grid>
-            </Grid>
-
-            <!-- 4. RECENT INCIDENTS AUTOMATED ANALYSIS & AUDIT TRAIL LOG -->
-            <Border Grid.Row="3" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                <Border Grid.Column="0" Style="{StaticResource InlineStatCellStyle}" CornerRadius="8,0,0,8" ToolTip="Click to open Students Directory">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateStudentsCommand}"/>
+                    </Border.InputBindings>
+                    <DockPanel>
+                        <TextBlock Text="{Binding TotalStudents}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Recent Automated Incident Analysis Log" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                            <TextBlock Text="Recent activity for your role." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                            <TextBlock Text="Enrolled Students" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            <TextBlock Text="Active directory" FontSize="11" Foreground="{DynamicResource MutedTextBrush}"/>
                         </StackPanel>
+                    </DockPanel>
+                </Border>
 
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <Button Content="View Complete Registry →" Style="{DynamicResource SecondaryButtonStyle}"
-                                    Command="{Binding ViewAllIncidentsCommand}" Height="34" Padding="12,0"/>
+                <Border Grid.Column="1" Width="1" Background="{DynamicResource DividerBrush}" Margin="0,8"/>
+
+                <Border Grid.Column="2" Style="{StaticResource InlineStatCellStyle}" ToolTip="Click to view Staff &amp; Faculty Records">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateUserManagementCommand}"/>
+                    </Border.InputBindings>
+                    <DockPanel>
+                        <TextBlock Text="{Binding TotalStaff}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Faculty &amp; Staff" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            <TextBlock Text="Educators &amp; staff" FontSize="11" Foreground="{DynamicResource MutedTextBrush}"/>
                         </StackPanel>
-                    </Grid>
+                    </DockPanel>
+                </Border>
 
-                    <ItemsControl Grid.Row="1" ItemsSource="{Binding RecentIncidents}">
+                <Border Grid.Column="3" Width="1" Background="{DynamicResource DividerBrush}" Margin="0,8"/>
+
+                <Border Grid.Column="4" Style="{StaticResource InlineStatCellStyle}" ToolTip="Click to open Behavior &amp; IAP Workspace">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateBehaviorCommand}"/>
+                    </Border.InputBindings>
+                    <DockPanel>
+                        <TextBlock Text="{Binding TotalActionPlans}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Action &amp; Merit Plans" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            <TextBlock Text="Restorative &amp; IAP" FontSize="11" Foreground="{DynamicResource MutedTextBrush}"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <Border Grid.Column="5" Width="1" Background="{DynamicResource DividerBrush}" Margin="0,8"/>
+
+                <Border Grid.Column="6" Style="{StaticResource InlineStatCellStyle}" CornerRadius="0,8,8,0" ToolTip="Click to open Parent Notices &amp; Letters">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateParentNoticesCommand}"/>
+                    </Border.InputBindings>
+                    <DockPanel>
+                        <TextBlock Text="{Binding TotalParentNotices}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Parent Disclosures" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            <TextBlock Text="Letters dispatched" FontSize="11" Foreground="{DynamicResource MutedTextBrush}"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- 3. TIER 3: RECENT INCIDENTS FEED (fills remaining space, internal scroll only if needed) -->
+        <Border Grid.Row="3" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="14,12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0" Margin="0,0,0,8">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Recent Incidents" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        <TextBlock Text="{Binding ScopeBadgeText, StringFormat='  ·  {0}'}" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <Button DockPanel.Dock="Right" Content="View Complete Registry →" Style="{DynamicResource SecondaryButtonStyle}"
+                            Command="{Binding ViewAllIncidentsCommand}" Height="30" Padding="10,0" HorizontalAlignment="Right"/>
+                </DockPanel>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding RecentIncidents}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="10,12" Cursor="Hand" ToolTip="Click to inspect case details">
+                                <Border BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,0,0,1" Padding="8,8" Cursor="Hand" ToolTip="Click to inspect case details">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="Background" Value="Transparent"/>
@@ -423,52 +287,46 @@
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="130"/>
+                                            <ColumnDefinition Width="125"/>
                                             <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <Border Grid.Column="0" Background="{DynamicResource PrimaryBrush}" CornerRadius="4" Padding="4,2" Margin="0,0,12,0" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding IncidentNumber}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                        <Border Grid.Column="0" Background="{DynamicResource PrimaryBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,10,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding IncidentNumber}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
                                         </Border>
 
-                                        <Border Grid.Column="1" Background="{DynamicResource TableHoverBrush}" CornerRadius="4" Padding="8,4" Margin="0,0,16,0" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding IncidentDate, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" FontSize="14" FontWeight="Medium" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                        </Border>
+                                        <TextBlock Grid.Column="1" Text="{Binding IncidentDate, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
 
-                                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                                <TextBlock Text="👨‍🎓 Student: " FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryBrush}"/>
-                                                <TextBlock Text="{Binding StudentDisplayName}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,10,0"/>
-                                                <TextBlock Text="•  " FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                                <TextBlock Text="{Binding Category}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding StudentDisplayName, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                <TextBlock Text=" · " FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                <TextBlock Text="{Binding Category, Mode=OneWay}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
                                             </StackPanel>
                                         </StackPanel>
 
-                                        <Border Grid.Column="3" CornerRadius="4" Padding="8,4" Margin="0,0,12,0" VerticalAlignment="Center" Background="{DynamicResource TableHoverBrush}">
-                                            <TextBlock Text="{Binding Severity, StringFormat='Severity: {0}'}" FontSize="14" FontWeight="Medium" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                        <Border Grid.Column="3" CornerRadius="4" Padding="8,3" Margin="0,0,8,0" VerticalAlignment="Center" Background="{DynamicResource TableHoverBrush}">
+                                            <TextBlock Text="{Binding Severity}" FontSize="12" FontWeight="Medium" Foreground="{DynamicResource PrimaryTextBrush}"/>
                                         </Border>
 
-                                        <Border Grid.Column="4" CornerRadius="4" Padding="8,4" Margin="0,0,12,0" VerticalAlignment="Center" Background="{DynamicResource DangerBgBrush}">
-                                            <TextBlock Text="{Binding Risk, StringFormat='Risk: {0}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}"/>
+                                        <Border Grid.Column="4" CornerRadius="4" Padding="8,3" Margin="0,0,8,0" VerticalAlignment="Center" Background="{DynamicResource DangerBgBrush}">
+                                            <TextBlock Text="{Binding Risk}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}"/>
                                         </Border>
 
-                                        <Border Grid.Column="5" CornerRadius="4" Padding="8,4" Margin="0,0,8,0" VerticalAlignment="Center" Background="{DynamicResource TableHoverBrush}">
-                                            <TextBlock Text="{Binding Status}" FontSize="14" FontWeight="Medium" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                        <Border Grid.Column="5" CornerRadius="4" Padding="8,3" VerticalAlignment="Center" Background="{DynamicResource TableHoverBrush}">
+                                            <TextBlock Text="{Binding Status}" FontSize="12" FontWeight="Medium" Foreground="{DynamicResource PrimaryTextBrush}"/>
                                         </Border>
-
-                                        <TextBlock Grid.Column="6" Text="→" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                </Grid>
-            </Border>
-        </Grid>
-    </ScrollViewer>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
 </UserControl>

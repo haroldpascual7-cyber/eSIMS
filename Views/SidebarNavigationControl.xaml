@@ -23,8 +23,9 @@
             </Grid>
         </DataTemplate>
 
-        <!-- Base item: 36px tall, 4px radius, 3px accent indicator when selected. -->
+        <!-- Base item: 32px tall, 4px radius, 3px accent indicator when selected. -->
         <Style x:Key="SidebarItemStyle" TargetType="Button" BasedOn="{StaticResource NavItemButtonStyle}">
+            <Setter Property="Height" Value="32"/>
             <Setter Property="ContentTemplate" Value="{StaticResource NavItemTemplate}"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsSidebarCollapsed}" Value="True">
@@ -39,7 +40,7 @@
             <Setter Property="FontFamily" Value="{DynamicResource FontFamilyText}"/>
             <Setter Property="FontSize" Value="{DynamicResource TypeCaption}"/>
             <Setter Property="Foreground" Value="{DynamicResource TextFillColorTertiaryBrush}"/>
-            <Setter Property="Margin" Value="14,14,0,4"/>
+            <Setter Property="Margin" Value="14,8,0,2"/>
         </Style>
 
         <Style x:Key="RailButtonStyle" TargetType="Button" BasedOn="{StaticResource IconButtonStyle}">
@@ -69,34 +70,26 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- ========================= PANE HEADER ========================= -->
-            <Grid Grid.Row="0" Height="52" Margin="8,0">
-                <Grid.Style>
-                    <Style TargetType="Grid">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsSidebarCollapsed}" Value="True">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Style>
+            <Grid Grid.Row="0" Height="48" Margin="8,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Width="28" Height="28" CornerRadius="4" VerticalAlignment="Center">
+                <Border Grid.Column="0" Width="28" Height="28" CornerRadius="4" VerticalAlignment="Center"
+                        Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}">
                     <Border.Background>
                         <ImageBrush ImageSource="{Binding DashboardLogoSource}" Stretch="UniformToFill"
                                     RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Border.Background>
                 </Border>
 
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,8,0">
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,8,0"
+                            Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}">
                     <TextBlock Text="{Binding SchoolName}" FontSize="{DynamicResource TypeCaption}" FontWeight="SemiBold"
                                TextTrimming="CharacterEllipsis"/>
                     <TextBlock Text="{Binding SystemTitle}" FontSize="12"
@@ -105,9 +98,10 @@
                 </StackPanel>
 
                 <Button Grid.Column="2" Style="{StaticResource RailButtonStyle}"
-                        Command="{Binding ToggleSidebarCommand}" ToolTip="Collapse navigation"
-                        AutomationProperties.Name="Collapse navigation">
-                    <Path Data="{StaticResource Icon.ChevronLeft}" Style="{StaticResource IconSmStyle}"/>
+                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Command="{Binding ToggleSidebarCommand}" ToolTip="Toggle navigation"
+                        AutomationProperties.Name="Toggle navigation">
+                    <Path Data="{StaticResource Icon.Menu}" Style="{StaticResource IconStyle}" Width="14" Height="14"/>
                 </Button>
             </Grid>
 
@@ -295,78 +289,6 @@
                     </Button>
                 </StackPanel>
             </ScrollViewer>
-
-            <!-- =========================== FOOTER ============================ -->
-            <Border Grid.Row="2" BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,1,0,0"
-                    Padding="8,8">
-                <Grid>
-                    <StackPanel Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVis}}">
-                        <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Style="{StaticResource AvatarStyle}" Width="28" Height="28" CornerRadius="999">
-                                <TextBlock Text="{Binding UserInitials}" FontSize="{DynamicResource TypeCaption}" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding CurrentUserName}" FontSize="{DynamicResource TypeCaption}" FontWeight="SemiBold"
-                                           TextTrimming="CharacterEllipsis"/>
-                                <TextBlock Text="{Binding CurrentUserRole}" FontSize="12"
-                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                           TextTrimming="CharacterEllipsis"/>
-                            </StackPanel>
-                        </Grid>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Style="{StaticResource StandardButtonStyle}" Height="28"
-                                    Command="{Binding LogoutCommand}" ToolTip="Sign out" HorizontalAlignment="Stretch">
-                                <StackPanel Orientation="Horizontal">
-                                    <Path Data="{StaticResource Icon.Logout}" Style="{StaticResource IconSmStyle}" Margin="0,0,6,0"/>
-                                    <TextBlock Text="Sign out" FontSize="{DynamicResource TypeCaption}" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Button>
-                            <Button Grid.Column="1" Style="{StaticResource RailButtonStyle}" Margin="6,0,0,0"
-                                    Command="{Binding ToggleThemeCommand}"
-                                    ToolTip="{Binding ThemeToggleTooltip, FallbackValue='Switch light / dark'}"
-                                    AutomationProperties.Name="Toggle theme">
-                                <Path Data="{StaticResource Icon.Sun}" Style="{StaticResource IconSmStyle}"/>
-                            </Button>
-                        </Grid>
-                    </StackPanel>
-
-                    <StackPanel HorizontalAlignment="Center"
-                                Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BoolToVis}}">
-                        <Border Style="{StaticResource AvatarStyle}" Width="28" Height="28" CornerRadius="999"
-                                ToolTip="{Binding UserTooltip}" ToolTipService.Placement="Right">
-                            <TextBlock Text="{Binding UserInitials}" FontSize="{DynamicResource TypeCaption}" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <Button Style="{StaticResource RailButtonStyle}" Margin="0,8,0,0"
-                                Command="{Binding ToggleSidebarCommand}" ToolTip="Expand navigation"
-                                ToolTipService.Placement="Right" AutomationProperties.Name="Expand navigation">
-                            <Path Data="{StaticResource Icon.ChevronRight}" Style="{StaticResource IconSmStyle}"/>
-                        </Button>
-                        <Button Style="{StaticResource RailButtonStyle}" Margin="0,4,0,0"
-                                Command="{Binding ToggleThemeCommand}" ToolTip="{Binding ThemeToggleTooltip}"
-                                ToolTipService.Placement="Right" AutomationProperties.Name="Toggle theme">
-                            <Path Data="{StaticResource Icon.Sun}" Style="{StaticResource IconSmStyle}"/>
-                        </Button>
-                        <Button Style="{StaticResource RailButtonStyle}" Margin="0,4,0,0"
-                                Command="{Binding LogoutCommand}" ToolTip="Sign out"
-                                ToolTipService.Placement="Right" AutomationProperties.Name="Sign out">
-                            <Path Data="{StaticResource Icon.Logout}" Style="{StaticResource IconSmStyle}"/>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-            </Border>
         </Grid>
     </Border>
 </UserControl>

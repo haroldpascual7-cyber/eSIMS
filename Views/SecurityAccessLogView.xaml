@@ -7,24 +7,16 @@
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid Margin="32,24">
+        <Grid Margin="0,4,0,0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Header -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                <Button Content="&#x2190; Back to Audit Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="8,4" Margin="0,0,0,10"/>
-                <TextBlock Text="Access logs" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                <TextBlock Text="Sign-in attempts and lockouts." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
-            </StackPanel>
-
             <!-- TOP KPI RIBBON (3 Cards) -->
-            <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid Grid.Row="0" Margin="0,0,0,12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="16"/>
@@ -65,35 +57,32 @@
             </Grid>
 
             <!-- FILTER BAR -->
-            <Border Grid.Row="2" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,16">
-                <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.03" BlurRadius="8" ShadowDepth="2"/></Border.Effect>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="260"/>
-                        <ColumnDefinition Width="14"/>
-                        <ColumnDefinition Width="160"/>
-                        <ColumnDefinition Width="14"/>
-                        <ColumnDefinition Width="150"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+            <Grid Grid.Row="1" Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0">
-                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Padding="28,0,24,0" Height="36"/>
-                        <TextBlock Text="🔍" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="8,0,0,0" IsHitTestVisible="False"/>
-                        <Button Content="✕" Command="{Binding ClearSearchCommand}" Visibility="{Binding HasSearchText, Converter={StaticResource BoolToVis}}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource SecondaryTextBrush}" Cursor="Hand" Width="20" Height="20"/>
-                    </Grid>
-
-                    <ComboBox Grid.Column="2" ItemsSource="{Binding EventTypeFilters}" SelectedItem="{Binding SelectedEventTypeFilter}" Height="36" VerticalContentAlignment="Center"/>
-
-                    <DatePicker Grid.Column="4" SelectedDate="{Binding SelectedDate}" Height="36" VerticalContentAlignment="Center"/>
-
-                    <Button Grid.Column="6" Content="🔄 Reset Filters" Command="{Binding ResetFiltersCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="36" Padding="12,0"/>
+                <Grid Grid.Column="0">
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Padding="28,0,24,0" Height="36"/>
+                    <TextBlock Text="🔍" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="8,0,0,0" IsHitTestVisible="False"/>
+                    <Button Content="✕" Command="{Binding ClearSearchCommand}" Visibility="{Binding HasSearchText, Converter={StaticResource BoolToVis}}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource SecondaryTextBrush}" Cursor="Hand" Width="20" Height="20"/>
                 </Grid>
-            </Border>
+
+                <ComboBox Grid.Column="2" ItemsSource="{Binding EventTypeFilters}" SelectedItem="{Binding SelectedEventTypeFilter}" Height="36" VerticalContentAlignment="Center"/>
+
+                <DatePicker Grid.Column="4" SelectedDate="{Binding SelectedDate}" Height="36" VerticalContentAlignment="Center"/>
+
+                <Button Grid.Column="6" Content="🔄 Reset Filters" Command="{Binding ResetFiltersCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="36" Padding="12,0"/>
+            </Grid>
 
             <!-- MAIN DATAGRID -->
-            <Border Grid.Row="3" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,16">
+            <Border Grid.Row="2" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,12">
                 <DataGrid ItemsSource="{Binding FilteredLogsView}" SelectedItem="{Binding SelectedLogItem}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{DynamicResource BorderBrush}" AlternatingRowBackground="{DynamicResource TableRowAltBrush}" Background="Transparent" RowBackground="Transparent" Foreground="{DynamicResource PrimaryTextBrush}" HeadersVisibility="Column" BorderThickness="0" RowHeight="42">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Timestamp" Binding="{Binding FormattedTimestamp}" Width="150">
@@ -155,7 +144,7 @@
             </Border>
 
             <!-- BOTTOM ACTION BAR -->
-            <Grid Grid.Row="4">
+            <Grid Grid.Row="3">
                 <Button Content="🔓 Unlock Selected Account" Command="{Binding UnlockAccountCommand}" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource WarningBrush}" BorderThickness="1" Foreground="{DynamicResource WarningBrush}" FontWeight="Bold" FontSize="14" Height="38" Padding="16,0" HorizontalAlignment="Left" Cursor="Hand"/>
                 <Button Content="🖨️ Export Security Report (PDF)" Command="{Binding ExportSecurityReportCommand}" Style="{DynamicResource PrimaryButtonStyle}" Height="38" Padding="18,0" FontSize="14" FontWeight="Bold" HorizontalAlignment="Right"/>
             </Grid>

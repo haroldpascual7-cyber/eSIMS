@@ -6,25 +6,15 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
 
-    <Grid Margin="32,24">
+    <Grid Margin="0,4,0,0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <Button Content="&#x2190; Back to Audit Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="8,4" Margin="0,0,0,10"/>
-            <TextBlock Text="System Audit Trail &amp; User Activity Logs" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-            <TextBlock Text="Sign-ins, record changes and exports." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
-        </StackPanel>
-
-        <!-- TOP FILTER BAR -->
-        <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,16">
-            <Border.Effect><DropShadowEffect Color="#000000" Opacity="0.03" BlurRadius="8" ShadowDepth="2"/></Border.Effect>
-            <Grid>
+        <!-- FLAT FILTER BAR -->
+        <Grid Grid.Row="0" Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="260"/>
                     <ColumnDefinition Width="14"/>
@@ -56,10 +46,9 @@
                 <!-- Reset Button -->
                 <Button Grid.Column="8" Content="🔄 Reset Filters" Command="{Binding ResetFiltersCommand}" Style="{DynamicResource SecondaryButtonStyle}" Height="36" Padding="12,0"/>
             </Grid>
-        </Border>
 
         <!-- MAIN DATAGRID -->
-        <Border Grid.Row="2" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,16">
+        <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,0,0,12">
             <DataGrid ItemsSource="{Binding FilteredLogsView}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{DynamicResource BorderBrush}" AlternatingRowBackground="{DynamicResource TableRowAltBrush}" Background="Transparent" RowBackground="Transparent" Foreground="{DynamicResource PrimaryTextBrush}" HeadersVisibility="Column" BorderThickness="0" RowHeight="42">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Timestamp" Binding="{Binding FormattedTimestamp}" Width="160">
@@ -124,7 +113,7 @@
         </Border>
 
         <!-- BOTTOM FOOTER PANEL -->
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="2">
             <Button Content="🖨️ Export Audit Ledger (PDF)" Command="{Binding ExportAuditLedgerCommand}" Style="{DynamicResource PrimaryButtonStyle}" HorizontalAlignment="Left" Height="36" Padding="16,0"/>
             <TextBlock Text="{Binding TotalRecordsCount, StringFormat='Total Records Found: {0}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
         </Grid>

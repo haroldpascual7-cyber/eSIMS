@@ -156,6 +156,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
                 if (SetProperty(ref _isAuthenticated, value))
                 {
                     OnPropertyChanged(nameof(ShowSidebar));
+                    OnPropertyChanged(nameof(ShowTitleBar));
                 }
             }
         }
@@ -498,6 +499,7 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             OnPropertyChanged(nameof(SectionBreadcrumb));
             OnPropertyChanged(nameof(IsKioskActive));
             OnPropertyChanged(nameof(ShowSidebar));
+            OnPropertyChanged(nameof(ShowTitleBar));
             OnPropertyChanged(nameof(IsHomeActive));
         }
     }

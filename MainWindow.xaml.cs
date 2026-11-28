@@ -71,6 +71,12 @@ namespace SmartSchoolIncidentManagementSystem
 
         private void OnCloseWindowClick(object sender, RoutedEventArgs e) => Close();
 
+        private void OnProfileLogoutClick(object sender, RoutedEventArgs e)
+        {
+            ProfileMenuButton.IsChecked = false;
+            ViewModel?.LogoutCommand.Execute(null);
+        }
+
         private static IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             const int wmGetMinMaxInfo = 0x0024;

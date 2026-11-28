@@ -11,11 +11,14 @@
     </UserControl.Background>
 
     <UserControl.Resources>
-        <!-- Metro Tile Button Style (Flat, Sharp Box Edges CornerRadius="0", No Border, Bright Blue Hover Glow) -->
-        <Style x:Key="MetroTileButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
+        <!-- Cohesive Kiosk Tile Style -->
+        <Style x:Key="KioskTileStyle" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource KioskTileBaseBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource KioskTextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource KioskTileBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Padding" Value="16,12"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="VerticalContentAlignment" Value="Stretch"/>
@@ -24,29 +27,24 @@
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="tileBorder"
                                 Background="{TemplateBinding Background}"
-                                BorderBrush="Transparent"
-                                BorderThickness="0"
-                                CornerRadius="0"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="tileBorder" Property="BorderBrush" Value="#3B82F6"/>
-                                <Setter TargetName="tileBorder" Property="BorderThickness" Value="2"/>
-                                <Setter TargetName="tileBorder" Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect Color="#3B82F6" Opacity="0.50" BlurRadius="16" ShadowDepth="0"/>
-                                    </Setter.Value>
-                                </Setter>
+                                <Setter TargetName="tileBorder" Property="BorderBrush" Value="{DynamicResource KioskTileHoverBorderBrush}"/>
+                                <Setter TargetName="tileBorder" Property="Background" Value="{DynamicResource KioskTileHoverBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="tileBorder" Property="Opacity" Value="0.85"/>
+                                <Setter TargetName="tileBorder" Property="Opacity" Value="0.88"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="tileBorder" Property="Background" Value="#0F172A"/>
-                                <Setter TargetName="tileBorder" Property="Opacity" Value="0.42"/>
+                                <Setter TargetName="tileBorder" Property="Background" Value="{DynamicResource KioskTileDisabledBrush}"/>
+                                <Setter TargetName="tileBorder" Property="Opacity" Value="0.45"/>
                                 <Setter Property="Cursor" Value="Arrow"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -55,115 +53,114 @@
             </Setter>
         </Style>
 
-        <!-- Top Right Header Control Button Style -->
-        <Style x:Key="HeaderSquareButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{DynamicResource SidebarHoverBrush}"/>
-            <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <!-- Unified Header Action Button Style -->
+        <Style x:Key="KioskHeaderButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource KioskButtonBgBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource KioskTextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource KioskTileBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="MinWidth" Value="32"/>
+            <Setter Property="Padding" Value="0"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="btnBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border x:Name="btnBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.Foreground="{TemplateBinding Foreground}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource PrimaryBrush}"/>
-                                <Setter TargetName="btnBorder" Property="BorderBrush" Value="{DynamicResource PrimaryHoverBrush}"/>
+                                <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource KioskButtonHoverBrush}"/>
+                                <Setter TargetName="btnBorder" Property="BorderBrush" Value="{DynamicResource KioskTileHoverBorderBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="btnBorder" Property="Opacity" Value="0.85"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="KioskTileTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource KioskTextPrimaryBrush}"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+
+        <Style x:Key="KioskTileSubtitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource KioskTextMutedBrush}"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+
+        <Style x:Key="KioskTileGlyphStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Opacity" Value="0.9"/>
+        </Style>
     </UserControl.Resources>
 
-    <!-- FIT-SCREEN RESPONSIVE GRID -->
-    <Grid Margin="16,8,16,6">
+    <Grid Margin="14,10,14,10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- 1. TOP HEADER BAR: MATTI NATIONAL HIGH SCHOOL & SMART INCIDENT BANNER -->
-        <Border Grid.Row="0" CornerRadius="0" Margin="0,0,0,8" Padding="12,6" BorderThickness="0,0,0,1" BorderBrush="#1E3A8A">
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#D9060E1A" Offset="0.0"/>
-                    <GradientStop Color="#B30F172A" Offset="0.5"/>
-                    <GradientStop Color="#801E293B" Offset="1.0"/>
-                </LinearGradientBrush>
-            </Border.Background>
+        <!-- 1. TOP HEADER BAR -->
+        <Border Grid.Row="0" Margin="4,0,4,6" Padding="14,8" CornerRadius="6" BorderThickness="1"
+                Background="{DynamicResource KioskBarBrush}" BorderBrush="{DynamicResource KioskBarBorderBrush}">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Left: 3D eSIMS+ SIDS Logo -->
                 <Image Grid.Column="0" Source="pack://application:,,,/Assets/esims_plus_sids_logo.png"
-                       Height="54" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"
-                       RenderOptions.BitmapScalingMode="HighQuality">
-                    <Image.Effect>
-                        <DropShadowEffect Color="#000000" Opacity="0.3" BlurRadius="8" ShadowDepth="2"/>
-                    </Image.Effect>
-                </Image>
+                       Height="46" Stretch="Uniform" Margin="0,0,14,0" VerticalAlignment="Center"
+                       RenderOptions.BitmapScalingMode="HighQuality"/>
 
-                <!-- Center-Left: System Title, Slogan, and 4 Pillars -->
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,16,0">
-                    <TextBlock Text="SCHOOL INCIDENT MANAGEMENT SYSTEM" FontSize="14" FontWeight="ExtraBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                    <TextBlock Text="Manage. Monitor. Protect." FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource InfoBrush}" Margin="0,2,0,3"/>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="📋 REPORT" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="🔍 MONITOR" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="🛡️ RESOLVE" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="📊 ANALYZE" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource InfoBrush}" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="SCHOOL INCIDENT MANAGEMENT SYSTEM" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource KioskTextPrimaryBrush}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                        <TextBlock Text="Manage. Monitor. Protect." FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource KioskAccentBrush}" Margin="0,0,12,0"/>
+                        <TextBlock Text="REPORT  ·  MONITOR  ·  RESOLVE  ·  ANALYZE" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource KioskTextMutedBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Central Glowing Security Shield Seal -->
-                <Border Grid.Column="2" Width="46" Height="46" CornerRadius="999" Background="#1A1E3A8A" BorderBrush="#0284C7" BorderThickness="1.5" VerticalAlignment="Center" Margin="4,0,12,0">
-                    <Border.Effect><DropShadowEffect Color="#38BDF8" Opacity="0.50" BlurRadius="12" ShadowDepth="0"/></Border.Effect>
-                    <TextBlock Text="🔒" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
-
-                <!-- Right: Action Buttons, Profile Pill & Notification Badge -->
-                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="🌓" Style="{StaticResource HeaderSquareButtonStyle}" Command="{Binding ToggleThemeCommand}" Width="32" Height="32" Margin="0,0,6,0" ToolTip="Toggle Light / Dark Mode"/>
-                    <Button Content="{Binding RefreshButtonIcon, FallbackValue='↻'}" Style="{StaticResource HeaderSquareButtonStyle}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}" Width="32" Height="32" Margin="0,0,8,0" ToolTip="Refresh Data"/>
-                    <Border Background="{DynamicResource DangerBgBrush}" BorderBrush="#991B1B" BorderThickness="1" CornerRadius="4" Padding="12,4" Margin="0,0,8,0">
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="{Binding DashboardTitle}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" HorizontalAlignment="Left"/>
-                            <TextBlock Text="{Binding UserFullName, StringFormat='{}{0} | Online'}" FontSize="12" Foreground="#FECACA" Margin="0,1,0,0" HorizontalAlignment="Left"/>
-                        </StackPanel>
-                    </Border>
-                    <Border Visibility="{Binding IsNotificationBadgeVisible, Converter={StaticResource BoolToVis}}">
-                        <Button Command="{Binding ViewNotificationsCommand}" Style="{StaticResource MetroTileButtonStyle}" Background="{DynamicResource DangerBrush}" Width="40" Height="36" Padding="0" ToolTip="System Notifications">
-                            <Grid>
-                                <TextBlock Text="🔔" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                <Border Background="{DynamicResource DangerBrush}" CornerRadius="4" Padding="3,1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,1,1,0">
-                                    <TextBlock Text="{Binding NewIncidentCount}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
-                                </Border>
-                            </Grid>
+                <!-- Right: Properly aligned controls -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="🌓" Style="{StaticResource KioskHeaderButtonStyle}" Command="{Binding ToggleThemeCommand}" Width="32" Margin="0,0,6,0" ToolTip="Toggle Light / Dark Mode"/>
+                    <Button Content="{Binding RefreshButtonIcon, FallbackValue='↻'}" Style="{StaticResource KioskHeaderButtonStyle}" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsNotRefreshing}" Width="32" Margin="0,0,6,0" ToolTip="Refresh Data"/>
+                    <Border Visibility="{Binding IsNotificationBadgeVisible, Converter={StaticResource BoolToVis}}" Margin="0,0,6,0">
+                        <Button Command="{Binding ViewNotificationsCommand}" Style="{StaticResource KioskHeaderButtonStyle}"
+                                Background="{DynamicResource KioskTileDangerBrush}" Padding="10,0" ToolTip="System Notifications">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="🔔" FontSize="13" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding NewIncidentCount}" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                            </StackPanel>
                         </Button>
                     </Border>
-                    <!-- Window Management Controls (Close Only) -->
-                    <Button Content="✕" Click="OnCloseWindowClick" Style="{StaticResource HeaderSquareButtonStyle}" Width="32" Height="32" Margin="8,0,0,0" ToolTip="Close Application"/>
+                    <Button Content="✕" Click="OnCloseWindowClick" Style="{StaticResource KioskHeaderButtonStyle}" Width="32" ToolTip="Close Application"/>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- 2. TABLET DASHBOARD CONTENT (ROLE-ALIGNED: TOP-RIGHT SIDS BANNER, LEFT-SIDE CLOCK, ZERO GHOST CARDS) -->
-        <Grid Grid.Row="1" Margin="0,0,0,6">
+        <!-- 2. UNIFIED TILE BOARD -->
+        <Grid Grid.Row="1">
 
-            <!-- ==================== A. STAFF & TEACHER GRID (3 BALANCED ROWS, TOP-RIGHT SIDS BANNER, LEFT-SIDE CLOCK) ==================== -->
+            <!-- A. STAFF & TEACHER GRID (3x6) -->
             <Grid Visibility="{Binding IsStaffOrTeacher, Converter={StaticResource BoolToVis}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -179,154 +176,144 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- ROW 0: Dashboard (Col 0), Report Incident (Col 1), Incident List (Col 2), SIDS Banner (Cols 3-5 TOP RIGHT) -->
-                <Button Grid.Row="0" Grid.Column="0" Style="{StaticResource MetroTileButtonStyle}" Background="#0078D7" Margin="0,0,6,6" Padding="12,8" Command="{Binding NavigateDashboardCommand}">
+                <!-- Row 0 -->
+                <Button Grid.Row="0" Grid.Column="0" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTilePrimaryBrush}" Command="{Binding NavigateDashboardCommand}">
                     <Grid>
-                        <TextBlock Text="📊" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
+                        <TextBlock Text="📊" Style="{StaticResource KioskTileGlyphStyle}"/>
                         <StackPanel VerticalAlignment="Bottom">
-                            <TextBlock Text="Dashboard" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                            <TextBlock Text="Alerts, KPIs, &amp; actions." FontSize="12" Foreground="#E0E7FF" Margin="0,2,0,0"/>
+                            <TextBlock Text="Dashboard" Style="{StaticResource KioskTileTitleStyle}"/>
+                            <TextBlock Text="Alerts, KPIs, &amp; actions." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/>
                         </StackPanel>
                     </Grid>
                 </Button>
-
-                <Button Grid.Row="0" Grid.Column="1" Style="{StaticResource MetroTileButtonStyle}" Background="#107C41" Margin="0,0,6,6" Padding="12,8" Command="{Binding NavigateReportNewIncidentCommand}">
+                <Button Grid.Row="0" Grid.Column="1" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTileTealBrush}" Command="{Binding NavigateReportNewIncidentCommand}">
                     <Grid>
-                        <TextBlock Text="📝" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
+                        <TextBlock Text="📝" Style="{StaticResource KioskTileGlyphStyle}"/>
                         <StackPanel VerticalAlignment="Bottom">
-                            <TextBlock Text="Report Incident" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                            <TextBlock Text="Quick intake shortcut." FontSize="12" Foreground="#D1FAE5" Margin="0,2,0,0"/>
+                            <TextBlock Text="Report Incident" Style="{StaticResource KioskTileTitleStyle}"/>
+                            <TextBlock Text="Quick intake shortcut." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/>
                         </StackPanel>
                     </Grid>
                 </Button>
-
-                <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource MetroTileButtonStyle}" Background="#0D9488" Margin="0,0,6,6" Padding="12,8" Command="{Binding NavigateIncidentListCommand}">
+                <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTileTealBrush}" Command="{Binding NavigateIncidentListCommand}">
                     <Grid>
-                        <TextBlock Text="📋" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
+                        <TextBlock Text="📋" Style="{StaticResource KioskTileGlyphStyle}"/>
                         <StackPanel VerticalAlignment="Bottom">
-                            <TextBlock Text="Incident List" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                            <TextBlock Text="Browse &amp; filter records." FontSize="12" Foreground="#CCFBF1" Margin="0,2,0,0"/>
+                            <TextBlock Text="Incident List" Style="{StaticResource KioskTileTitleStyle}"/>
+                            <TextBlock Text="Browse &amp; filter records." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/>
                         </StackPanel>
                     </Grid>
                 </Button>
-
-                <!-- Top Right: SIDS Software Solution Banner (Cols 3-5) -->
-                <Border Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="3" Background="Transparent" BorderThickness="0" CornerRadius="0" Margin="0,0,0,6" Padding="0" ClipToBounds="True">
+                <Border Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="3" Margin="4" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource KioskTileBorderBrush}" ClipToBounds="True">
                     <Image Source="pack://application:,,,/Assets/sids_blue_banner.png" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
 
-                <!-- ROW 1: Live Clock (Cols 0-2 LEFT SIDE TIME) -->
-                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" BorderThickness="0" CornerRadius="0" Margin="0,0,6,6" Padding="16,12">
+                <!-- Row 1: Live Clock + My Filed Reports / Investigations -->
+                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="4" Padding="20,12" CornerRadius="6" BorderThickness="1"
+                        Background="{DynamicResource KioskTileBaseBrush}" BorderBrush="{DynamicResource KioskTileBorderBrush}">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left">
-                        <TextBlock Text="{Binding TimeGreeting}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,0,4"/>
-                        <TextBlock Text="{Binding CurrentDate}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,4"/>
-                        <TextBlock Text="{Binding CurrentTime}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource InfoBrush}"/>
+                        <TextBlock Text="{Binding TimeGreeting}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource KioskTextMutedBrush}"/>
+                        <TextBlock Text="{Binding CurrentDate}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource KioskTextPrimaryBrush}" Margin="0,3,0,2"/>
+                        <TextBlock Text="{Binding CurrentTime}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource KioskAccentBrush}"/>
                     </StackPanel>
                 </Border>
-
-                <!-- ROW 1 RIGHT: When Investigations IS permitted in RBAC (My Filed Reports 2 cols + Investigations 1 col) -->
                 <Grid Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="3" Visibility="{Binding CanAccessInvestigations, Converter={StaticResource BoolToVis}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Style="{StaticResource MetroTileButtonStyle}" Background="#0063B1" Margin="0,0,6,6" Padding="12,8" Command="{Binding NavigateMyFiledReportsCommand}">
+                    <Button Grid.Column="0" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTilePrimaryBrush}" Command="{Binding NavigateMyFiledReportsCommand}">
                         <Grid>
-                            <TextBlock Text="📂" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
+                            <TextBlock Text="📂" Style="{StaticResource KioskTileGlyphStyle}"/>
                             <StackPanel VerticalAlignment="Bottom">
-                                <TextBlock Text="My Filed Reports" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                <TextBlock Text="Personal incident filings &amp; status records." FontSize="12" Foreground="#DBEAFE" Margin="0,2,0,0"/>
+                                <TextBlock Text="My Filed Reports" Style="{StaticResource KioskTileTitleStyle}"/>
+                                <TextBlock Text="Personal incident filings &amp; status records." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/>
                             </StackPanel>
                         </Grid>
                     </Button>
-                    <Button Grid.Column="1" Style="{StaticResource MetroTileButtonStyle}" Background="{DynamicResource CardBackgroundBrush}" Margin="0,0,0,6" Padding="12,8" Command="{Binding NavigateInvestigationsCommand}">
+                    <Button Grid.Column="1" Style="{StaticResource KioskTileStyle}" Command="{Binding NavigateInvestigationsCommand}">
                         <Grid>
-                            <TextBlock Text="🔍" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
+                            <TextBlock Text="🔍" Style="{StaticResource KioskTileGlyphStyle}"/>
                             <StackPanel VerticalAlignment="Bottom">
-                                <TextBlock Text="Investigations" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                <TextBlock Text="Evidence &amp; case logs." FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,2,0,0"/>
+                                <TextBlock Text="Investigations" Style="{StaticResource KioskTileTitleStyle}"/>
+                                <TextBlock Text="Evidence &amp; case logs." Style="{StaticResource KioskTileSubtitleStyle}"/>
                             </StackPanel>
                         </Grid>
                     </Button>
                 </Grid>
-
-                <!-- ROW 1 RIGHT: When Investigations is NOT permitted in RBAC (My Filed Reports spans all 3 columns) -->
                 <Button Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="3" Visibility="{Binding CanAccessInvestigations, Converter={StaticResource InverseBoolToVis}}"
-                        Style="{StaticResource MetroTileButtonStyle}" Background="#0063B1" Margin="0,0,0,6" Padding="12,8" Command="{Binding NavigateMyFiledReportsCommand}">
+                        Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTilePrimaryBrush}" Command="{Binding NavigateMyFiledReportsCommand}">
                     <Grid>
-                        <TextBlock Text="📂" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
+                        <TextBlock Text="📂" Style="{StaticResource KioskTileGlyphStyle}"/>
                         <StackPanel VerticalAlignment="Bottom">
-                            <TextBlock Text="My Filed Reports" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                            <TextBlock Text="Personal incident filings &amp; status records." FontSize="12" Foreground="#DBEAFE" Margin="0,2,0,0"/>
+                            <TextBlock Text="My Filed Reports" Style="{StaticResource KioskTileTitleStyle}"/>
+                            <TextBlock Text="Personal incident filings &amp; status records." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/>
                         </StackPanel>
                     </Grid>
                 </Button>
 
-                <!-- ROW 2: Student Profile, Reports & Data (if enabled), and Exit / Log Out -->
-                <!-- Layout 1: When Reports & Data IS permitted in RBAC (3 clean cards, 2 cols each) -->
+                <!-- Row 2 -->
                 <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6" Visibility="{Binding CanAccessReportsAnalytics, Converter={StaticResource BoolToVis}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*"/>
                         <ColumnDefinition Width="2*"/>
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Style="{StaticResource MetroTileButtonStyle}" Background="#0284C7" Margin="0,0,6,0" Padding="12,8" Command="{Binding NavigateStudentProfileCommand}">
+                    <Button Grid.Column="0" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTilePrimaryBrush}" Command="{Binding NavigateStudentProfileCommand}">
                         <Grid>
-                            <TextBlock Text="👨‍🎓" FontSize="28" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
+                            <TextBlock Text="👨‍🎓" Style="{StaticResource KioskTileGlyphStyle}"/>
                             <StackPanel VerticalAlignment="Bottom">
-                                <TextBlock Text="Student Profile" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                <TextBlock Text="Behavioral histories &amp; records." FontSize="12" Foreground="#E0F2FE" Margin="0,2,0,0"/>
+                                <TextBlock Text="Student Profile" Style="{StaticResource KioskTileTitleStyle}"/>
+                                <TextBlock Text="Behavioral histories &amp; records." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/>
                             </StackPanel>
                         </Grid>
                     </Button>
-                    <Button Grid.Column="1" Style="{StaticResource MetroTileButtonStyle}" Background="#7C3AED" Margin="0,0,6,0" Padding="12,8" Command="{Binding NavigateReportsAnalyticsCommand}">
+                    <Button Grid.Column="1" Style="{StaticResource KioskTileStyle}" Command="{Binding NavigateReportsAnalyticsCommand}">
                         <Grid>
-                            <TextBlock Text="📈" FontSize="28" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
+                            <TextBlock Text="📈" Style="{StaticResource KioskTileGlyphStyle}"/>
                             <StackPanel VerticalAlignment="Bottom">
-                                <TextBlock Text="Reports &amp; Data" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                <TextBlock Text="Heatmaps, safety trends &amp; exports." FontSize="12" Foreground="#EDE9FE" Margin="0,2,0,0"/>
+                                <TextBlock Text="Reports &amp; Data" Style="{StaticResource KioskTileTitleStyle}"/>
+                                <TextBlock Text="Heatmaps, safety trends &amp; exports." Style="{StaticResource KioskTileSubtitleStyle}"/>
                             </StackPanel>
                         </Grid>
                     </Button>
-                    <Button Grid.Column="2" Style="{StaticResource MetroTileButtonStyle}" Background="#B91C1C" Margin="0,0,0,0" Padding="12,8" Command="{Binding LogoutCommand}">
+                    <Button Grid.Column="2" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTileDangerBrush}" Command="{Binding LogoutCommand}">
                         <Grid>
-                            <TextBlock Text="🚪" FontSize="28" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
+                            <TextBlock Text="🚪" Style="{StaticResource KioskTileGlyphStyle}"/>
                             <StackPanel VerticalAlignment="Bottom">
-                                <TextBlock Text="Exit / Log Out" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                <TextBlock Text="Close application or switch user." FontSize="12" Foreground="#FEE2E2" Margin="0,2,0,0"/>
+                                <TextBlock Text="Exit / Log Out" Style="{StaticResource KioskTileTitleStyle}"/>
+                                <TextBlock Text="Close application or switch user." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/>
                             </StackPanel>
                         </Grid>
                     </Button>
                 </Grid>
-
-                <!-- Layout 2: When Reports & Data is NOT permitted in RBAC (2 wide cards, 3 cols each) -->
                 <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6" Visibility="{Binding CanAccessReportsAnalytics, Converter={StaticResource InverseBoolToVis}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Style="{StaticResource MetroTileButtonStyle}" Background="#0284C7" Margin="0,0,6,0" Padding="12,8" Command="{Binding NavigateStudentProfileCommand}">
+                    <Button Grid.Column="0" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTilePrimaryBrush}" Command="{Binding NavigateStudentProfileCommand}">
                         <Grid>
-                            <TextBlock Text="👨‍🎓" FontSize="28" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
+                            <TextBlock Text="👨‍🎓" Style="{StaticResource KioskTileGlyphStyle}"/>
                             <StackPanel VerticalAlignment="Bottom">
-                                <TextBlock Text="Student Profile" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                <TextBlock Text="Behavioral histories &amp; student records." FontSize="12" Foreground="#E0F2FE" Margin="0,2,0,0"/>
+                                <TextBlock Text="Student Profile" Style="{StaticResource KioskTileTitleStyle}"/>
+                                <TextBlock Text="Behavioral histories &amp; student records." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/>
                             </StackPanel>
                         </Grid>
                     </Button>
-                    <Button Grid.Column="1" Style="{StaticResource MetroTileButtonStyle}" Background="#B91C1C" Margin="0,0,0,0" Padding="12,8" Command="{Binding LogoutCommand}">
+                    <Button Grid.Column="1" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTileDangerBrush}" Command="{Binding LogoutCommand}">
                         <Grid>
-                            <TextBlock Text="🚪" FontSize="28" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
+                            <TextBlock Text="🚪" Style="{StaticResource KioskTileGlyphStyle}"/>
                             <StackPanel VerticalAlignment="Bottom">
-                                <TextBlock Text="Exit / Log Out" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                <TextBlock Text="Close application or switch user." FontSize="12" Foreground="#FEE2E2" Margin="0,2,0,0"/>
+                                <TextBlock Text="Exit / Log Out" Style="{StaticResource KioskTileTitleStyle}"/>
+                                <TextBlock Text="Close application or switch user." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/>
                             </StackPanel>
                         </Grid>
                     </Button>
                 </Grid>
             </Grid>
 
-            <!-- ==================== B. LEADERSHIP & ADMIN MASTER GRID (4 ROWS x 6 COLUMNS) ==================== -->
+            <!-- B. LEADERSHIP & ADMIN MASTER GRID (4x6) -->
             <Grid Visibility="{Binding IsStaffOrTeacher, Converter={StaticResource InverseBoolToVis}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -343,120 +330,56 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- ROW 0: Dashboard (Col 0), Report Incident (Col 1), Incident List (Col 2), SIDS Banner (Cols 3-5) -->
-                <Button Grid.Row="0" Grid.Column="0" Style="{StaticResource MetroTileButtonStyle}" Background="#0078D7" Margin="0,0,6,6" Padding="8,6" Command="{Binding NavigateDashboardCommand}"><Grid><TextBlock Text="📊" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Dashboard" FontSize="14" FontWeight="Bold"/><TextBlock Text="Alerts, KPIs, &amp; actions." FontSize="12" Foreground="#E0E7FF" Margin="0,1,0,0"/></StackPanel></Grid></Button>
-                <Button Grid.Row="0" Grid.Column="1" Style="{StaticResource MetroTileButtonStyle}" Background="#107C41" Margin="0,0,6,6" Padding="8,6" Command="{Binding NavigateReportNewIncidentCommand}"><Grid><TextBlock Text="📝" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Report Incident" FontSize="14" FontWeight="Bold"/><TextBlock Text="Quick intake shortcut." FontSize="12" Foreground="#D1FAE5" Margin="0,1,0,0"/></StackPanel></Grid></Button>
-                <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource MetroTileButtonStyle}" Background="#0D9488" Margin="0,0,6,6" Padding="8,6" Command="{Binding NavigateIncidentListCommand}"><Grid><TextBlock Text="📋" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Incident List" FontSize="14" FontWeight="Bold"/><TextBlock Text="Browse &amp; filter records." FontSize="12" Foreground="#CCFBF1" Margin="0,1,0,0"/></StackPanel></Grid></Button>
-                <Border Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="3" Background="Transparent" BorderThickness="0" CornerRadius="0" Margin="0,0,0,6" Padding="0" ClipToBounds="True">
+                <!-- Row 0 -->
+                <Button Grid.Row="0" Grid.Column="0" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTilePrimaryBrush}" Command="{Binding NavigateDashboardCommand}"><Grid><TextBlock Text="📊" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Dashboard" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Alerts, KPIs, &amp; actions." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/></StackPanel></Grid></Button>
+                <Button Grid.Row="0" Grid.Column="1" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTileTealBrush}" Command="{Binding NavigateReportNewIncidentCommand}"><Grid><TextBlock Text="📝" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Report Incident" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Quick intake shortcut." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/></StackPanel></Grid></Button>
+                <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTileTealBrush}" Command="{Binding NavigateIncidentListCommand}"><Grid><TextBlock Text="📋" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Incident List" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Browse &amp; filter records." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/></StackPanel></Grid></Button>
+                <Border Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="3" Margin="4" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource KioskTileBorderBrush}" ClipToBounds="True">
                     <Image Source="pack://application:,,,/Assets/sids_blue_banner.png" RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
 
-                <!-- ROW 1: Live Clock (Cols 0-2), My Filed Reports (Cols 3-4), Investigations (Col 5) -->
-                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" BorderThickness="0" CornerRadius="0" Margin="0,0,6,6" Padding="20,10">
+                <!-- Row 1 -->
+                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="4" Padding="20,12" CornerRadius="6" BorderThickness="1"
+                        Background="{DynamicResource KioskTileBaseBrush}" BorderBrush="{DynamicResource KioskTileBorderBrush}">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left">
-                        <TextBlock Text="{Binding TimeGreeting}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,0,0,3"/>
-                        <TextBlock Text="{Binding CurrentDate}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,3"/>
-                        <TextBlock Text="{Binding CurrentTime}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource InfoBrush}"/>
+                        <TextBlock Text="{Binding TimeGreeting}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource KioskTextMutedBrush}"/>
+                        <TextBlock Text="{Binding CurrentDate}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource KioskTextPrimaryBrush}" Margin="0,3,0,2"/>
+                        <TextBlock Text="{Binding CurrentTime}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource KioskAccentBrush}"/>
                     </StackPanel>
                 </Border>
-                <Button Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" Style="{StaticResource MetroTileButtonStyle}" Background="#0063B1" Margin="0,0,6,6" Padding="12,8" Command="{Binding NavigateMyFiledReportsCommand}"><Grid><TextBlock Text="📂" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="My Filed Reports" FontSize="14" FontWeight="Bold"/><TextBlock Text="Personal filings." FontSize="12" Foreground="#DBEAFE" Margin="0,1,0,0"/></StackPanel></Grid></Button>
-                <Button Grid.Row="1" Grid.Column="5" Style="{StaticResource MetroTileButtonStyle}" Background="{DynamicResource CardBackgroundBrush}" Margin="0,0,0,6" Padding="8,6" Command="{Binding NavigateInvestigationsCommand}"><Grid><TextBlock Text="🔍" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Investigations" FontSize="14" FontWeight="Bold"/><TextBlock Text="Evidence &amp; case logs." FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Margin="0,1,0,0"/></StackPanel></Grid></Button>
+                <Button Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTilePrimaryBrush}" Command="{Binding NavigateMyFiledReportsCommand}"><Grid><TextBlock Text="📂" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="My Filed Reports" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Personal filings." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/></StackPanel></Grid></Button>
+                <Button Grid.Row="1" Grid.Column="5" Style="{StaticResource KioskTileStyle}" Command="{Binding NavigateInvestigationsCommand}"><Grid><TextBlock Text="🔍" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Investigations" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Evidence &amp; case logs." Style="{StaticResource KioskTileSubtitleStyle}"/></StackPanel></Grid></Button>
 
-                <!-- ROW 2: Disciplinary (Col 0), Risk & Rules (Col 1), Student Profile (Col 2), Parent Notices (Col 3), Reports & Data (Col 4), Audit Trail (Col 5) -->
-                <Button Grid.Row="2" Grid.Column="0" Style="{StaticResource MetroTileButtonStyle}" Background="{DynamicResource ControlFillColorSecondaryBrush}" Margin="0,0,6,6" Padding="8,6" Command="{Binding NavigateDisciplinaryActionsCommand}"><Grid><TextBlock Text="⚖️" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Disciplinary" FontSize="14" FontWeight="Bold"/><TextBlock Text="Sanctions &amp; plans." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,1,0,0"/></StackPanel></Grid></Button>
-                <Button Grid.Row="2" Grid.Column="1" Style="{StaticResource MetroTileButtonStyle}" Background="#D97706" Margin="0,0,6,6" Padding="8,6" Command="{Binding NavigateRiskRulesCommand}"><Grid><TextBlock Text="⚡" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Risk &amp; Rules" FontSize="14" FontWeight="Bold"/><TextBlock Text="Matrix &amp; evaluation." FontSize="12" Foreground="#FEF3C7" Margin="0,1,0,0"/></StackPanel></Grid></Button>
-                <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource MetroTileButtonStyle}" Background="#0284C7" Margin="0,0,6,6" Padding="8,6" Command="{Binding NavigateStudentProfileCommand}"><Grid><TextBlock Text="👨‍🎓" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Student Profile" FontSize="14" FontWeight="Bold"/><TextBlock Text="Behavioral histories." FontSize="12" Foreground="#E0F2FE" Margin="0,1,0,0"/></StackPanel></Grid></Button>
-                <Button Grid.Row="2" Grid.Column="3" Style="{StaticResource MetroTileButtonStyle}" Background="#0891B2" Margin="0,0,6,6" Padding="8,6" Command="{Binding NavigateParentNoticesCommand}"><Grid><TextBlock Text="✉️" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Parent Notices" FontSize="14" FontWeight="Bold"/><TextBlock Text="Letters &amp; tracking." FontSize="12" Foreground="#CFFAFE" Margin="0,1,0,0"/></StackPanel></Grid></Button>
-                <Button Grid.Row="2" Grid.Column="4" Style="{StaticResource MetroTileButtonStyle}" Background="#7C3AED" Margin="0,0,6,6" Padding="8,6" Command="{Binding NavigateReportsAnalyticsCommand}"><Grid><TextBlock Text="📈" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Reports &amp; Data" FontSize="14" FontWeight="Bold"/><TextBlock Text="Heatmaps &amp; trends." FontSize="12" Foreground="#EDE9FE" Margin="0,1,0,0"/></StackPanel></Grid></Button>
-                <Button Grid.Row="2" Grid.Column="5" Style="{StaticResource MetroTileButtonStyle}" Background="#0F766E" Margin="0,0,0,6" Padding="8,6" Command="{Binding NavigateAuditTrailCommand}"><Grid><TextBlock Text="🔒" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Audit Trail" FontSize="14" FontWeight="Bold"/><TextBlock Text="Tamper-evident logs." FontSize="12" Foreground="#CCFBF1" Margin="0,1,0,0"/></StackPanel></Grid></Button>
+                <!-- Row 2 -->
+                <Button Grid.Row="2" Grid.Column="0" Style="{StaticResource KioskTileStyle}" Command="{Binding NavigateDisciplinaryActionsCommand}"><Grid><TextBlock Text="⚖️" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Disciplinary" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Sanctions &amp; plans." Style="{StaticResource KioskTileSubtitleStyle}"/></StackPanel></Grid></Button>
+                <Button Grid.Row="2" Grid.Column="1" Style="{StaticResource KioskTileStyle}" Command="{Binding NavigateRiskRulesCommand}"><Grid><TextBlock Text="⚡" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Risk &amp; Rules" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Matrix &amp; evaluation." Style="{StaticResource KioskTileSubtitleStyle}"/></StackPanel></Grid></Button>
+                <Button Grid.Row="2" Grid.Column="2" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTilePrimaryBrush}" Command="{Binding NavigateStudentProfileCommand}"><Grid><TextBlock Text="👨‍🎓" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Student Profile" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Behavioral histories." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/></StackPanel></Grid></Button>
+                <Button Grid.Row="2" Grid.Column="3" Style="{StaticResource KioskTileStyle}" Command="{Binding NavigateParentNoticesCommand}"><Grid><TextBlock Text="✉️" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Parent Notices" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Letters &amp; tracking." Style="{StaticResource KioskTileSubtitleStyle}"/></StackPanel></Grid></Button>
+                <Button Grid.Row="2" Grid.Column="4" Style="{StaticResource KioskTileStyle}" Command="{Binding NavigateReportsAnalyticsCommand}"><Grid><TextBlock Text="📈" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Reports &amp; Data" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Heatmaps &amp; trends." Style="{StaticResource KioskTileSubtitleStyle}"/></StackPanel></Grid></Button>
+                <Button Grid.Row="2" Grid.Column="5" Style="{StaticResource KioskTileStyle}" Command="{Binding NavigateAuditTrailCommand}"><Grid><TextBlock Text="🔒" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Audit Trail" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Tamper-evident logs." Style="{StaticResource KioskTileSubtitleStyle}"/></StackPanel></Grid></Button>
 
-                <!-- ROW 3: Layout 1 (Admin: User Management 2 cols + System Settings 2 cols + Exit/Logout 2 cols) -->
+                <!-- Row 3: Admin (with User Management) -->
                 <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="6" Visibility="{Binding CanAccessUserManagement, Converter={StaticResource BoolToVis}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*"/>
                         <ColumnDefinition Width="2*"/>
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Style="{StaticResource MetroTileButtonStyle}" Background="#4338CA" Margin="0,0,6,0" Padding="12,8" Command="{Binding NavigateUserManagementCommand}">
-                        <Grid>
-                            <TextBlock Text="👥" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
-                            <StackPanel VerticalAlignment="Bottom">
-                                <TextBlock Text="User Management" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                <TextBlock Text="Accounts, roles &amp; privileges." FontSize="12" Foreground="#E0E7FF" Margin="0,1,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Button>
-                    <Button Grid.Column="1" Style="{StaticResource MetroTileButtonStyle}" Background="{DynamicResource ControlFillColorSecondaryBrush}" Margin="0,0,6,0" Padding="12,8" Command="{Binding NavigateSystemSettingsCommand}">
-                        <Grid>
-                            <TextBlock Text="⚙️" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
-                            <StackPanel VerticalAlignment="Bottom">
-                                <TextBlock Text="System Settings" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                <TextBlock Text="School branding &amp; database." FontSize="12" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,1,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Button>
-                    <Button Grid.Column="2" Style="{StaticResource MetroTileButtonStyle}" Background="#B91C1C" Margin="0,0,0,0" Padding="12,8" Command="{Binding LogoutCommand}">
-                        <Grid>
-                            <TextBlock Text="🚪" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
-                            <StackPanel VerticalAlignment="Bottom">
-                                <TextBlock Text="Exit / Log Out" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                <TextBlock Text="Close application or switch user." FontSize="12" Foreground="#FEE2E2" Margin="0,1,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Button>
+                    <Button Grid.Column="0" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTilePrimaryBrush}" Command="{Binding NavigateUserManagementCommand}"><Grid><TextBlock Text="👥" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="User Management" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Accounts, roles &amp; privileges." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/></StackPanel></Grid></Button>
+                    <Button Grid.Column="1" Style="{StaticResource KioskTileStyle}" Command="{Binding NavigateSystemSettingsCommand}"><Grid><TextBlock Text="⚙️" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="System Settings" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="School branding &amp; database." Style="{StaticResource KioskTileSubtitleStyle}"/></StackPanel></Grid></Button>
+                    <Button Grid.Column="2" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTileDangerBrush}" Command="{Binding LogoutCommand}"><Grid><TextBlock Text="🚪" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Exit / Log Out" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Close application or switch user." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/></StackPanel></Grid></Button>
                 </Grid>
 
-                <!-- ROW 3: Layout 2 (Discipline & Guidance: System Settings 3 cols + Exit/Logout 3 cols, NO User Management) -->
+                <!-- Row 3: Discipline & Guidance (no User Management) -->
                 <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="6" Visibility="{Binding CanAccessUserManagement, Converter={StaticResource InverseBoolToVis}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Style="{StaticResource MetroTileButtonStyle}" Background="{DynamicResource ControlFillColorSecondaryBrush}" Margin="0,0,6,0" Padding="12,8" Command="{Binding NavigateSystemSettingsCommand}">
-                        <Grid>
-                            <TextBlock Text="⚙️" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
-                            <StackPanel VerticalAlignment="Bottom">
-                                <TextBlock Text="System Settings" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                <TextBlock Text="School branding, display preferences &amp; database maintenance." FontSize="12" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,2,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Button>
-                    <Button Grid.Column="1" Style="{StaticResource MetroTileButtonStyle}" Background="#B91C1C" Margin="0,0,0,0" Padding="12,8" Command="{Binding LogoutCommand}">
-                        <Grid>
-                            <TextBlock Text="🚪" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0.9"/>
-                            <StackPanel VerticalAlignment="Bottom">
-                                <TextBlock Text="Exit / Log Out" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                <TextBlock Text="Close application or switch user." FontSize="12" Foreground="#FEE2E2" Margin="0,2,0,0"/>
-                            </StackPanel>
-                        </Grid>
-                    </Button>
+                    <Button Grid.Column="0" Style="{StaticResource KioskTileStyle}" Command="{Binding NavigateSystemSettingsCommand}"><Grid><TextBlock Text="⚙️" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="System Settings" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="School branding, display preferences &amp; database maintenance." Style="{StaticResource KioskTileSubtitleStyle}"/></StackPanel></Grid></Button>
+                    <Button Grid.Column="1" Style="{StaticResource KioskTileStyle}" Background="{DynamicResource KioskTileDangerBrush}" Command="{Binding LogoutCommand}"><Grid><TextBlock Text="🚪" Style="{StaticResource KioskTileGlyphStyle}"/><StackPanel VerticalAlignment="Bottom"><TextBlock Text="Exit / Log Out" Style="{StaticResource KioskTileTitleStyle}"/><TextBlock Text="Close application or switch user." Style="{StaticResource KioskTileSubtitleStyle}" Foreground="{DynamicResource KioskTextSecondaryBrush}"/></StackPanel></Grid></Button>
                 </Grid>
             </Grid>
         </Grid>
-
-        <!-- 3. FOOTER STATUS BAR (Dark Mode Kiosk Status Bar) -->
-        <Border Grid.Row="2" CornerRadius="0" Margin="0,4,0,0" Padding="14,6" BorderThickness="0,1,0,0" BorderBrush="#1E3A8A">
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Color="#D9060E1A" Offset="0.0"/>
-                    <GradientStop Color="#B30F172A" Offset="0.5"/>
-                    <GradientStop Color="#801E293B" Offset="1.0"/>
-                </LinearGradientBrush>
-            </Border.Background>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="● Offline (SQLite)" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" Margin="0,0,14,0"/>
-                    <TextBlock Text="•  Smart School Incident Management System  •  Ctrl + Shift + P: Commands  •  Ctrl + K: Search  •  Ctrl + L: Lock" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}"/>
-                </StackPanel>
-
-                <TextBlock Grid.Column="2" Text="{Binding CurrentDate}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
-            </Grid>
-        </Border>
     </Grid>
 </UserControl>

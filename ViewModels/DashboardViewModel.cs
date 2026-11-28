@@ -317,12 +317,13 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
         public async Task LoadDataAsync()
         {
-            var all = (await _incidentService.GetAllIncidentsAsync()).ToList();
-            ProcessScopeData(all);
-
             try
             {
                 using var context = new AppDbContext();
+                var freshIncidentService = new IncidentService(context);
+                var all = (await freshIncidentService.GetAllIncidentsAsync()).ToList();
+                ProcessScopeData(all);
+
                 TotalStudents = await context.Students.CountAsync();
                 TotalStaff = await context.StaffMembers.CountAsync();
 
@@ -347,11 +348,15 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             }
             catch
             {
-                TotalStudents = 7;
-                TotalStaff = 4;
-                TotalInvestigations = InProgressIncidents > 0 ? InProgressIncidents : 3;
-                TotalActionPlans = 6;
-                TotalParentNotices = 6;
+                try
+                {
+                    var fallback = (await _incidentService.GetAllIncidentsAsync()).ToList();
+                    ProcessScopeData(fallback);
+                }
+                catch
+                {
+                    // Keep existing cached values if fallback also fails.
+                }
             }
 
             OnPropertyChanged(nameof(TimeGreeting));

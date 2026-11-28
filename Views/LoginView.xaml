@@ -25,19 +25,22 @@
             </Grid.ColumnDefinitions>
 
             <!-- LEFT BRANDING SECTION -->
-            <local:LoginBrandingView Grid.Column="0" Margin="32,20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <Viewbox Grid.Column="0" StretchDirection="DownOnly" Stretch="Uniform"
+                     Margin="28,20" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <local:LoginBrandingView/>
+            </Viewbox>
 
             <!-- RIGHT SECTION: FLIPPING CARD CONTAINER -->
-            <Grid Grid.Column="1" Margin="20,16">
+            <Grid Grid.Column="1" Margin="24,20">
                 <Border x:Name="CardContainer"
-                        Width="450"
-                        MaxHeight="720"
-                        HorizontalAlignment="Center"
+                        MinWidth="340"
+                        MaxWidth="450"
+                        HorizontalAlignment="Stretch"
                         VerticalAlignment="Center"
-                        Background="{DynamicResource CardBackgroundBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
+                        Background="{DynamicResource LoginCardBackgroundBrush}"
+                        BorderBrush="{DynamicResource LoginCardBorderBrush}"
                         BorderThickness="1.5"
-                        CornerRadius="8"
+                        CornerRadius="12"
                         ClipToBounds="True"
                         RenderTransformOrigin="0.5,0.5">
                     <Border.RenderTransform>
@@ -50,11 +53,11 @@
                     <Grid>
                         <!-- Flowing / Spiral Blue Wave Curves -->
                         <Grid IsHitTestVisible="False">
-                            <Path Fill="{DynamicResource PrimaryBrush}" Opacity="0.10" Stretch="Fill" Height="90" VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                            <Path Fill="{DynamicResource LoginWaveFillBrush}" Opacity="0.10" Stretch="Fill" Height="90" VerticalAlignment="Top" HorizontalAlignment="Stretch"
                                    Data="M 0,0 L 450,0 L 450,35 C 360,70 270,15 170,45 C 80,70 25,25 0,40 Z"/>
-                            <Path Fill="{DynamicResource PrimaryBrush}" Opacity="0.08" Stretch="Fill" Height="140" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
+                            <Path Fill="{DynamicResource LoginWaveFillBrush}" Opacity="0.08" Stretch="Fill" Height="140" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
                                    Data="M 0,140 C 120,80 240,110 330,60 C 390,30 420,10 450,0 L 450,140 Z"/>
-                            <Path Fill="{DynamicResource AccentBrush}" Opacity="0.13" Stretch="Fill" Height="95" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
+                            <Path Fill="{DynamicResource LoginAccentTextBrush}" Opacity="0.12" Stretch="Fill" Height="95" VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
                                    Data="M 0,95 C 150,55 260,85 360,40 C 410,18 435,5 450,0 L 450,95 Z"/>
                         </Grid>
 

@@ -8,124 +8,115 @@
         <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis"/>
     </UserControl.Resources>
 
-    <Grid Margin="32,24">
-        <!-- ==================== 1. USER DIRECTORY & CREDENTIALS VIEW ==================== -->
+    <Grid Margin="0,4,0,0">
+        <!-- ==================== 1. USER DIRECTORY & CREDENTIALS TABLE ==================== -->
         <Grid Visibility="{Binding IsUserModalOpen, Converter={StaticResource InverseBoolToVis}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- HEADER WITH ONLINE ADMIN BADGE -->
-            <Grid Grid.Row="0" Margin="0,0,0,20">
+            <!-- FLAT TOOLBAR: SEARCH, ROLE FILTER, + ADD USER BUTTON -->
+            <Grid Grid.Row="0" Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="320"/>
+                    <ColumnDefinition Width="210"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Title & Subtitle -->
-                <StackPanel Grid.Column="0">
-                    <Button Content="&#x2190; Back to Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="8,4" Margin="0,0,0,10"/>
-                    <TextBlock Text="User Credentials &amp; Management" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                    <TextBlock Text="Accounts and roles." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
-                </StackPanel>
+                <!-- Search Box -->
+                <Grid Grid.Column="0" Margin="0,0,10,0">
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{DynamicResource ModernTextBoxStyle}" Height="34" Padding="28,0,24,0"/>
+                    <TextBlock Text="🔍" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="8,0,0,0" IsHitTestVisible="False"/>
+                    <Button Content="✕" Command="{Binding ClearSearchCommand}" Visibility="{Binding HasSearchText, Converter={StaticResource BoolToVis}}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource SecondaryTextBrush}" Cursor="Hand" Width="20" Height="20"/>
+                </Grid>
 
-                <!-- TOP HEADER ONLINE ADMIN BADGE PILL -->
-                <Border Grid.Column="1" VerticalAlignment="Bottom" Background="{DynamicResource TableHoverBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12,6">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Width="10" Height="10" CornerRadius="999" Background="{DynamicResource SuccessBrush}" Margin="0,0,8,0"/>
-                        <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}">
-                            <Run Text="Online Admin: " Foreground="{DynamicResource SecondaryTextBrush}"/>
-                            <Run Text="{Binding OnlineAdminText, Mode=OneWay}" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                        </TextBlock>
-                    </StackPanel>
-                </Border>
+                <!-- Role Filter -->
+                <ComboBox Grid.Column="1" ItemsSource="{Binding RoleFilterOptions}" SelectedItem="{Binding SelectedRoleFilter}"
+                          Style="{DynamicResource ModernComboBoxStyle}" Height="34" Margin="0,0,10,0"/>
+
+                <!-- Add User Button -->
+                <Button Grid.Column="3" Content="+ Add New User" Style="{DynamicResource PrimaryButtonStyle}"
+                        Command="{Binding OpenCreateUserModalCommand}" Height="34" Padding="14,0"/>
             </Grid>
 
-            <!-- MAIN CONTENT AREA -->
-            <Grid Grid.Row="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            <!-- USERS DATA TABLE -->
+            <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <DataGrid ItemsSource="{Binding UsersView}"
+                          SelectedItem="{Binding SelectedUser}"
+                          Style="{DynamicResource FluentDataGridStyle}"
+                          RowHeight="42"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Full Name" Binding="{Binding FullName}" Width="1.4*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
 
-                <!-- TOOLBAR: SEARCH, ROLE FILTER, + ADD USER BUTTON -->
-                <Border Grid.Row="0" Style="{DynamicResource CardBorderStyle}" Padding="16,12" Margin="0,0,0,16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="320"/>
-                            <ColumnDefinition Width="220"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                        <DataGridTextColumn Header="Username" Binding="{Binding Username, StringFormat='@{0}'}" Width="1.1*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
 
-                        <!-- Search Box -->
-                        <Grid Grid.Column="0" Margin="0,0,12,0">
-                            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{DynamicResource ModernTextBoxStyle}" Height="36" Padding="28,0,24,0"/>
-                            <TextBlock Text="🔍" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="8,0,0,0" IsHitTestVisible="False"/>
-                            <Button Content="✕" Command="{Binding ClearSearchCommand}" Visibility="{Binding HasSearchText, Converter={StaticResource BoolToVis}}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource SecondaryTextBrush}" Cursor="Hand" Width="20" Height="20"/>
-                        </Grid>
+                        <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="1.6*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
 
-                        <!-- Role Filter -->
-                        <ComboBox Grid.Column="1" ItemsSource="{Binding RoleFilterOptions}" SelectedItem="{Binding SelectedRoleFilter}"
-                                  Style="{DynamicResource ModernComboBoxStyle}" Height="36" Margin="0,0,12,0"/>
+                        <DataGridTemplateColumn Header="Role" Width="170">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource InfoBgBrush}" CornerRadius="4" Padding="8,3" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Role}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource InfoBrush}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                        <!-- Add User Button -->
-                        <Button Grid.Column="3" Content="+ Add New User" Style="{DynamicResource PrimaryButtonStyle}"
-                                Command="{Binding OpenCreateUserModalCommand}" Height="36" Padding="16,0"/>
-                    </Grid>
-                </Border>
+                        <DataGridTemplateColumn Header="Status" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="4" Padding="8,3" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                            Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <TextBlock Text="{Binding Status}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                <!-- 4-COLUMN RESPONSIVE USER CARDS -->
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding UsersView}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Columns="4"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Style="{DynamicResource RecordCardStyle}">
-                                    <Border.InputBindings>
-                                        <MouseBinding MouseAction="LeftClick"
-                                                      Command="{Binding DataContext.OpenUserCardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                      CommandParameter="{Binding}"/>
-                                    </Border.InputBindings>
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-
-                                        <!-- Top Row: Role Badge & Status Pill -->
-                                        <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                                            <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource PrimaryBrush}" HorizontalAlignment="Left">
-                                                <TextBlock Text="{Binding Role}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
-                                            </Border>
-                                            <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Right">
-                                                <TextBlock Text="{Binding Status}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                            </Border>
-                                        </DockPanel>
-
-                                        <!-- Full Name -->
-                                        <TextBlock Grid.Row="1" Text="{Binding FullName}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,2"/>
-
-                                        <!-- Username -->
-                                        <TextBlock Grid.Row="2" Text="{Binding Username, StringFormat='@{0}'}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
-
-                                        <!-- Email -->
-                                        <TextBlock Grid.Row="3" Text="{Binding Email}" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </Grid>
+                        <DataGridTemplateColumn Header="Actions" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Manage →" Style="{DynamicResource LinkButtonStyle}"
+                                            Command="{Binding DataContext.OpenUserCardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
         </Grid>
 
         <!-- ==================== 2. USER ACCOUNT DETAILS VIEW (TARGET 2ND IMAGE) ==================== -->

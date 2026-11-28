@@ -11,121 +11,86 @@
 
     <Grid Margin="0" ClipToBounds="False">
         <!-- Inner Workspace Content -->
-        <Grid Margin="24,16">
+        <Grid Margin="20,12,20,14">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-        <!-- 1. WORKSPACE HEADER & ACTIONS -->
-        <Border Grid.Row="0" Style="{DynamicResource CardBorderStyle}" Padding="18,14" Margin="0,0,0,14">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+        <!-- 1. UNIFIED FLAT TOOLBAR (no boxed headers, no redundant title) -->
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="🚨" FontSize="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Incidents Records &amp; Intelligence Log" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                    </StackPanel>
-                    <TextBlock Text="Report, classify and monitor incidents." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+            <TextBox Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     ToolTip="Search incidents" Style="{DynamicResource ModernTextBoxStyle}" Height="34" Margin="0,0,8,0"/>
+
+            <ComboBox Grid.Column="1" ItemsSource="{Binding CategoryFilterOptions}" SelectedItem="{Binding SelectedCategoryFilter}"
+                      Style="{DynamicResource ModernComboBoxStyle}" Height="34" Margin="0,0,8,0"/>
+
+            <ComboBox Grid.Column="2" ItemsSource="{Binding StatusFilterOptions}" SelectedItem="{Binding SelectedStatusFilter}"
+                      Style="{DynamicResource ModernComboBoxStyle}" Height="34" Margin="0,0,8,0"/>
+
+            <ComboBox Grid.Column="3" ItemsSource="{Binding SeverityFilterOptions}" SelectedItem="{Binding SelectedSeverityFilter}"
+                      Style="{DynamicResource ModernComboBoxStyle}" Height="34" Margin="0,0,8,0"/>
+
+            <Button Grid.Column="4" Content="Clear" Style="{DynamicResource SecondaryButtonStyle}"
+                    Command="{Binding ClearFiltersCommand}" Height="34" Padding="12,0" Margin="0,0,8,0"/>
+
+            <Button Grid.Column="5" Content="+ Report New Incident" Style="{DynamicResource PrimaryButtonStyle}"
+                    Command="{Binding NewIncidentCommand}" Margin="0,0,8,0" Height="34"
+                    Visibility="{Binding CanManageIncidents, Converter={StaticResource BoolToVis}}"/>
+
+            <Button Grid.Column="6" Style="{DynamicResource SecondaryButtonStyle}"
+                    Command="{Binding RefreshCommand}" Height="34" MinWidth="104" IsEnabled="{Binding IsNotLoading}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Grid Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center">
+                        <TextBlock Text="&#x21BB;"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVis}}"/>
+                        <Grid Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                            <Ellipse Stroke="{DynamicResource BorderBrush}" StrokeThickness="2"/>
+                            <Path x:Name="RefreshButtonLoadingSpinner"
+                                  Data="M 9,2 A 7,7 0 0 1 16,9"
+                                  Stroke="{DynamicResource PrimaryBrush}"
+                                  StrokeThickness="2"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  RenderTransformOrigin="0.5,0.5">
+                                <Path.RenderTransform>
+                                    <RotateTransform Angle="0"/>
+                                </Path.RenderTransform>
+                                <Path.Triggers>
+                                    <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                        <BeginStoryboard>
+                                            <Storyboard RepeatBehavior="Forever">
+                                                <DoubleAnimation Storyboard.TargetName="RefreshButtonLoadingSpinner"
+                                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                                 From="0" To="360" Duration="0:0:0.75"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                </Path.Triggers>
+                            </Path>
+                        </Grid>
+                    </Grid>
+                    <TextBlock Text="{Binding RefreshButtonText}" Foreground="{DynamicResource PrimaryTextBrush}" FontWeight="SemiBold"/>
                 </StackPanel>
+            </Button>
+        </Grid>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="+ Report New Incident" Style="{DynamicResource PrimaryButtonStyle}"
-                            Command="{Binding NewIncidentCommand}" Margin="0,0,8,0" Height="36"
-                            Visibility="{Binding CanManageIncidents, Converter={StaticResource BoolToVis}}"/>
-
-                    <Button Style="{DynamicResource SecondaryButtonStyle}"
-                            Command="{Binding RefreshCommand}" Height="36" MinWidth="122" IsEnabled="{Binding IsNotLoading}">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Grid Width="18" Height="18" Margin="0,0,7,0" VerticalAlignment="Center">
-                                <TextBlock Text="&#x21BB;"
-                                           FontSize="14"
-                                           Foreground="{DynamicResource PrimaryTextBrush}"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVis}}"/>
-                                <Grid Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
-                                    <Ellipse Stroke="{DynamicResource BorderBrush}" StrokeThickness="2"/>
-                                    <Path x:Name="RefreshButtonLoadingSpinner"
-                                          Data="M 9,2 A 7,7 0 0 1 16,9"
-                                          Stroke="{DynamicResource PrimaryBrush}"
-                                          StrokeThickness="2"
-                                          StrokeStartLineCap="Round"
-                                          StrokeEndLineCap="Round"
-                                          RenderTransformOrigin="0.5,0.5">
-                                        <Path.RenderTransform>
-                                            <RotateTransform Angle="0"/>
-                                        </Path.RenderTransform>
-                                        <Path.Triggers>
-                                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                                <BeginStoryboard>
-                                                    <Storyboard RepeatBehavior="Forever">
-                                                        <DoubleAnimation Storyboard.TargetName="RefreshButtonLoadingSpinner"
-                                                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
-                                                                         From="0" To="360" Duration="0:0:0.75"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </EventTrigger>
-                                        </Path.Triggers>
-                                    </Path>
-                                </Grid>
-                            </Grid>
-                            <TextBlock Text="{Binding RefreshButtonText}" Foreground="{DynamicResource PrimaryTextBrush}" FontWeight="SemiBold"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <!-- 2. SEARCH & MULTI-FILTER TOOLBAR -->
-        <Border Grid.Row="1" Style="{DynamicResource CardBorderStyle}" Padding="12,8" Margin="0,0,0,14">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Search Input -->
-                <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                    <TextBlock Text="Search incidents" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="34"/>
-                </StackPanel>
-
-                <!-- Category Filter -->
-                <StackPanel Grid.Column="1" Margin="0,0,10,0">
-                    <TextBlock Text="Category" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                    <ComboBox ItemsSource="{Binding CategoryFilterOptions}" SelectedItem="{Binding SelectedCategoryFilter}" Style="{DynamicResource ModernComboBoxStyle}" Height="34"/>
-                </StackPanel>
-
-                <!-- Status Filter -->
-                <StackPanel Grid.Column="2" Margin="0,0,10,0">
-                    <TextBlock Text="Lifecycle Status" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                    <ComboBox ItemsSource="{Binding StatusFilterOptions}" SelectedItem="{Binding SelectedStatusFilter}" Style="{DynamicResource ModernComboBoxStyle}" Height="34"/>
-                </StackPanel>
-
-                <!-- Severity Filter -->
-                <StackPanel Grid.Column="3" Margin="0,0,10,0">
-                    <TextBlock Text="Severity" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                    <ComboBox ItemsSource="{Binding SeverityFilterOptions}" SelectedItem="{Binding SelectedSeverityFilter}" Style="{DynamicResource ModernComboBoxStyle}" Height="34"/>
-                </StackPanel>
-
-                <!-- Reset Button -->
-                <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
-                    <Button Content="Clear Filters" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding ClearFiltersCommand}" Height="34" Padding="12,0"/>
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <!-- 3. INCIDENTS (4-COLUMN RESPONSIVE CARDS) -->
-        <Grid Grid.Row="2">
+        <!-- 2. INCIDENTS (4-COLUMN RESPONSIVE CARDS) -->
+        <Grid Grid.Row="1">
             <!-- Empty State Display -->
             <Border Visibility="{Binding HasNoIncidents, Converter={StaticResource BoolToVis}}"
                     Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}"

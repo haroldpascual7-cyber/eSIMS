@@ -11,54 +11,45 @@
 
     <Grid Margin="0" ClipToBounds="False">
         <!-- Inner Workspace Content -->
-        <Grid Margin="24,16">
+        <Grid Margin="20,12,20,14">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-        <!-- 1. WORKSPACE HEADER & SEARCH -->
-        <Border Grid.Row="0" Style="{DynamicResource CardBorderStyle}" Padding="18,14" Margin="0,0,0,14">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+        <!-- 1. FLAT TOOLBAR: STUDENT SEARCH & ACTIONS (no boxed card, no redundant title) -->
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MaxWidth="420"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="📈" FontSize="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Student Behavioral Management" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                    </StackPanel>
-                    <TextBlock Text="Scores, timeline, contracts, action plans." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
-                </StackPanel>
+            <!-- Student Search Box -->
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                <TextBox Text="{Binding StudentSearchText, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Select / Search Student Record"
+                         Style="{DynamicResource ModernTextBoxStyle}" Height="34"/>
+                <!-- Auto-Suggestions Dropdown -->
+                <ListBox ItemsSource="{Binding StudentSuggestions}" Visibility="{Binding IsStudentSuggestionsOpen, Converter={StaticResource BoolToVis}}"
+                         MaxHeight="120" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,2,0,0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Button Content="{Binding DisplayName}" Style="{DynamicResource SecondaryButtonStyle}"
+                                    Command="{Binding DataContext.SelectStudentCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    CommandParameter="{Binding}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Height="28" Padding="6,0"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
 
-                <!-- Student Search Box -->
-                <StackPanel Grid.Column="1" Margin="20,0,20,0" VerticalAlignment="Center">
-                    <TextBlock Text="Select / Search Student Record" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                    <TextBox Text="{Binding StudentSearchText, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="34"/>
-                    <!-- Auto-Suggestions Dropdown -->
-                    <ListBox ItemsSource="{Binding StudentSuggestions}" Visibility="{Binding IsStudentSuggestionsOpen, Converter={StaticResource BoolToVis}}"
-                             MaxHeight="120" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="0,2,0,0">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Button Content="{Binding DisplayName}" Style="{DynamicResource SecondaryButtonStyle}"
-                                        Command="{Binding DataContext.SelectStudentCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                        CommandParameter="{Binding}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Height="28" Padding="6,0"/>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel>
-
-                <!-- Export Buttons -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="📜 Good Moral Cert" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding PrintGoodMoralCommand}" Height="36" Margin="0,0,8,0"/>
-                    <Button Content="📑 Export Transcript" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding ExportTranscriptCommand}" Height="36"/>
-                </StackPanel>
-            </Grid>
-        </Border>
+            <!-- Export Buttons -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="📜 Good Moral Cert" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding PrintGoodMoralCommand}" Height="34" Margin="0,0,8,0"/>
+                <Button Content="📑 Export Transcript" Style="{DynamicResource PrimaryButtonStyle}" Command="{Binding ExportTranscriptCommand}" Height="34"/>
+            </StackPanel>
+        </Grid>
 
         <!-- 2. STUDENT KPI CONDUCT SUMMARY ROW -->
         <Grid Grid.Row="1" Margin="0,0,0,14">
