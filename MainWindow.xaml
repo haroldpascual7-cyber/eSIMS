@@ -7,11 +7,25 @@
         xmlns:views="clr-namespace:SmartSchoolIncidentManagementSystem.Views"
         mc:Ignorable="d"
         Title="Smart School Incident Management System"
+        Width="1366" Height="820"
+        MinWidth="1024" MinHeight="640"
         WindowState="Maximized"
         WindowStyle="None"
-        ResizeMode="NoResize"
+        ResizeMode="CanResize"
         WindowStartupLocation="CenterScreen"
-        Background="{DynamicResource AppBackgroundBrush}">
+        Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+        UseLayoutRounding="True"
+        FontFamily="{DynamicResource FontFamilyText}"
+        FontSize="{DynamicResource TypeBody}"
+        TextOptions.TextFormattingMode="Ideal">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="34"
+                      ResizeBorderThickness="6"
+                      GlassFrameThickness="0"
+                      CornerRadius="0"
+                      UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
 
     <Window.Resources>
         <!-- DataTemplates mapping ViewModels to Views -->
@@ -66,167 +80,179 @@
         <DataTemplate DataType="{x:Type vm:SettingsWorkspaceViewModel}">
             <views:SettingsWorkspaceView/>
         </DataTemplate>
+
+        <!-- Quiet busy spinner: 16px arc, no full-screen curtain over the data. -->
+        <Style x:Key="BusyArcStyle" TargetType="Path">
+            <Setter Property="Data" Value="M16 3a13 13 0 1 0 13 13"/>
+            <Setter Property="Stroke" Value="{DynamicResource AccentFillColorDefaultBrush}"/>
+            <Setter Property="StrokeThickness" Value="3"/>
+            <Setter Property="StrokeStartLineCap" Value="Round"/>
+            <Setter Property="StrokeEndLineCap" Value="Round"/>
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="Stretch" Value="Uniform"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <RotateTransform Angle="0"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
-    <Grid>
-        <!-- 1. Unauthenticated View (Login Screen) -->
-        <ContentControl Content="{Binding CurrentViewModel}">
-            <ContentControl.Style>
-                <Style TargetType="ContentControl">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsAuthenticated}" Value="False">
-                            <Setter Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </ContentControl.Style>
-        </ContentControl>
+    <Grid x:Name="ShellRoot">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>  <!-- 34px title bar -->
+            <RowDefinition Height="*"/>     <!-- navigation pane + page content -->
+        </Grid.RowDefinitions>
 
-        <!-- 2. Authenticated Shell (Header Bar + 8 Workspaces) -->
-        <Grid ClipToBounds="False">
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsAuthenticated}" Value="True">
-                            <Setter Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
-
+        <!-- ============================= TITLE BAR ========================= -->
+        <Grid x:Name="TitleBar" Grid.Row="0" Height="34"
+              Visibility="{Binding IsKioskActive, Converter={StaticResource InverseBoolToVis}}"
+              Background="{DynamicResource LayeredTitleBarBrush}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/> <!-- Left Sidebar Navigation -->
-                <ColumnDefinition Width="*"/>    <!-- Main Workspace Content Area -->
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- REUSABLE COLLAPSIBLE LEFT SIDEBAR NAVIGATION: Icons only when collapsed, Icons + Text when expanded -->
-            <views:SidebarNavigationControl Grid.Column="0"
-                                            Visibility="{Binding IsDashboardActive, Converter={StaticResource InverseBoolToVis}}"/>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0"
+                        Visibility="{Binding IsAuthenticated, Converter={StaticResource BoolToVis}}">
+                <Path Data="{StaticResource Icon.School}" Style="{StaticResource IconSmStyle}"
+                      Fill="{DynamicResource AccentFillColorDefaultBrush}" Margin="0,0,8,0"/>
+                <TextBlock Text="eSIMS" FontSize="{DynamicResource TypeCaption}" FontWeight="SemiBold"
+                           VerticalAlignment="Center"/>
+                <TextBlock Text="·" Margin="8,0" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"/>
+                <TextBlock Text="{Binding SectionBreadcrumb}" FontSize="{DynamicResource TypeCaption}"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center"/>
+            </StackPanel>
 
-            <!-- MAIN WORKSPACE CONTENT AREA -->
-            <Grid Grid.Column="1" ClipToBounds="False" Panel.ZIndex="10">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/> <!-- Minimal Top Breadcrumb & Window Controls -->
-                    <RowDefinition Height="*"/>    <!-- Active Workspace View -->
-                </Grid.RowDefinitions>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
+                        WindowChrome.IsHitTestVisibleInChrome="True">
+                <Button Style="{StaticResource TitleBarButtonStyle}" Command="{Binding NavigateHomeCommand}"
+                        ToolTip="Open the dashboard" AutomationProperties.Name="Dashboard">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource Icon.Home}" Style="{StaticResource IconSmStyle}" Margin="0,0,6,0"/>
+                        <TextBlock Text="Dashboard" FontSize="{DynamicResource TypeCaption}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
 
-                <!-- Minimal Top Bar (Active only when NOT on full-screen Tablet Dashboard) -->
-                <Border Grid.Row="0" Height="42"
-                        Visibility="{Binding IsDashboardActive, Converter={StaticResource InverseBoolToVis}}"
-                        Background="{DynamicResource HeaderBackgroundBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="0,0,0,1"
-                        Padding="18,0,12,0">
-                    <Grid>
-                        <!-- Left: Breadcrumb Navigation with Home Icon -->
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
-                            <Button Command="{Binding NavigateTabletDashboardCommand}"
-                                    Background="Transparent" BorderThickness="0" Padding="0" Margin="0,0,6,0"
-                                    Cursor="Hand" ToolTip="Return to Main Home Dashboard">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="🏠" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <TextBlock Text="Workspace" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Button>
-                            <TextBlock Text="  /  " FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding ActiveSectionTitle}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
-                        </StackPanel>
+                <Button Style="{StaticResource TitleBarButtonStyle}" Command="{Binding NavigateKioskCommand}"
+                        ToolTip="Open the full-screen kiosk board" AutomationProperties.Name="Kiosk board">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource Icon.Fullscreen}" Style="{StaticResource IconSmStyle}" Margin="0,0,6,0"/>
+                        <TextBlock Text="Kiosk" FontSize="{DynamicResource TypeCaption}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
 
-                        <!-- Right: Action Bar (Home, Notifications, Close) -->
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
-                            <!-- Home Dashboard Icon Button -->
-                            <Button Command="{Binding NavigateTabletDashboardCommand}"
-                                    Style="{DynamicResource SecondaryButtonStyle}"
-                                    Height="28" Width="32" Padding="0" Margin="0,0,8,0"
-                                    Cursor="Hand" ToolTip="Home (Return to Main Dashboard)">
-                                <TextBlock Text="🏠" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Button>
-
-                            <!-- Notification Center Bell Icon Button -->
-                            <Button Command="{Binding ViewNotificationsCommand}"
-                                    Style="{DynamicResource SecondaryButtonStyle}"
-                                    Height="28" Padding="8,0" Margin="0,0,8,0"
-                                    Cursor="Hand" ToolTip="Open Notification Center">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="🔔" FontSize="12" VerticalAlignment="Center"/>
-                                    <Border Visibility="{Binding HasUnreadNotifications, Converter={StaticResource BoolToVis}}"
-                                            Background="{DynamicResource DangerBrush}" CornerRadius="6"
-                                            Padding="4,0" Margin="5,0,0,0" Height="14" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding UnreadNotificationCount}" FontSize="9" FontWeight="Bold"
-                                                   Foreground="{DynamicResource ButtonTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Close Application Button -->
-                            <Button Content="✕" Click="OnCloseWindowClick" Width="30" Height="28"
-                                    FontSize="11" Background="Transparent" BorderBrush="{DynamicResource DangerBrush}"
-                                    BorderThickness="1" Foreground="{DynamicResource DangerBrush}" Cursor="Hand" ToolTip="Close Application"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- Workspace View Content Control -->
-                <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" ClipToBounds="False"/>
-            </Grid>
-        </Grid>
-
-        <!-- ==================== 3. GLOBAL FULL-SCREEN REFRESH / LOADING OVERLAY ==================== -->
-        <Grid Visibility="{Binding CurrentViewModel.IsLoading, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}"
-              Panel.ZIndex="2500"
-              ClipToBounds="False"
-              Background="{DynamicResource ModalOverlayBrush}">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <!-- Smooth Rotating Radial Activity Indicator -->
-                <Grid Width="56" Height="56" HorizontalAlignment="Center" Margin="0,0,0,16" RenderTransformOrigin="0.5,0.5">
-                    <Grid.RenderTransform>
-                        <RotateTransform Angle="0"/>
-                    </Grid.RenderTransform>
-                    <Grid.Triggers>
-                        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                            <BeginStoryboard>
-                                <Storyboard RepeatBehavior="Forever">
-                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
-                                                     From="0" To="360" Duration="0:0:0.9"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </Grid.Triggers>
-                    <!-- 12 Radial Rounded Spokes with Graduated Opacities -->
-                    <Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="1.0" VerticalAlignment="Top" HorizontalAlignment="Center"/>
-                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="30"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.91" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
-                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="60"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.82" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
-                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="90"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.73" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
-                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="120"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.64" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
-                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="150"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.55" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
-                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="180"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.46" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
-                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="210"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.36" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
-                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="240"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.27" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
-                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="270"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.20" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
-                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="300"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.14" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
-                    <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="330"/></Grid.RenderTransform><Border Width="3.5" Height="11" CornerRadius="2" Background="{DynamicResource AccentBrush}" Opacity="0.08" VerticalAlignment="Top" HorizontalAlignment="Center"/></Grid>
+                <!-- Live busy spinner (only while a page is loading) -->
+                <Grid Width="24" Height="24" VerticalAlignment="Center" Margin="4,0"
+                      Visibility="{Binding CurrentViewModel.IsLoading, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}">
+                    <Path Style="{StaticResource BusyArcStyle}">
+                        <Path.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                         From="0" To="360" Duration="0:0:0.9"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Path.Triggers>
+                    </Path>
                 </Grid>
 
-                <!-- Status Title & Subtitle Matching Reference Mockup -->
-                <TextBlock Text="Refreshing..."
-                           FontSize="19"
-                           FontWeight="Bold"
-                           Foreground="{DynamicResource ButtonTextBrush}"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,6"/>
-                <TextBlock Text="Please wait a moment."
-                           FontSize="13"
-                           Foreground="{DynamicResource SidebarTextBrush}"
-                           HorizontalAlignment="Center"/>
+                <Button Style="{StaticResource IconButtonStyle}" Command="{Binding ToggleThemeCommand}"
+                        ToolTip="{Binding ThemeToggleTooltip, FallbackValue='Switch light / dark'}"
+                        AutomationProperties.Name="Toggle theme">
+                    <Path>
+                        <Path.Style>
+                            <Style TargetType="Path" BasedOn="{StaticResource IconSmStyle}">
+                                <Setter Property="Data" Value="{StaticResource Icon.Moon}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsDarkMode}" Value="True">
+                                        <Setter Property="Data" Value="{StaticResource Icon.Sun}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Path.Style>
+                    </Path>
+                </Button>
+
+                <Button Style="{StaticResource IconButtonStyle}" Command="{Binding ViewNotificationsCommand}"
+                        ToolTip="Notifications" AutomationProperties.Name="Notifications">
+                    <Grid>
+                        <Path Data="{StaticResource Icon.Bell}" Style="{StaticResource IconSmStyle}"/>
+                        <Border Style="{StaticResource CountBadgeStyle}" Margin="0,-4,-6,0"
+                                Visibility="{Binding HasUnreadNotifications, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="{Binding UnreadNotificationCount}"
+                                       FontSize="10" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                </Button>
+
+                <Button Style="{StaticResource CaptionButtonStyle}" Click="OnMinimizeWindowClick"
+                        ToolTip="Minimise" AutomationProperties.Name="Minimise">
+                    <Path Data="{StaticResource Icon.Minimize}" Style="{StaticResource IconSmStyle}"/>
+                </Button>
+
+                <Button Style="{StaticResource CaptionButtonStyle}" Click="OnMaximizeWindowClick"
+                        ToolTip="Maximise or restore" AutomationProperties.Name="Maximise">
+                    <Path>
+                        <Path.Style>
+                            <Style TargetType="Path" BasedOn="{StaticResource IconSmStyle}">
+                                <Setter Property="Data" Value="{StaticResource Icon.Maximize}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
+                                        <Setter Property="Data" Value="{StaticResource Icon.Restore}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Path.Style>
+                    </Path>
+                </Button>
+
+                <Button Style="{StaticResource CaptionCloseButtonStyle}" Click="OnCloseWindowClick"
+                        ToolTip="Close" AutomationProperties.Name="Close">
+                    <Path Data="{StaticResource Icon.Close}" Style="{StaticResource IconSmStyle}"/>
+                </Button>
             </StackPanel>
         </Grid>
 
-        <!-- ==================== 3. FULL-SCREEN NOTIFICATION CENTER MODAL DIALOG ==================== -->
-        <Grid Visibility="{Binding IsNotificationModalOpen, Converter={StaticResource BoolToVis}}"
+        <!-- ========================= NAVIGATION + PAGE ===================== -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <views:SidebarNavigationControl Grid.Column="0"
+                                            Visibility="{Binding ShowSidebar, Converter={StaticResource BoolToVis}}"/>
+
+            <ContentControl Grid.Column="1" Content="{Binding CurrentViewModel}" ClipToBounds="False"/>
+
+            <!-- Kiosk board hides the chrome, so keep exactly one way out -->
+            <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,12,0"
+                    Style="{StaticResource StandardButtonStyle}"
+                    Command="{Binding NavigateHomeCommand}"
+                    ToolTip="Leave the kiosk board and return to the dashboard"
+                    AutomationProperties.Name="Leave kiosk board"
+                    Visibility="{Binding IsKioskActive, Converter={StaticResource BoolToVis}}"
+                    Panel.ZIndex="40">
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="{StaticResource Icon.Back}" Style="{StaticResource IconSmStyle}" Margin="0,0,6,0"/>
+                    <TextBlock Text="Exit kiosk" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- ================== NOTIFICATION CENTER (MODAL) ================== -->
+        <Grid Grid.RowSpan="2"
+              Visibility="{Binding IsNotificationModalOpen, Converter={StaticResource BoolToVis}}"
               Panel.ZIndex="3000"
-              ClipToBounds="False"
               Background="{DynamicResource ModalOverlayBrush}">
             <views:NotificationCenterModalView HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Grid>

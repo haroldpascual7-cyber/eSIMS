@@ -1,4 +1,4 @@
-<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.BehaviorWorkspaceView"
+﻿<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.BehaviorWorkspaceView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -30,14 +30,14 @@
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="📈" FontSize="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Student Behavioral Management" FontSize="19" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        <TextBlock Text="Student Behavioral Management" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
-                    <TextBlock Text="Conduct scoring, behavioral timeline, restorative contracts, and action plans." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                    <TextBlock Text="Scores, timeline, contracts, action plans." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
                 </StackPanel>
 
                 <!-- Student Search Box -->
                 <StackPanel Grid.Column="1" Margin="20,0,20,0" VerticalAlignment="Center">
-                    <TextBlock Text="Select / Search Student Record" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Select / Search Student Record" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding StudentSearchText, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Height="34"/>
                     <!-- Auto-Suggestions Dropdown -->
                     <ListBox ItemsSource="{Binding StudentSuggestions}" Visibility="{Binding IsStudentSuggestionsOpen, Converter={StaticResource BoolToVis}}"
@@ -71,58 +71,58 @@
             </Grid.ColumnDefinitions>
 
             <!-- Student Profile Summary -->
-            <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Margin="0,0,10,0" Padding="14,10">
+            <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Margin="0,0,10,0" Padding="12,8">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Width="44" Height="44" CornerRadius="22" Background="{DynamicResource PrimaryBrush}" Margin="0,0,12,0" VerticalAlignment="Center">
+                    <Border Grid.Column="0" Width="44" Height="44" CornerRadius="999" Background="{DynamicResource PrimaryBrush}" Margin="0,0,12,0" VerticalAlignment="Center">
                         <TextBlock Text="🎓" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding SelectedStudent.FullName, TargetNullValue='No Student Selected'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                        <TextBlock Text="{Binding SelectedStudent.DisplayName}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <TextBlock Text="{Binding StandingLabel}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SuccessBrush}" Margin="0,2,0,0"/>
+                        <TextBlock Text="{Binding SelectedStudent.FullName, TargetNullValue='No Student Selected'}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        <TextBlock Text="{Binding SelectedStudent.DisplayName}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding StandingLabel}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SuccessBrush}" Margin="0,2,0,0"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
             <!-- Conduct Score -->
-            <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Margin="0,0,10,0" Padding="14,10">
+            <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Margin="0,0,10,0" Padding="12,8">
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Conduct Score" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <TextBlock Text="Conduct Score" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <TextBlock Text="{Binding ConductScore, StringFormat='{}{0} / 100'}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,2,0,0"/>
                 </StackPanel>
             </Border>
 
             <!-- Total Infractions -->
-            <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Margin="0,0,10,0" Padding="14,10">
+            <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Margin="0,0,10,0" Padding="12,8">
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Recorded Infractions" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <TextBlock Text="Recorded Infractions" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <TextBlock Text="{Binding TotalIncidentsCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,2,0,0"/>
                 </StackPanel>
             </Border>
 
             <!-- Merits & Commendations -->
-            <Border Grid.Column="3" Style="{DynamicResource CardBorderStyle}" Margin="0,0,10,0" Padding="14,10">
+            <Border Grid.Column="3" Style="{DynamicResource CardBorderStyle}" Margin="0,0,10,0" Padding="12,8">
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Commendations" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <TextBlock Text="Commendations" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <TextBlock Text="{Binding TotalMeritsCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" Margin="0,2,0,0"/>
                 </StackPanel>
             </Border>
 
             <!-- Active Restorative Plans -->
-            <Border Grid.Column="4" Style="{DynamicResource CardBorderStyle}" Padding="14,10">
+            <Border Grid.Column="4" Style="{DynamicResource CardBorderStyle}" Padding="12,8">
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Active Interventions" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <TextBlock Text="Active Interventions" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <TextBlock Text="{Binding ActiveRestorativePlansCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,2,0,0"/>
                 </StackPanel>
             </Border>
         </Grid>
 
         <!-- 3. MAIN BEHAVIORAL TABS -->
-        <Border Grid.Row="2" Style="{DynamicResource CardBorderStyle}" Padding="14">
+        <Border Grid.Row="2" Style="{DynamicResource CardBorderStyle}" Padding="12">
             <TabControl Background="Transparent" BorderBrush="{DynamicResource BorderBrush}">
                 <!-- TAB 1: BEHAVIORAL TIMELINE & TRANSCRIPT -->
                 <TabItem Header="Timeline &amp; Transcript">
@@ -160,13 +160,13 @@
                                                 </Grid.RowDefinitions>
                                                 <DockPanel Grid.Row="0" Margin="0,0,0,6">
                                                     <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource PrimaryBrush}" HorizontalAlignment="Left">
-                                                        <TextBlock Text="{Binding PointsString}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                                        <TextBlock Text="{Binding PointsString}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
                                                     </Border>
-                                                    <TextBlock Text="{Binding FormattedDate}" FontSize="10" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding FormattedDate}" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                 </DockPanel>
-                                                <TextBlock Grid.Row="1" Text="{Binding Type}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Grid.Row="2" Text="{Binding Category}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,2,0,4"/>
-                                                <TextBlock Grid.Row="3" Text="{Binding Description}" FontSize="10" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis" MaxHeight="32"/>
+                                                <TextBlock Grid.Row="1" Text="{Binding Type}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Grid.Row="2" Text="{Binding Category}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,2,0,4"/>
+                                                <TextBlock Grid.Row="3" Text="{Binding Description}" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis" MaxHeight="32"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -212,13 +212,13 @@
                                                 </Grid.RowDefinitions>
                                                 <DockPanel Grid.Row="0" Margin="0,0,0,6">
                                                     <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Left">
-                                                        <TextBlock Text="{Binding ObservationType}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                        <TextBlock Text="{Binding ObservationType}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
                                                     </Border>
-                                                    <TextBlock Text="{Binding FormattedDate}" FontSize="10" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding FormattedDate}" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                 </DockPanel>
-                                                <TextBlock Grid.Row="1" Text="{Binding SettingOrSubject}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Grid.Row="2" Text="{Binding TeacherName, StringFormat='👤 {0}'}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,2,0,4"/>
-                                                <TextBlock Grid.Row="3" Text="{Binding NarrativeObservation}" FontSize="10" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis" MaxHeight="32"/>
+                                                <TextBlock Grid.Row="1" Text="{Binding SettingOrSubject}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Grid.Row="2" Text="{Binding TeacherName, StringFormat='👤 {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,2,0,4"/>
+                                                <TextBlock Grid.Row="3" Text="{Binding NarrativeObservation}" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" TextTrimming="CharacterEllipsis" MaxHeight="32"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -264,15 +264,15 @@
                                                 </Grid.RowDefinitions>
                                                 <DockPanel Grid.Row="0" Margin="0,0,0,6">
                                                     <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource PrimaryBrush}" HorizontalAlignment="Left">
-                                                        <TextBlock Text="{Binding PlanId}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                                        <TextBlock Text="{Binding PlanId}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
                                                     </Border>
                                                     <Border CornerRadius="4" Padding="5,1" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Right">
-                                                        <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                        <TextBlock Text="{Binding Status}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
                                                     </Border>
                                                 </DockPanel>
-                                                <TextBlock Grid.Row="1" Text="{Binding PlanType}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Grid.Row="2" Text="{Binding AssignedStaff, StringFormat='Staff: {0}'}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,2,0,4"/>
-                                                <TextBlock Grid.Row="3" Text="{Binding ProgressText}" FontSize="10" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Grid.Row="1" Text="{Binding PlanType}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Grid.Row="2" Text="{Binding AssignedStaff, StringFormat='Staff: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,2,0,4"/>
+                                                <TextBlock Grid.Row="3" Text="{Binding ProgressText}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -309,15 +309,15 @@
                                                 </Grid.RowDefinitions>
                                                 <DockPanel Grid.Row="0" Margin="0,0,0,6">
                                                     <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource PrimaryBrush}" HorizontalAlignment="Left">
-                                                        <TextBlock Text="{Binding Id, StringFormat='IAP-{0}'}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
+                                                        <TextBlock Text="{Binding Id, StringFormat='IAP-{0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
                                                     </Border>
                                                     <Border CornerRadius="4" Padding="5,1" Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Right">
-                                                        <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                        <TextBlock Text="{Binding Status}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
                                                     </Border>
                                                 </DockPanel>
-                                                <TextBlock Grid.Row="1" Text="{Binding FocusArea}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Grid.Row="2" Text="{Binding AssignedCounselor, StringFormat='Counselor: {0}'}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,2,0,4"/>
-                                                <TextBlock Grid.Row="3" Text="{Binding ReviewDate, StringFormat='Review: {0}'}" FontSize="10" Foreground="{DynamicResource MutedTextBrush}"/>
+                                                <TextBlock Grid.Row="1" Text="{Binding FocusArea}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Grid.Row="2" Text="{Binding AssignedCounselor, StringFormat='Counselor: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" Margin="0,2,0,4"/>
+                                                <TextBlock Grid.Row="3" Text="{Binding ReviewDate, StringFormat='Review: {0}'}" FontSize="12" Foreground="{DynamicResource MutedTextBrush}"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -337,14 +337,14 @@
 
         <!-- 4. MODAL: ADD MERIT / COMMENDATION -->
         <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Visibility="{Binding IsAddMeritModalOpen, Converter={StaticResource BoolToVis}}" Background="{DynamicResource ModalOverlayBrush}">
-            <Border Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+            <Border Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel>
-                    <TextBlock Text="Award Student Commendation / Merit" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
-                    <TextBlock Text="Commendation Category" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Award Student Commendation / Merit" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
+                    <TextBlock Text="Commendation Category" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <ComboBox ItemsSource="{Binding MeritTypeOptions}" SelectedItem="{Binding MeritType}" Style="{DynamicResource ModernComboBoxStyle}" Height="34" Margin="0,0,0,10"/>
-                    <TextBlock Text="Points Awarded (+)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Points Awarded (+)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding MeritPoints}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" Margin="0,0,0,10"/>
-                    <TextBlock Text="Citation / Commendation Narrative *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Citation / Commendation Narrative *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding MeritCitation}" Style="{DynamicResource ModernTextBoxStyle}" Height="70" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,16"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Cancel" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseAddMeritCommand}" Margin="0,0,8,0" Height="34"/>
@@ -356,16 +356,16 @@
 
         <!-- 5. MODAL: ADD ANECDOTAL NOTE -->
         <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Visibility="{Binding IsAddAnecdotalModalOpen, Converter={StaticResource BoolToVis}}" Background="{DynamicResource ModalOverlayBrush}">
-            <Border Width="560" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+            <Border Width="560" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel>
-                    <TextBlock Text="Log Classroom Anecdotal Observation" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
-                    <TextBlock Text="Subject / Setting" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Log Classroom Anecdotal Observation" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
+                    <TextBlock Text="Subject / Setting" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding AnecdotalSubject}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" Margin="0,0,0,10"/>
-                    <TextBlock Text="Observation Type" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Observation Type" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <ComboBox ItemsSource="{Binding AnecdotalTypeOptions}" SelectedItem="{Binding AnecdotalType}" Style="{DynamicResource ModernComboBoxStyle}" Height="34" Margin="0,0,0,10"/>
-                    <TextBlock Text="Narrative Observation *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Narrative Observation *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding AnecdotalNarrative}" Style="{DynamicResource ModernTextBoxStyle}" Height="60" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,10"/>
-                    <TextBlock Text="Immediate Action Taken by Teacher" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Immediate Action Taken by Teacher" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding AnecdotalActionTaken}" Style="{DynamicResource ModernTextBoxStyle}" Height="40" Margin="0,0,0,16"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Cancel" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseAddAnecdotalCommand}" Margin="0,0,8,0" Height="34"/>
@@ -377,14 +377,14 @@
 
         <!-- 6. MODAL: ADD RESTORATIVE PLAN -->
         <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Visibility="{Binding IsAddRestorativeModalOpen, Converter={StaticResource BoolToVis}}" Background="{DynamicResource ModalOverlayBrush}">
-            <Border Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="20">
+            <Border Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel>
-                    <TextBlock Text="Assign Restorative Intervention Plan" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
-                    <TextBlock Text="Intervention Type" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Assign Restorative Intervention Plan" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
+                    <TextBlock Text="Intervention Type" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <ComboBox ItemsSource="{Binding RestorativeTypeOptions}" SelectedItem="{Binding RestorativeType}" Style="{DynamicResource ModernComboBoxStyle}" Height="34" Margin="0,0,0,10"/>
-                    <TextBlock Text="Target Metric (Required Hours or Sessions)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Target Metric (Required Hours or Sessions)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding RestorativeTargetMetric}" Style="{DynamicResource ModernTextBoxStyle}" Height="34" Margin="0,0,0,10"/>
-                    <TextBlock Text="Intervention Objectives &amp; Conditions *" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Intervention Objectives &amp; Conditions *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding RestorativeObjectives}" Style="{DynamicResource ModernTextBoxStyle}" Height="70" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,16"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Cancel" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseAddRestorativeCommand}" Margin="0,0,8,0" Height="34"/>
@@ -396,18 +396,18 @@
 
         <!-- 7. MODAL: VIEW TIMELINE ENTRY -->
         <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Visibility="{Binding IsViewTimelineModalOpen, Converter={StaticResource BoolToVis}}" Background="{DynamicResource ModalOverlayBrush}">
-            <Border Width="500" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="20">
+            <Border Width="500" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel>
                     <DockPanel Margin="0,0,0,12">
-                        <TextBlock Text="📜 Timeline Entry Details" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        <TextBlock Text="📜 Timeline Entry Details" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
                         <Button Content="✕" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseTimelineCardCommand}" HorizontalAlignment="Right" Width="28" Height="28" Padding="0"/>
                     </DockPanel>
-                    <TextBlock Text="{Binding ViewingTimelineEntry.FormattedDate, StringFormat='Date: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                    <TextBlock Text="{Binding ViewingTimelineEntry.Type, StringFormat='Type: {0}'}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
-                    <TextBlock Text="{Binding ViewingTimelineEntry.Category, StringFormat='Category: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                    <TextBlock Text="{Binding ViewingTimelineEntry.PointsString, StringFormat='Score Impact: {0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,8"/>
-                    <TextBlock Text="Citation &amp; Details:" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                    <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,4,0,14">
+                    <TextBlock Text="{Binding ViewingTimelineEntry.FormattedDate, StringFormat='Date: {0}'}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="{Binding ViewingTimelineEntry.Type, StringFormat='Type: {0}'}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="{Binding ViewingTimelineEntry.Category, StringFormat='Category: {0}'}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="{Binding ViewingTimelineEntry.PointsString, StringFormat='Score Impact: {0}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,8"/>
+                    <TextBlock Text="Citation &amp; Details:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,4,0,14">
                         <TextBlock Text="{Binding ViewingTimelineEntry.Description}" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap"/>
                     </Border>
                     <Button Content="Close" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseTimelineCardCommand}" HorizontalAlignment="Right" Height="32" Width="80"/>
@@ -417,21 +417,21 @@
 
         <!-- 8. MODAL: VIEW ANECDOTAL RECORD (WITH DELETE) -->
         <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Visibility="{Binding IsViewAnecdotalModalOpen, Converter={StaticResource BoolToVis}}" Background="{DynamicResource ModalOverlayBrush}">
-            <Border Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="20">
+            <Border Width="520" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel>
                     <DockPanel Margin="0,0,0,12">
-                        <TextBlock Text="📝 Anecdotal Observation" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        <TextBlock Text="📝 Anecdotal Observation" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
                         <Button Content="✕" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseAnecdotalCardCommand}" HorizontalAlignment="Right" Width="28" Height="28" Padding="0"/>
                     </DockPanel>
-                    <TextBlock Text="{Binding ViewingAnecdotalRecord.FormattedDate, StringFormat='Date: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                    <TextBlock Text="{Binding ViewingAnecdotalRecord.TeacherName, StringFormat='Observer: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                    <TextBlock Text="{Binding ViewingAnecdotalRecord.SettingOrSubject, StringFormat='Subject / Setting: {0}'}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
-                    <TextBlock Text="Observation Narrative:" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                    <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,4,0,8">
+                    <TextBlock Text="{Binding ViewingAnecdotalRecord.FormattedDate, StringFormat='Date: {0}'}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="{Binding ViewingAnecdotalRecord.TeacherName, StringFormat='Observer: {0}'}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="{Binding ViewingAnecdotalRecord.SettingOrSubject, StringFormat='Subject / Setting: {0}'}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
+                    <TextBlock Text="Observation Narrative:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,4,0,8">
                         <TextBlock Text="{Binding ViewingAnecdotalRecord.NarrativeObservation}" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap"/>
                     </Border>
-                    <TextBlock Text="Action Taken by Teacher:" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                    <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,4,0,14">
+                    <TextBlock Text="Action Taken by Teacher:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,4,0,14">
                         <TextBlock Text="{Binding ViewingAnecdotalRecord.ActionTakenByTeacher}" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap"/>
                     </Border>
                     <DockPanel>
@@ -444,17 +444,17 @@
 
         <!-- 9. MODAL: VIEW RESTORATIVE PLAN -->
         <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Visibility="{Binding IsViewRestorativeModalOpen, Converter={StaticResource BoolToVis}}" Background="{DynamicResource ModalOverlayBrush}">
-            <Border Width="500" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="20">
+            <Border Width="500" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel>
                     <DockPanel Margin="0,0,0,12">
-                        <TextBlock Text="🤝 Restorative Plan Details" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        <TextBlock Text="🤝 Restorative Plan Details" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
                         <Button Content="✕" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseRestorativeCardCommand}" HorizontalAlignment="Right" Width="28" Height="28" Padding="0"/>
                     </DockPanel>
-                    <TextBlock Text="{Binding ViewingRestorativePlan.PlanId, StringFormat='Plan ID: {0}'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,4"/>
-                    <TextBlock Text="{Binding ViewingRestorativePlan.PlanType, StringFormat='Type: {0}'}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
-                    <TextBlock Text="{Binding ViewingRestorativePlan.AssignedStaff, StringFormat='Staff: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                    <TextBlock Text="{Binding ViewingRestorativePlan.ProgressText, StringFormat='Progress: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8"/>
-                    <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,4,0,14">
+                    <TextBlock Text="{Binding ViewingRestorativePlan.PlanId, StringFormat='Plan ID: {0}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="{Binding ViewingRestorativePlan.PlanType, StringFormat='Type: {0}'}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="{Binding ViewingRestorativePlan.AssignedStaff, StringFormat='Staff: {0}'}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <TextBlock Text="{Binding ViewingRestorativePlan.ProgressText, StringFormat='Progress: {0}'}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8"/>
+                    <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,4,0,14">
                         <TextBlock Text="{Binding ViewingRestorativePlan.Objectives}" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap"/>
                     </Border>
                     <DockPanel>
@@ -466,16 +466,16 @@
         </Grid>
         <!-- 10. MODAL: VIEW ACTION PLAN -->
         <Grid Margin="-260,-60,-20,-20" Panel.ZIndex="1000" Visibility="{Binding IsViewActionPlanModalOpen, Converter={StaticResource BoolToVis}}" Background="{DynamicResource ModalOverlayBrush}">
-            <Border Width="500" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="20">
+            <Border Width="500" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel>
                     <DockPanel Margin="0,0,0,12">
-                        <TextBlock Text="🎯 Individual Action Plan (IAP)" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                        <TextBlock Text="🎯 Individual Action Plan (IAP)" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
                         <Button Content="✕" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseActionPlanCardCommand}" HorizontalAlignment="Right" Width="28" Height="28" Padding="0"/>
                     </DockPanel>
-                    <TextBlock Text="{Binding ViewingActionPlan.FocusArea, StringFormat='Focus: {0}'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/>
-                    <TextBlock Text="{Binding ViewingActionPlan.AssignedCounselor, StringFormat='Counselor: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
-                    <TextBlock Text="{Binding ViewingActionPlan.ReviewDate, StringFormat='Review Date: {0}'}" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,6"/>
-                    <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,2,0,12">
+                    <TextBlock Text="{Binding ViewingActionPlan.FocusArea, StringFormat='Focus: {0}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,3"/>
+                    <TextBlock Text="{Binding ViewingActionPlan.AssignedCounselor, StringFormat='Counselor: {0}'}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3"/>
+                    <TextBlock Text="{Binding ViewingActionPlan.ReviewDate, StringFormat='Review Date: {0}'}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,6"/>
+                    <Border Background="{DynamicResource SurfaceBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="8" Margin="0,2,0,12">
                         <TextBlock Text="{Binding ViewingActionPlan.CoreRoadmapObjectives}" Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap"/>
                     </Border>
                     <Button Content="Close" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseActionPlanCardCommand}" HorizontalAlignment="Right" Height="32" Width="80"/>

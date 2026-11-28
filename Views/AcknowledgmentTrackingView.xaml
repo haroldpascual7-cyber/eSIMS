@@ -1,4 +1,4 @@
-<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.AcknowledgmentTrackingView"
+﻿<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.AcknowledgmentTrackingView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:views="clr-namespace:SmartSchoolIncidentManagementSystem.Views"
@@ -19,9 +19,9 @@
 
                 <!-- Header -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                    <Button Content="&#x2190; Back to Parent Notices Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="10,4" Margin="0,0,0,10"/>
-                    <TextBlock Text="Parent Acknowledgment &amp; Disclosure Tracking" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                    <TextBlock Text="Track signed parent response slips, physical meeting attendance, and electronic disclosure receipts." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+                    <Button Content="&#x2190; Back to Parent Notices Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="8,4" Margin="0,0,0,10"/>
+                    <TextBlock Text="Parent Acknowledgment &amp; Disclosure Tracking" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    <TextBlock Text="Signed slips, meetings and receipts." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
                 </StackPanel>
 
                 <!-- TOP KPI RIBBON (3 Cards) -->
@@ -35,29 +35,29 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- KPI 1: Pending Signatures -->
-                    <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Padding="18">
+                    <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Padding="16">
                         <StackPanel>
-                            <TextBlock Text="PENDING SIGNATURES" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="PENDING SIGNATURES" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
                             <TextBlock Text="{Binding PendingCount}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,6,0,0"/>
-                            <TextBlock Text="Awaiting parent response slip" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0"/>
+                            <TextBlock Text="Awaiting parent response slip" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0"/>
                         </StackPanel>
                     </Border>
 
                     <!-- KPI 2: Overdue Compliance -->
-                    <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Padding="18">
+                    <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Padding="16">
                         <StackPanel>
-                            <TextBlock Text="OVERDUE COMPLIANCE" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="OVERDUE COMPLIANCE" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
                             <TextBlock Text="{Binding OverdueCount}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,6,0,0"/>
-                            <TextBlock Text="Exceeded deadline date" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0"/>
+                            <TextBlock Text="Exceeded deadline date" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0"/>
                         </StackPanel>
                     </Border>
 
                     <!-- KPI 3: Conferences Completed -->
-                    <Border Grid.Column="4" Style="{DynamicResource CardBorderStyle}" Padding="18">
+                    <Border Grid.Column="4" Style="{DynamicResource CardBorderStyle}" Padding="16">
                         <StackPanel>
-                            <TextBlock Text="ACKNOWLEDGED / COMPLETED" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="ACKNOWLEDGED / COMPLETED" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
                             <TextBlock Text="{Binding CompletedCount}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" Margin="0,6,0,0"/>
-                            <TextBlock Text="Signed slip or meeting verified" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0"/>
+                            <TextBlock Text="Signed slip or meeting verified" FontSize="12" Foreground="{DynamicResource MutedTextBrush}" Margin="0,2,0,0"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -73,13 +73,13 @@
                     <!-- Search Input -->
                     <Grid Grid.Column="0">
                         <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource ModernTextBoxStyle}" Padding="28,0,24,0" Height="36"/>
-                        <TextBlock Text="🔍" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="8,0,0,0" IsHitTestVisible="False"/>
+                        <TextBlock Text="🔍" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="8,0,0,0" IsHitTestVisible="False"/>
                         <Button Content="✕" Command="{Binding ClearSearchCommand}" Visibility="{Binding HasSearchText, Converter={StaticResource BoolToVis}}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource SecondaryTextBrush}" Cursor="Hand" Width="20" Height="20"/>
                     </Grid>
 
                     <!-- Filter ComboBox & Export Button -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="Status Filter:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="Status Filter:" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
                         <ComboBox ItemsSource="{Binding StatusFilters}" SelectedItem="{Binding SelectedStatusFilter}" Width="140" Height="36" VerticalContentAlignment="Center" Margin="0,0,12,0"/>
                         
                         <!-- Export Overdue Report PDF Button -->
@@ -90,7 +90,7 @@
                                 BorderThickness="1"
                                 Foreground="{DynamicResource DangerBrush}"
                                 FontWeight="Bold"
-                                FontSize="12"
+                                FontSize="14"
                                 Height="36"
                                 Padding="12,0"
                                 Cursor="Hand"/>
@@ -128,12 +128,12 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <Border Grid.Column="0" Background="{DynamicResource PrimaryBrush}"
-                                                CornerRadius="4" Padding="6,3" HorizontalAlignment="Left">
-                                            <TextBlock Text="{Binding NoticeId}" FontSize="10"
+                                                CornerRadius="4" Padding="4,2" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding NoticeId}" FontSize="12"
                                                        FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
                                         </Border>
                                         <!-- Status badge -->
-                                        <Border Grid.Column="1" CornerRadius="10" Padding="8,3">
+                                        <Border Grid.Column="1" CornerRadius="8" Padding="8,3">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
@@ -147,7 +147,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="{Binding DisplayStatus}" FontSize="10" FontWeight="Bold">
+                                            <TextBlock Text="{Binding DisplayStatus}" FontSize="12" FontWeight="Bold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
@@ -172,13 +172,13 @@
                                                TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
 
                                     <!-- Issue Date -->
-                                    <TextBlock Grid.Row="2" FontSize="11"
+                                    <TextBlock Grid.Row="2" FontSize="12"
                                                Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,3">
                                         <Run Text="Issued: "/><Run Text="{Binding IssueDate}"/>
                                     </TextBlock>
 
                                     <!-- Due Date -->
-                                    <TextBlock Grid.Row="3" FontSize="11"
+                                    <TextBlock Grid.Row="3" FontSize="12"
                                                Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,8">
                                         <Run Text="Due: "/><Run Text="{Binding DueDate}"/>
                                     </TextBlock>
@@ -187,7 +187,7 @@
                                     <Button Grid.Row="4"
                                             Command="{Binding DataContext.OpenLogModalCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
-                                            Height="30" FontSize="11" Padding="6,0" Cursor="Hand">
+                                            Height="30" FontSize="12" Padding="6,0" Cursor="Hand">
                                         <Button.Style>
                                             <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
                                                 <Setter Property="Content" Value="📋 Log Receipt"/>

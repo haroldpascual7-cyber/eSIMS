@@ -84,6 +84,10 @@ namespace SmartSchoolIncidentManagementSystem
                 // Initialize Services
                 _incidentService = new IncidentService(_context);
                 _themeService = new ThemeService();
+
+                // Follow the Windows accent colour and keep it in sync with the in-app theme.
+                SystemAccentProvider.Initialize(() => _themeService.CurrentTheme == AppTheme.Dark);
+                _themeService.ThemeChanged += theme => SystemAccentProvider.Refresh(theme == AppTheme.Dark);
                 _authService = new AuthService(_context);
                 _settingsService = new SettingsService(_context);
                 _ruleEngineService = new RuleEngineService(_context);
@@ -151,10 +155,21 @@ namespace SmartSchoolIncidentManagementSystem
             }
         }
 
+        private bool _isHandlingDispatcherException;
+
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            MessageBox.Show($"An unexpected error occurred:\n\n{e.Exception.Message}", "Application Error", MessageBoxButton.OK, MessageBoxImage.Error);
             e.Handled = true;
+            if (_isHandlingDispatcherException) return;
+            _isHandlingDispatcherException = true;
+            try
+            {
+                MessageBox.Show($"An unexpected error occurred:\n\n{e.Exception.Message}", "Application Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                _isHandlingDispatcherException = false;
+            }
         }
 
         private void OnDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)

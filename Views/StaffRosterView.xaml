@@ -1,4 +1,4 @@
-<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.StaffRosterView"
+﻿<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.StaffRosterView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{DynamicResource AppBackgroundBrush}">
@@ -18,9 +18,9 @@
 
                 <!-- Header -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                    <Button Content="&#x2190; Back to User Management Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="10,4" Margin="0,0,0,10"/>
-                    <TextBlock Text="Staff Roster Directory &amp; Sync" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                    <TextBlock Text="Maintain active staff directory, department assignments, case investigators, homeroom advisers, and contact records." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
+                    <Button Content="&#x2190; Back to User Management Hub" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToHubCommand}" HorizontalAlignment="Left" Padding="8,4" Margin="0,0,0,10"/>
+                    <TextBlock Text="Staff Roster Directory &amp; Sync" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    <TextBlock Text="Staff, departments and contacts." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
                 </StackPanel>
 
                 <!-- Toolbar -->
@@ -39,7 +39,7 @@
                     <Grid Grid.Column="0">
                         <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{DynamicResource ModernTextBoxStyle}" Padding="30,0,24,0" Height="38"/>
-                        <TextBlock Text="🔍" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}"
+                        <TextBlock Text="🔍" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}"
                                    VerticalAlignment="Center" Margin="9,0,0,0" IsHitTestVisible="False"/>
                         <Button Content="✕" Command="{Binding ClearSearchCommand}"
                                 Visibility="{Binding HasSearchText, Converter={StaticResource BoolToVis}}"
@@ -56,11 +56,11 @@
 
                     <!-- Add New Button -->
                     <Button Grid.Column="4" Content="+ Add New Staff" Command="{Binding OpenCreateStaffModalCommand}"
-                            Style="{DynamicResource PrimaryButtonStyle}" Height="38" Padding="16,0" FontSize="13" FontWeight="Bold"/>
+                            Style="{DynamicResource PrimaryButtonStyle}" Height="38" Padding="16,0" FontSize="14" FontWeight="Bold"/>
 
                     <!-- Sync Button -->
                     <Button Grid.Column="6" Content="🔄 Sync Directory" Command="{Binding SyncDirectoryCommand}"
-                            Style="{DynamicResource SecondaryButtonStyle}" Height="38" Padding="14,0" FontSize="12"/>
+                            Style="{DynamicResource SecondaryButtonStyle}" Height="38" Padding="14,0" FontSize="14"/>
                 </Grid>
 
                 <!-- 4-Column Card Grid -->
@@ -94,11 +94,11 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <Border Grid.Column="0" Background="{DynamicResource PrimaryBrush}"
-                                                CornerRadius="4" Padding="6,3" HorizontalAlignment="Left">
-                                            <TextBlock Text="{Binding StaffNumber}" FontSize="10"
+                                                CornerRadius="4" Padding="4,2" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding StaffNumber}" FontSize="12"
                                                        FontWeight="Bold" Foreground="{DynamicResource ButtonTextBrush}"/>
                                         </Border>
-                                        <Border Grid.Column="1" CornerRadius="10" Padding="8,3">
+                                        <Border Grid.Column="1" CornerRadius="8" Padding="8,3">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
@@ -109,7 +109,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="{Binding Status}" FontSize="10" FontWeight="Bold">
+                                            <TextBlock Text="{Binding Status}" FontSize="12" FontWeight="Bold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
@@ -132,11 +132,11 @@
 
                                     <!-- Role -->
                                     <TextBlock Grid.Row="2" Text="{Binding AssignmentRole}"
-                                               FontSize="12" Foreground="{DynamicResource AccentBrush}"
+                                               FontSize="14" Foreground="{DynamicResource AccentBrush}"
                                                FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
 
                                     <!-- Department -->
-                                    <TextBlock Grid.Row="3" FontSize="11"
+                                    <TextBlock Grid.Row="3" FontSize="12"
                                                Foreground="{DynamicResource SecondaryTextBrush}"
                                                TextTrimming="CharacterEllipsis" Margin="0,0,0,3">
                                         <Run Text="Dept: "/><Run Text="{Binding Department}"/>
@@ -144,7 +144,7 @@
 
                                     <!-- Email -->
                                     <TextBlock Grid.Row="4" Text="{Binding Email}"
-                                               FontSize="11" Foreground="{DynamicResource MutedTextBrush}"
+                                               FontSize="12" Foreground="{DynamicResource MutedTextBrush}"
                                                TextTrimming="CharacterEllipsis"/>
                                 </Grid>
                             </Border>
@@ -160,7 +160,7 @@
               Visibility="{Binding IsStaffModalOpen, Converter={StaticResource BoolToVis}}">
             <Border Width="560" MaxHeight="660" VerticalAlignment="Center" HorizontalAlignment="Center"
                     Background="{DynamicResource CardBackgroundBrush}"
-                    CornerRadius="14" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                    CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                     Padding="32,28">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -176,7 +176,7 @@
                         <Button Content="✕" Command="{Binding CloseStaffModalCommand}"
                                 DockPanel.Dock="Right" HorizontalAlignment="Right"
                                 Background="Transparent" BorderThickness="0"
-                                Foreground="{DynamicResource SecondaryTextBrush}" FontSize="16" Cursor="Hand"/>
+                                Foreground="{DynamicResource SecondaryTextBrush}" FontSize="18" Cursor="Hand"/>
                     </DockPanel>
 
                     <!-- VIEW MODE -->
@@ -197,9 +197,9 @@
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                 <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
                                     <TextBlock Text="{Binding ViewingStaff.StaffNumber}" FontWeight="Bold"
-                                               Foreground="{DynamicResource ButtonTextBrush}" FontSize="11"/>
+                                               Foreground="{DynamicResource ButtonTextBrush}" FontSize="12"/>
                                 </Border>
-                                <Border CornerRadius="10" Padding="8,3">
+                                <Border CornerRadius="8" Padding="8,3">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
@@ -210,7 +210,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
-                                    <TextBlock Text="{Binding ViewingStaff.Status}" FontWeight="Bold" FontSize="11">
+                                    <TextBlock Text="{Binding ViewingStaff.Status}" FontWeight="Bold" FontSize="12">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
@@ -225,7 +225,7 @@
                                 </Border>
                             </StackPanel>
 
-                            <TextBlock Text="{Binding ViewingStaff.FullName}" FontSize="22" FontWeight="Bold"
+                            <TextBlock Text="{Binding ViewingStaff.FullName}" FontSize="20" FontWeight="Bold"
                                        Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
                             <TextBlock Text="{Binding ViewingStaff.AssignmentRole}" FontSize="14"
                                        Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" Margin="0,0,0,18"/>
@@ -239,24 +239,24 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="DEPARTMENT" FontSize="10" FontWeight="Bold"
+                                    <TextBlock Text="DEPARTMENT" FontSize="12" FontWeight="Bold"
                                                Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
-                                    <TextBlock Text="{Binding ViewingStaff.Department}" FontSize="13"
+                                    <TextBlock Text="{Binding ViewingStaff.Department}" FontSize="14"
                                                Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
-                                    <TextBlock Text="OFFICIAL EMAIL" FontSize="10" FontWeight="Bold"
+                                    <TextBlock Text="OFFICIAL EMAIL" FontSize="12" FontWeight="Bold"
                                                Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
-                                    <TextBlock Text="{Binding ViewingStaff.Email}" FontSize="13"
+                                    <TextBlock Text="{Binding ViewingStaff.Email}" FontSize="14"
                                                Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
-                                    <TextBlock Text="CONTACT PHONE" FontSize="10" FontWeight="Bold"
+                                    <TextBlock Text="CONTACT PHONE" FontSize="12" FontWeight="Bold"
                                                Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
-                                    <TextBlock Text="{Binding ViewingStaff.Phone}" FontSize="13"
+                                    <TextBlock Text="{Binding ViewingStaff.Phone}" FontSize="14"
                                                Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,14"/>
-                                    <TextBlock Text="MEMBER SINCE" FontSize="10" FontWeight="Bold"
+                                    <TextBlock Text="MEMBER SINCE" FontSize="12" FontWeight="Bold"
                                                Foreground="{DynamicResource MutedTextBrush}" Margin="0,0,0,3"/>
                                     <TextBlock Text="{Binding ViewingStaff.CreatedAt, StringFormat='{}{0:MMM dd, yyyy}'}"
-                                               FontSize="13" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                               FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -276,34 +276,34 @@
                                 </Style>
                             </StackPanel.Style>
 
-                            <TextBlock Text="STAFF ID / NUMBER" FontSize="11" FontWeight="Bold"
+                            <TextBlock Text="STAFF ID / NUMBER" FontSize="12" FontWeight="Bold"
                                        Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding EditStaffNumber, UpdateSourceTrigger=PropertyChanged}"
                                      Style="{DynamicResource ModernTextBoxStyle}" Height="38" Margin="0,0,0,14"/>
 
-                            <TextBlock Text="FULL NAME" FontSize="11" FontWeight="Bold"
+                            <TextBlock Text="FULL NAME" FontSize="12" FontWeight="Bold"
                                        Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding EditFullName, UpdateSourceTrigger=PropertyChanged}"
                                      Style="{DynamicResource ModernTextBoxStyle}" Height="38" Margin="0,0,0,14"/>
 
-                            <TextBlock Text="DEPARTMENT" FontSize="11" FontWeight="Bold"
+                            <TextBlock Text="DEPARTMENT" FontSize="12" FontWeight="Bold"
                                        Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                             <ComboBox ItemsSource="{Binding Departments}" SelectedItem="{Binding EditDepartment}"
                                       Height="38" VerticalContentAlignment="Center" Margin="0,0,0,14"
                                       Style="{DynamicResource ModernComboBoxStyle}"/>
 
-                            <TextBlock Text="ASSIGNMENT ROLE" FontSize="11" FontWeight="Bold"
+                            <TextBlock Text="ASSIGNMENT ROLE" FontSize="12" FontWeight="Bold"
                                        Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                             <ComboBox ItemsSource="{Binding AssignmentRoles}" SelectedItem="{Binding EditRole}"
                                       Height="38" VerticalContentAlignment="Center" Margin="0,0,0,14"
                                       Style="{DynamicResource ModernComboBoxStyle}"/>
 
-                            <TextBlock Text="OFFICIAL EMAIL" FontSize="11" FontWeight="Bold"
+                            <TextBlock Text="OFFICIAL EMAIL" FontSize="12" FontWeight="Bold"
                                        Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding EditEmail, UpdateSourceTrigger=PropertyChanged}"
                                      Style="{DynamicResource ModernTextBoxStyle}" Height="38" Margin="0,0,0,14"/>
 
-                            <TextBlock Text="CONTACT PHONE" FontSize="11" FontWeight="Bold"
+                            <TextBlock Text="CONTACT PHONE" FontSize="12" FontWeight="Bold"
                                        Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding EditPhone, UpdateSourceTrigger=PropertyChanged}"
                                      Style="{DynamicResource ModernTextBoxStyle}" Height="38" Margin="0,0,0,6"/>
@@ -326,9 +326,9 @@
                             </StackPanel.Style>
                             <Button Content="🔄 Toggle Status" Command="{Binding ToggleStaffStatusCommand}"
                                     Style="{DynamicResource SecondaryButtonStyle}" Height="38" Padding="14,0"
-                                    Margin="0,0,10,0" FontSize="12"/>
+                                    Margin="0,0,10,0" FontSize="14"/>
                             <Button Content="✏️ Edit Staff" Command="{Binding SwitchToStaffEditModeCommand}"
-                                    Style="{DynamicResource PrimaryButtonStyle}" Height="38" Padding="18,0" FontSize="13"/>
+                                    Style="{DynamicResource PrimaryButtonStyle}" Height="38" Padding="18,0" FontSize="14"/>
                         </StackPanel>
 
                         <!-- EDIT/CREATE mode footer -->
@@ -349,9 +349,9 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Button Grid.Column="0" Content="Cancel" Command="{Binding CancelStaffEditCommand}"
-                                    Style="{DynamicResource SecondaryButtonStyle}" Height="38" FontSize="13"/>
+                                    Style="{DynamicResource SecondaryButtonStyle}" Height="38" FontSize="14"/>
                             <Button Grid.Column="2" Content="💾 Save Staff" Command="{Binding SaveStaffFromModalCommand}"
-                                    Style="{DynamicResource PrimaryButtonStyle}" Height="38" FontSize="13"/>
+                                    Style="{DynamicResource PrimaryButtonStyle}" Height="38" FontSize="14"/>
                         </Grid>
                     </Grid>
                 </Grid>

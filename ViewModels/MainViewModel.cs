@@ -151,7 +151,13 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
         public bool IsAuthenticated
         {
             get => _isAuthenticated;
-            set => SetProperty(ref _isAuthenticated, value);
+            set
+            {
+                if (SetProperty(ref _isAuthenticated, value))
+                {
+                    OnPropertyChanged(nameof(ShowSidebar));
+                }
+            }
         }
 
         public User? CurrentUser => _authService.CurrentUser;
@@ -172,16 +178,16 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
 
         public string ActiveSectionTitle => ActiveSection switch
         {
-            "Dashboard" => "System Dashboard",
-            "Dashboard Overview" => "Operational Dashboard & Telemetry",
-            "Students" => "Students Directory & Records",
-            "Incidents" => "Incidents Records & Intelligence Log",
-            "Investigations" => "Case Investigation Workspace",
-            "DisciplinaryActions" => "Suspension & Probation Tracking",
-            "Behavior" => "Student Behavioral Management",
-            "ParentNotices" => "Parent Notices & Official Disclosures",
-            "ReportsAnalytics" => "Safety Reports & Safety Analytics",
-            "Settings" => "System Administration & Settings",
+            "Dashboard" => "Kiosk board",
+            "Dashboard Overview" => "Dashboard",
+            "Students" => "Students",
+            "Incidents" => "Incidents",
+            "Investigations" => "Investigations",
+            "DisciplinaryActions" => "Disciplinary actions",
+            "Behavior" => "Behavior & intervention",
+            "ParentNotices" => "Parent notices",
+            "ReportsAnalytics" => "Reports",
+            "Settings" => "Administration",
             _ => ActiveSection
         };
 
@@ -489,6 +495,10 @@ namespace SmartSchoolIncidentManagementSystem.ViewModels
             OnPropertyChanged(nameof(IsReportsAnalyticsActive));
             OnPropertyChanged(nameof(IsSettingsActive));
             OnPropertyChanged(nameof(ActiveSectionTitle));
+            OnPropertyChanged(nameof(SectionBreadcrumb));
+            OnPropertyChanged(nameof(IsKioskActive));
+            OnPropertyChanged(nameof(ShowSidebar));
+            OnPropertyChanged(nameof(IsHomeActive));
         }
     }
 }

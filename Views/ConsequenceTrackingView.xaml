@@ -1,4 +1,4 @@
-<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.ConsequenceTrackingView"
+﻿<UserControl x:Class="SmartSchoolIncidentManagementSystem.Views.ConsequenceTrackingView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -21,9 +21,9 @@
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                             <Button Content="← Back to Overview" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding BackToOverviewCommand}" Margin="0,0,14,0" Padding="12,6"/>
-                            <TextBlock Text="Consequence &amp; Sanction Tracking" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="Consequence &amp; Sanction Tracking" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <TextBlock Text="Manage and record verbal warnings, written reprimands, and parent conference compliance." FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
+                        <TextBlock Text="Warnings, reprimands and conferences." FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2,0,0"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -32,7 +32,7 @@
                 </Grid>
 
                 <!-- Status Notification Banner -->
-                <Border Grid.Row="1" Background="{DynamicResource InfoBgBrush}" BorderBrush="{DynamicResource InfoBrush}" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,16">
+                <Border Grid.Row="1" Background="{DynamicResource InfoBgBrush}" BorderBrush="{DynamicResource InfoBrush}" BorderThickness="1" CornerRadius="4" Padding="12,8" Margin="0,0,0,16">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Visibility" Value="Visible"/>
@@ -55,31 +55,31 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Margin="0,0,12,0" Padding="16,14">
+                    <Border Grid.Column="0" Style="{DynamicResource CardBorderStyle}" Margin="0,0,12,0" Padding="16,12">
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="TOTAL SANCTIONS ISSUED" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                            <TextBlock Text="{Binding TotalSanctionsCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,6,0,0"/>
+                            <TextBlock Text="TOTAL SANCTIONS ISSUED" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding TotalSanctionsCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,6,0,0"/>
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Margin="0,0,12,0" Padding="16,14">
+                    <Border Grid.Column="1" Style="{DynamicResource CardBorderStyle}" Margin="0,0,12,0" Padding="16,12">
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="PENDING CONFERENCES" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                            <TextBlock Text="{Binding PendingConferencesCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,6,0,0"/>
+                            <TextBlock Text="PENDING CONFERENCES" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding PendingConferencesCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" Margin="0,6,0,0"/>
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Margin="0,0,12,0" Padding="16,14">
+                    <Border Grid.Column="2" Style="{DynamicResource CardBorderStyle}" Margin="0,0,12,0" Padding="16,12">
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="COMPLETED / COMPLIED" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                            <TextBlock Text="{Binding CompletedCount}" FontSize="24" FontWeight="Bold" Foreground="#10B981" Margin="0,6,0,0"/>
+                            <TextBlock Text="COMPLETED / COMPLIED" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding CompletedCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource SuccessBrush}" Margin="0,6,0,0"/>
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="3" Style="{DynamicResource CardBorderStyle}" Padding="16,14">
+                    <Border Grid.Column="3" Style="{DynamicResource CardBorderStyle}" Padding="16,12">
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="OVERDUE / NON-COMPLIANT" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                            <TextBlock Text="{Binding NonCompliantCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,6,0,0"/>
+                            <TextBlock Text="OVERDUE / NON-COMPLIANT" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="{Binding NonCompliantCount}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" Margin="0,6,0,0"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -94,17 +94,17 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                            <TextBlock Text="Search Records" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Search Records" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                             <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Margin="0,0,12,0">
-                            <TextBlock Text="Sanction Type" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Sanction Type" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                             <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding CategoryFilterOptions}" SelectedItem="{Binding SelectedCategoryFilter}"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Compliance Status" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Compliance Status" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
                             <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding StatusFilterOptions}" SelectedItem="{Binding SelectedStatusFilter}"/>
                         </StackPanel>
                     </Grid>
@@ -178,7 +178,7 @@
                             <DataGridTemplateColumn Header="Parent Notified" MinWidth="105" Width="105">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border CornerRadius="4" Padding="6,3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Border CornerRadius="4" Padding="4,2" HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="#D1FAE5"/>
@@ -189,7 +189,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock FontSize="11" FontWeight="Bold">
+                                            <TextBlock FontSize="12" FontWeight="Bold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Text" Value="Yes ✓"/>
@@ -226,7 +226,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="Bold">
+                                            <TextBlock Text="{Binding Status}" FontSize="12" FontWeight="Bold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Foreground" Value="#92400E"/>
@@ -251,10 +251,10 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Button Content="✔ Complete" Style="{DynamicResource SecondaryButtonStyle}" Padding="8,4" FontSize="11" Margin="0,0,6,0"
+                                            <Button Content="✔ Complete" Style="{DynamicResource SecondaryButtonStyle}" Padding="8,4" FontSize="12" Margin="0,0,6,0"
                                                     Command="{Binding DataContext.MarkCompletedCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                     CommandParameter="{Binding}"/>
-                                            <Button Content="🖨️ Notice Slip" Style="{DynamicResource SecondaryButtonStyle}" Padding="8,4" FontSize="11"
+                                            <Button Content="🖨️ Notice Slip" Style="{DynamicResource SecondaryButtonStyle}" Padding="8,4" FontSize="12"
                                                     Command="{Binding DataContext.PrintNoticeSlipCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                     CommandParameter="{Binding}"/>
                                         </StackPanel>
@@ -280,15 +280,15 @@
                 </Style>
             </Grid.Style>
 
-            <Border Style="{DynamicResource CardBorderStyle}" Width="520" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24" CornerRadius="12">
+            <Border Style="{DynamicResource CardBorderStyle}" Width="520" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24" CornerRadius="8">
                 <StackPanel Orientation="Vertical">
                     <Grid Margin="0,0,0,14">
                         <TextBlock Text="Log Student Consequence &amp; Action" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                        <Button Content="✕" Width="28" Height="28" Padding="0" FontSize="13" FontWeight="Bold" ToolTip="Close" Cursor="Hand"
+                        <Button Content="✕" Width="28" Height="28" Padding="0" FontSize="14" FontWeight="Bold" ToolTip="Close" Cursor="Hand"
                                 HorizontalAlignment="Right" Style="{DynamicResource SecondaryButtonStyle}" Command="{Binding CloseModalCommand}"/>
                     </Grid>
 
-                    <Border Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,12">
+                    <Border Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1" CornerRadius="4" Padding="8,4" Margin="0,0,0,12">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Visibility" Value="Visible"/>
@@ -299,7 +299,7 @@
                                 </Style.Triggers>
                             </Style>
                         </Border.Style>
-                        <TextBlock Text="{Binding ModalErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontSize="12" FontWeight="Medium"/>
+                        <TextBlock Text="{Binding ModalErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontSize="14" FontWeight="Medium"/>
                     </Border>
 
                     <Grid Margin="0,0,0,10">
@@ -308,11 +308,11 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                            <TextBlock Text="Student Name *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Student Name *" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
                             <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding ModalStudentName, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1">
-                            <TextBlock Text="Student ID Number" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Student ID Number" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
                             <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding ModalStudentId, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                     </Grid>
@@ -323,11 +323,11 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                            <TextBlock Text="Associated Incident Ref" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Associated Incident Ref" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
                             <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding AvailableIncidents}" SelectedItem="{Binding ModalIncidentNumber}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1">
-                            <TextBlock Text="Consequence Type *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Consequence Type *" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
                             <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding ConsequenceTypeOptions}" SelectedItem="{Binding ModalConsequenceType}"/>
                         </StackPanel>
                     </Grid>
@@ -338,11 +338,11 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                            <TextBlock Text="Offense Level" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Offense Level" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
                             <ComboBox Style="{DynamicResource ModernComboBoxStyle}" ItemsSource="{Binding OffenseLevelOptions}" SelectedItem="{Binding ModalOffenseLevel}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1">
-                            <TextBlock Text="Issued By" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <TextBlock Text="Issued By" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
                             <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding ModalIssuedBy, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                     </Grid>
@@ -353,19 +353,19 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                            <TextBlock Text="Date Issued" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
-                            <DatePicker SelectedDate="{Binding ModalDateIssued}" FontSize="13" Padding="6,4"/>
+                            <TextBlock Text="Date Issued" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <DatePicker SelectedDate="{Binding ModalDateIssued}" FontSize="14" Padding="4,2"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1">
-                            <TextBlock Text="Due / Target Date" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
-                            <DatePicker SelectedDate="{Binding ModalDueDate}" FontSize="13" Padding="6,4"/>
+                            <TextBlock Text="Due / Target Date" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                            <DatePicker SelectedDate="{Binding ModalDueDate}" FontSize="14" Padding="4,2"/>
                         </StackPanel>
                     </Grid>
 
-                    <CheckBox Content="Parent Notification Required &amp; Sent" IsChecked="{Binding ModalParentNotified}" Margin="0,0,0,10" FontSize="12"/>
+                    <CheckBox Content="Parent Notification Required &amp; Sent" IsChecked="{Binding ModalParentNotified}" Margin="0,0,0,10" FontSize="14"/>
 
                     <StackPanel Margin="0,0,0,16">
-                        <TextBlock Text="Sanction Details &amp; Required Terms *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                        <TextBlock Text="Sanction Details &amp; Required Terms *" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
                         <TextBox Style="{DynamicResource ModernTextBoxStyle}" Text="{Binding ModalSanctionTerms, UpdateSourceTrigger=PropertyChanged}" Height="65" TextWrapping="Wrap" AcceptsReturn="True"/>
                     </StackPanel>
 

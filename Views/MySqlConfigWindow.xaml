@@ -1,4 +1,4 @@
-<Window x:Class="SmartSchoolIncidentManagementSystem.Views.MySqlConfigWindow"
+﻿<Window x:Class="SmartSchoolIncidentManagementSystem.Views.MySqlConfigWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MySQL Configuration"
@@ -23,8 +23,8 @@
                            VerticalAlignment="Center"/>
             </StackPanel>
 
-            <TextBlock Text="Enter connection details for your institutional MySQL incident database."
-                       FontSize="12.5"
+            <TextBlock Text="MySQL connection details."
+                       FontSize="14"
                        Foreground="{DynamicResource SecondaryTextBrush}"
                        Margin="0,0,0,16"
                        TextWrapping="Wrap"/>
@@ -32,14 +32,14 @@
             <!-- Status Banner -->
             <Border x:Name="StatusBorder"
                     Visibility="Collapsed"
-                    CornerRadius="6"
+                    CornerRadius="4"
                     BorderThickness="1"
-                    Padding="10,8"
+                    Padding="8,6"
                     Margin="0,0,0,14"
                     Background="{DynamicResource InputBackgroundBrush}"
                     BorderBrush="{DynamicResource BorderBrush}">
                 <TextBlock x:Name="StatusText"
-                           FontSize="12"
+                           FontSize="14"
                            FontWeight="Medium"
                            Foreground="{DynamicResource PrimaryTextBrush}"
                            TextWrapping="Wrap"/>
@@ -55,7 +55,7 @@
 
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="Server Host / IP"
-                               FontSize="12"
+                               FontSize="14"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource SecondaryTextBrush}"
                                Margin="0,0,0,4"/>
@@ -66,7 +66,7 @@
 
                 <StackPanel Grid.Column="2">
                     <TextBlock Text="Port"
-                               FontSize="12"
+                               FontSize="14"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource SecondaryTextBrush}"
                                Margin="0,0,0,4"/>
@@ -79,7 +79,7 @@
             <!-- Database Name -->
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="Database Name"
-                           FontSize="12"
+                           FontSize="14"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource SecondaryTextBrush}"
                            Margin="0,0,0,4"/>
@@ -91,7 +91,7 @@
             <!-- Username -->
             <StackPanel Margin="0,0,0,12">
                 <TextBlock Text="Username"
-                           FontSize="12"
+                           FontSize="14"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource SecondaryTextBrush}"
                            Margin="0,0,0,4"/>
@@ -103,7 +103,7 @@
             <!-- Password -->
             <StackPanel Margin="0,0,0,20">
                 <TextBlock Text="Password"
-                           FontSize="12"
+                           FontSize="14"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource SecondaryTextBrush}"
                            Margin="0,0,0,4"/>
@@ -113,8 +113,8 @@
                              Foreground="{DynamicResource PrimaryTextBrush}"
                              BorderBrush="{DynamicResource InputBorderBrush}"
                              BorderThickness="1"
-                             Padding="10,8"
-                             FontSize="13.5"/>
+                             Padding="8,6"
+                             FontSize="14"/>
             </StackPanel>
 
             <Separator Background="{DynamicResource DividerBrush}" Margin="0,0,0,16"/>
